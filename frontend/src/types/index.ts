@@ -17,6 +17,7 @@ export interface Person {
 
 export interface HiringCandidate {
   clientId: string;
+  id: string; // Added ID
   name: string;
   role: string;
   stage: 'Screening' | 'Interview' | 'Offer';
@@ -31,7 +32,18 @@ export interface TimeEntry {
   notes: string;
 }
 
-// Global App State (for your Context if needed)
-export interface AppState {
-  currentClientId: string;
+export interface FinanceRecord {
+  clientId: string;
+  id: string;
+  amount: string;
+  status: 'Paid' | 'Pending' | 'Overdue';
+  date: string;
+  entity: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  senderId: string; // 'me' or user ID
+  text: string;
+  timestamp: Date;
 }

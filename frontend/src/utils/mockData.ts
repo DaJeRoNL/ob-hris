@@ -1,4 +1,4 @@
-import { Client, Person, HiringCandidate, TimeEntry } from '../types';
+import { Client, Person, HiringCandidate, FinanceRecord } from '../types';
 
 export const MOCK_DB = {
   clients: [
@@ -10,13 +10,21 @@ export const MOCK_DB = {
   people: [
     { clientId: 'c1', id: 'u1', name: "Alice Johnson", role: "Sr. Engineer", status: "Active", loc: "USA", visa: "Citizen" },
     { clientId: 'c1', id: 'u2', name: "Bob Smith", role: "Sales Lead", status: "Active", loc: "UK", visa: "T2 General" },
-    // ... add the rest from index.html
+    { clientId: 'c1', id: 'u3', name: "Charlie Davis", role: "Contractor", status: "Onboarding", loc: "Brazil", visa: "N/A" },
+    { clientId: 'c1', id: 'u4', name: "Diana Prince", role: "Product Mgr", status: "Active", loc: "USA", visa: "H1B" },
+    { clientId: 'c1', id: 'u5', name: "Elena G.", role: "Support", status: "Active", loc: "Philippines", visa: "Citizen" },
+    { clientId: 'c1', id: 'u6', name: "Frank M.", role: "DevOps", status: "Active", loc: "Germany", visa: "Citizen" },
+    { clientId: 'c2', id: 'u7', name: "Hank Scorpio", role: "CEO", status: "Active", loc: "USA", visa: "Citizen" },
   ] as Person[],
 
   hiring: [
-    { clientId: 'c1', name: "Mike Ross", role: "Legal Ops", stage: "Screening" },
-    // ... rest of hiring
+    { clientId: 'c1', id: 'h1', name: "Mike Ross", role: "Legal Ops", stage: "Screening" },
+    { clientId: 'c1', id: 'h2', name: "Rachel Zane", role: "Paralegal", stage: "Interview" },
+    { clientId: 'c1', id: 'h3', name: "Louis Litt", role: "Partner", stage: "Offer" },
   ] as HiringCandidate[],
 
-  timeEntries: [] as TimeEntry[]
+  finance: [
+    { clientId: 'c1', id: "INV-001", entity: "Acme HQ", amount: "$42,500", status: "Paid", date: "Oct 01" },
+    { clientId: 'c1', id: "INV-002", entity: "Acme UK", amount: "$12,200", status: "Pending", date: "Oct 15" },
+  ] as FinanceRecord[]
 };
