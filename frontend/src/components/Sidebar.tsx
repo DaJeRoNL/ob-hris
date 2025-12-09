@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   SquaresFour, Users, Briefcase, Clock, ChatCircleDots, SignOut, 
-  Moon, Sun, CurrencyDollar, TrendUp, GlobeHemisphereWest, Files, Gear 
+  Moon, Sun, CurrencyDollar, TrendUp, Globe, Files, Gear 
 } from '@phosphor-icons/react';
 import { useState, useEffect } from 'react';
 
@@ -48,7 +48,7 @@ export default function Sidebar() {
       <Item to="/time" icon={Clock} title="Time" />
       <Item to="/finance" icon={CurrencyDollar} title="Finance" />
       <Item to="/growth" icon={TrendUp} title="Growth" />
-      <Item to="/compliance" icon={GlobeHemisphereWest} title="Compliance" />
+      <Item to="/compliance" icon={Globe} title="Compliance" />
       <Item to="/docs" icon={Files} title="Documents" />
       <Item to="/chat" icon={ChatCircleDots} title="Chat" />
       
@@ -61,9 +61,9 @@ export default function Sidebar() {
       <button onClick={toggleTheme} className="w-11 h-11 rounded-xl flex items-center justify-center text-gray-500 hover:text-indigo-500 mb-2">
         {theme === 'dark' ? <Moon size={22} weight="fill" /> : <Sun size={22} weight="fill" />}
       </button>
-          <button onClick={signOut} className="w-11 h-11 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 hover:text-red-500">
-            <SignOut size={22} weight="bold" />
-          </button>
-        </aside>
-      );
-    }
+      <button onClick={signOut} className="w-11 h-11 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 hover:text-red-500">
+        <SignOut size={22} weight="bold" />
+      </button>
+    </aside>
+  );
+}

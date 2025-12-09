@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import './Login.css'; // Import the CSS we just created
 
 export default function Login() {
   const navigate = useNavigate();
@@ -8,65 +9,143 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: 'error' | 'success', text: string } | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Ref for the background element
+  const bgRef = useRef<HTMLDivElement>(null);
 
-  // Background Animation Effect
+  // --- ANIMATION SCRIPT PORT ---
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const bg = bgRef.current;
+    if (!bg) return;
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
+    const layers = [
+        { strength: 20, phase: Math.random() * 2 * Math.PI, speed: 0.0003 },
+        { strength: 15, phase: Math.random() * 2 * Math.PI, speed: 0.0004 },
+        { strength: 10, phase: Math.random() * 2 * Math.PI, speed: 0.0005 }
+    ];
 
-    const particles: any[] = [];
-    const colors = ['rgba(139, 92, 246, 0.5)', 'rgba(16, 185, 129, 0.5)', 'rgba(234, 179, 8, 0.5)'];
+    const state = layers.map(() => ({ x: 50, y: 50 }));
 
-    for (let i = 0; i < 50; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: Math.random() * 4 + 1,
-        dx: (Math.random() - 0.5) * 0.5,
-        dy: (Math.random() - 0.5) * 0.5,
-        color: colors[Math.floor(Math.random() * colors.length)]
-      });
-    }
+    let noiseX = 0, noiseY = 0;
+    let mouseX: number | null = null; 
+    let mouseY: number | null = null;
+    let lastMouseX: number | null = null; 
+    let lastMouseY: number | null = null;
+    let lastMouseTime = 0;
+    let mouseSpeedNorm = 0;
+    let animationFrameId: number;
 
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      particles.forEach(p => {
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > width) p.dx *= -1;
-        if (p.y < 0 || p.y > height) p.dy *= -1;
+    const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-      });
-      requestAnimationFrame(animate);
-    };
-    
-    animate();
-
-    const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+    const handleMouseMove = (e: MouseEvent) => {
+        const now = performance.now();
+        if (lastMouseTime) {
+            const dt = Math.max(1, now - lastMouseTime);
+            // safe check for nulls
+            const dist = Math.hypot(e.clientX - (lastMouseX ?? e.clientX), e.clientY - (lastMouseY ?? e.clientY));
+            const raw = clamp((dist / dt) / 1.5, 0, 2);
+            mouseSpeedNorm = lerp(mouseSpeedNorm, clamp(raw, 0, 1), 0.35);
+        }
+        lastMouseTime = now;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const handleMouseLeave = () => {
+        mouseX = null; 
+        mouseY = null;
+        mouseSpeedNorm = lerp(mouseSpeedNorm, 0, 0.2);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+
+    const updateNoise = () => {
+        noiseX = lerp(noiseX, noiseX + (Math.random() - 0.5) * 0.04, 0.08);
+        noiseY = lerp(noiseY, noiseY + (Math.random() - 0.5) * 0.04, 0.08);
+        noiseX = clamp(noiseX, -5, 5);
+        noiseY = clamp(noiseY, -5, 5);
+    };
+
+    const animate = (ts: number) => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+
+        updateNoise();
+
+        for (let i = 0; i < layers.length; i++) {
+            const l = layers[i];
+            const s = state[i];
+            const t = ts * l.speed;
+
+            const amp1 = 15, amp2 = 8;
+            const ambientX = (Math.sin(t * (0.6 + i * 0.13) + l.phase) * amp1) + (Math.sin(t * (1.3 + i * 0.2)) * amp2);
+            const ambientY = (Math.cos(t * (0.7 + i * 0.11) + l.phase) * amp1) + (Math.cos(t * (1.5 + i * 0.25)) * amp2);
+
+            let targetX = 50 + ambientX + noiseX * (1 + i * 0.2);
+            let targetY = 50 + ambientY + noiseY * (1 + i * 0.2);
+
+            if (mouseX !== null && mouseY !== null) {
+                const layerPxX = (s.x / 100) * w;
+                const layerPxY = (s.y / 100) * h;
+
+                let vx = layerPxX - mouseX;
+                let vy = layerPxY - mouseY;
+                const dist = Math.hypot(vx, vy);
+                if (dist > 0.0001) { vx /= dist; vy /= dist; } 
+                else { vx = 0; vy = 0; }
+
+                const maxInfluenceDist = Math.max(w, h) * 0.5;
+                const falloff = clamp(1 - dist / maxInfluenceDist, 0, 1);
+                const speedAmpl = 0.5 + 0.5 * clamp(mouseSpeedNorm, 0, 1);
+
+                const repulse = l.strength * falloff * speedAmpl * 1.5;
+                targetX += (vx * repulse) * (100 / w);
+                targetY += (vy * repulse) * (100 / h);
+
+                const mouseInfluenceX = lerp(0, (mouseX - w / 2) / w * 100, 0.1);
+                const mouseInfluenceY = lerp(0, (mouseY - h / 2) / h * 100, 0.1);
+                targetX += mouseInfluenceX * 0.5;
+                targetY += mouseInfluenceY * 0.5;
+            }
+
+            targetX = clamp(targetX, 2, 98);
+            targetY = clamp(targetY, 2, 98);
+
+            const ease = 0.05 + i * 0.01;
+            s.x = lerp(s.x, targetX, ease);
+            s.y = lerp(s.y, targetY, ease);
+        }
+
+        const css = `${state[0].x.toFixed(2)}% ${state[0].y.toFixed(2)}%, ` +
+                    `${state[1].x.toFixed(2)}% ${state[1].y.toFixed(2)}%, ` +
+                    `${state[2].x.toFixed(2)}% ${state[2].y.toFixed(2)}%`;
+        
+        if (bg) bg.style.backgroundPosition = css;
+
+        animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+    const intervalId = setInterval(() => { mouseSpeedNorm = lerp(mouseSpeedNorm, 0, 0.07); }, 120);
+
+    // Cleanup
+    return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseleave', handleMouseLeave);
+        cancelAnimationFrame(animationFrameId);
+        clearInterval(intervalId);
+    };
   }, []);
+  // -----------------------------
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return setMsg({ type: 'error', text: 'Enter email and password' });
+    
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setMsg({ type: 'error', text: error.message });
@@ -74,53 +153,87 @@ export default function Login() {
     setLoading(false);
   };
 
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return setMsg({ type: 'error', text: 'Enter email and password' });
+
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) setMsg({ type: 'error', text: error.message });
+    else setMsg({ type: 'success', text: 'Account created! Check email.' });
+    setLoading(false);
+  };
+
   const enterDevMode = () => {
     sessionStorage.setItem('dev_bypass', 'true');
-    window.location.reload(); // Reload to trigger AuthContext
+    window.location.reload();
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#111827] flex items-center justify-center overflow-hidden font-['Raleway']">
-      <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-50" />
-      
-      <div className="relative z-10 w-full max-w-md p-8 bg-gray-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl animate-fade-in-up">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white font-['Montserrat'] mb-2">Welcome!</h1>
-          <div className="h-1 w-24 bg-gradient-to-r from-indigo-500 to-emerald-500 mx-auto rounded-full mb-4"></div>
-          <p className="text-gray-400">PB // HRIS Portal</p>
+    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
+      {/* Background Overlay mapped to the Ref */}
+      <div id="bg-overlay" ref={bgRef}></div>
+
+      {/* Login Container */}
+      <div className="login-glass-container">
+        <div className="title-sequence">
+            <h1 className="welcome-text">Welcome!</h1>
+            <div className="title-line"></div>
+            <h1 className="pb-text">PB // HRIS</h1>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input 
-            type="email" 
-            placeholder="Email Address" 
-            className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
-          
-          <button disabled={loading} className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold py-3 rounded-lg shadow-lg transform transition hover:-translate-y-0.5">
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
+        <form className="w-full max-w-[350px]">
+            <div className="input-group">
+                <input 
+                    type="email" 
+                    className="login-input" 
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                />
+            </div>
+            <div className="input-group">
+                <input 
+                    type="password" 
+                    className="login-input" 
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                />
+            </div>
+
+            <div className="btn-container">
+                <button 
+                    onClick={handleSignIn} 
+                    className="action-button btn-primary"
+                    disabled={loading}
+                >
+                    {loading ? '...' : 'Sign In'}
+                </button>
+                <button 
+                    onClick={handleSignUp} 
+                    className="action-button btn-secondary"
+                    disabled={loading}
+                >
+                    Sign Up
+                </button>
+            </div>
         </form>
 
-        <button onClick={enterDevMode} className="w-full mt-4 text-xs text-gray-600 hover:text-gray-400 transition">
-          ( Developer Bypass )
+        <button onClick={enterDevMode} className="dev-mode-btn">
+            ( Developer Bypass )
         </button>
 
         {msg && (
-          <div className={`mt-4 p-3 rounded-lg text-sm text-center ${msg.type === 'error' ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'}`}>
-            {msg.text}
-          </div>
+            <div className={`mt-4 p-2 rounded text-sm text-center w-full animate-fade-in ${msg.type === 'error' ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'}`}>
+                {msg.text}
+            </div>
         )}
       </div>
+
+      <footer className="footer">
+          <span className="footer-text">Powered by CoreByte!</span>
+      </footer>
     </div>
   );
 }

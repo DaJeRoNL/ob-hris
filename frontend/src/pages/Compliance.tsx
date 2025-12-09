@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { MOCK_DB } from '../utils/mockData';
 import { useAuth } from '../context/AuthContext';
-import { Passport, Laptop } from '@phosphor-icons/react';
+import { IdentificationCard, Laptop } from '@phosphor-icons/react';
 
 export default function Compliance() {
   const { currentClientId } = useAuth();
@@ -38,7 +38,7 @@ export default function Compliance() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="glass-card p-6 rounded-2xl">
           <h3 className="font-bold mb-4 flex items-center gap-2">
-            <Passport size={20} className="text-indigo-500" /> Visa Status
+            <IdentificationCard size={20} className="text-indigo-500" /> Visa Status
           </h3>
           <table className="w-full text-sm">
             <tbody className="divide-y divide-gray-200 dark:divide-white/10">
