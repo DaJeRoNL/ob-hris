@@ -17,7 +17,7 @@ export interface Person {
 
 export interface HiringCandidate {
   clientId: string;
-  id: string; // Added ID
+  id: string;
   name: string;
   role: string;
   stage: 'Screening' | 'Interview' | 'Offer';
@@ -25,11 +25,13 @@ export interface HiringCandidate {
 
 export interface TimeEntry {
   clientId: string;
+  id?: string;
   date: string;
   startTime: string;
   endTime: string;
   duration: string;
   notes: string;
+  isManual?: boolean; // New Flag
 }
 
 export interface FinanceRecord {
@@ -43,7 +45,7 @@ export interface FinanceRecord {
 
 export interface ChatMessage {
   id: string;
-  senderId: string; // 'me' or user ID
+  senderId: string;
   text: string;
   timestamp: Date;
 }
