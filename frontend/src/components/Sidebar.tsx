@@ -60,17 +60,20 @@ export default function Sidebar() {
     >
       <Link 
         to="/context"
-        className="mb-6 flex items-center justify-center font-extrabold text-xl cursor-pointer hover:scale-105 transition-transform w-12 h-12 rounded-xl bg-[var(--bg-panel)] text-[var(--accent-primary)] shadow-lg z-50"
+        className="mb-2 flex items-center justify-center font-extrabold text-xl cursor-pointer hover:scale-105 transition-transform w-12 h-12 rounded-xl bg-[var(--bg-panel)] text-[var(--accent-primary)] shadow-lg z-50"
         title="Workspace Hub"
       >
         PB
       </Link>
       
-      <div className="w-8 border-t mb-6 border-[var(--border-color)]"></div>
+      {/* Grouped Dashboard with Context */}
+      <Item to="/dashboard" icon={SquaresFour} title="Dashboard" id="dashboard" />
 
-      {/* Navigation Items Container - Allow overflow for tooltips if needed */}
+      {/* Separator moved underneath Dashboard */}
+      <div className="w-8 border-t my-4 border-[var(--border-color)]"></div>
+
+      {/* Navigation Items Container */}
       <div className="flex-1 w-full flex flex-col items-center overflow-y-auto no-scrollbar space-y-2 pb-4">
-          <Item to="/dashboard" icon={SquaresFour} title="Dashboard" id="dashboard" />
           <Item to="/hiring" icon={Briefcase} title="Hiring" id="hiring" />
           <Item to="/people" icon={Users} title="People" id="people" />
           <Item to="/time" icon={Clock} title="Time" id="time" />

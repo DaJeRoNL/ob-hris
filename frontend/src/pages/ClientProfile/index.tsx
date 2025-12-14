@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { MOCK_DB } from '../utils/mockData';
+import { useAuth } from '../../context/AuthContext';
+import { MOCK_DB } from '../../utils/mockData';
 import { 
     CheckCircle, Crown, ShieldCheck, User, Sparkle, Clock, 
     CalendarCheck, ArrowRight, Play, Briefcase, CaretRight, 
     WarningCircle, TrendUp, Users, Files 
 } from '@phosphor-icons/react';
-import { getCurrentRole, getSystemConfig, SystemConfig, UserRole } from '../utils/dashboardConfig';
-import { useSystemSettings } from '../hooks/useSystemSettings';
+import { getCurrentRole, getSystemConfig, SystemConfig, UserRole } from '../../utils/dashboardConfig';
+import { useSystemSettings } from '../../hooks/useSystemSettings';
 
 const ACTION_MAP: Record<string, { route: string, tabKey: string, label: string, icon: any, color: string }> = {
     'compliance': { route: '/compliance', tabKey: 'compliance', label: 'Resolve Alert', icon: ShieldCheck, color: 'rose' },
