@@ -5,11 +5,13 @@ import {
     Plus, CheckCircle, XCircle, User, Clock, 
     ChatCenteredText, MagnifyingGlass, Funnel, 
     UserPlus, ArrowRight, CaretLeft, CaretRight, Note, 
-    ClockCounterClockwise, ShieldCheck, Files 
+    ClockCounterClockwise, ShieldCheck, Files, Archive
 } from '@phosphor-icons/react';
 import CandidateModal, { CandidateDetails } from './components/CandidateModal';
 import VerificationModal from './components/VerificationModal';
 import RequisitionsModal from './components/RequisitionsModal';
+import AddCandidateModal from './components/AddCandidateModal';
+
 
 // --- Types ---
 interface ExtendedCandidate extends CandidateDetails {
@@ -43,7 +45,7 @@ const hydrateCandidates = (baseCandidates: any[]): ExtendedCandidate[] => {
             location: 'New York, USA',
             lastUpdated: d.toISOString(),
             summary: "Strong candidate with experience in relevant fields.",
-            rating: 0 // Unused but kept for interface compatibility if needed
+            rating: 0 
         };
     });
 };
@@ -59,11 +61,17 @@ const Hiring: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [hiredCandidateId, setHiredCandidateId] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [showLogs, setShowLogs] = useState(false);
   const [showRequisitions, setShowRequisitions] = useState(false);
   const [showNewReqModal, setShowNewReqModal] = useState(false);
+  const [showAddCandidateModal, setShowAddCandidateModal] = useState(false);
   const [verificationModal, setVerificationModal] = useState<{ show: boolean, type: 'verify' | 'revoke', candidateId: string | null }>({ show: false, type: 'verify', candidateId: null });
   const [newReqForm, setNewReqForm] = useState({ title: '', dept: '', budget: '' });
+  
+  // UI State
+  const [showFilters, setShowFilters] = useState(false);
+  const [showRejections, setShowRejections] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const historyTimer = useRef<number | null>(null);
 
   // Scroll & Tooltip
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -74,15 +82,24 @@ const Hiring: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   // Derived Data
-  const allTags = useMemo(() => Array.from(new Set(candidates.flatMap(c => c.tags))), [candidates]);
+  // FIX: Only consider active (non-rejected) candidates for the filter list
+  const activeCandidates = useMemo(() => candidates.filter(c => c.stage !== 'Rejected'), [candidates]);
+  const allTags = useMemo(() => Array.from(new Set(activeCandidates.flatMap(c => c.tags))), [activeCandidates]);
 
   const filteredCandidates = useMemo(() => {
       return candidates.filter(c => {
+          if (c.stage === 'Rejected') return false; 
           const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.role.toLowerCase().includes(search.toLowerCase());
           const matchesTags = selectedTags.length === 0 || selectedTags.every(t => c.tags.includes(t));
           return matchesSearch && matchesTags;
       });
   }, [candidates, search, selectedTags]);
+
+  const rejectedCandidates = useMemo(() => {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return candidates.filter(c => c.stage === 'Rejected' && new Date(c.lastUpdated) > thirtyDaysAgo);
+  }, [candidates]);
 
   const hiredCandidate = useMemo(() => candidates.find(c => c.id === hiredCandidateId), [candidates, hiredCandidateId]);
 
@@ -107,7 +124,6 @@ const Hiring: React.FC = () => {
       const el = scrollContainerRef.current;
       if (el) {
           el.addEventListener('scroll', checkScroll);
-          // Initial check after render
           setTimeout(checkScroll, 100);
           return () => el.removeEventListener('scroll', checkScroll);
       }
@@ -117,14 +133,14 @@ const Hiring: React.FC = () => {
 
   const handleCardHover = (e: React.MouseEvent, note: string) => {
       const rect = e.currentTarget.getBoundingClientRect();
-      setHoveredNote({ text: note, x: rect.left, y: rect.top - 15 }); // 15px Offset up
+      setHoveredNote({ text: note, x: rect.left, y: rect.top - 15 });
   };
 
   const scrollBoard = (dir: 'left' | 'right') => {
       if (scrollContainerRef.current) {
           const amount = dir === 'left' ? -400 : 400;
           scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
-          setTimeout(checkScroll, 500); // Re-check after scroll animation
+          setTimeout(checkScroll, 500);
       }
   };
 
@@ -140,12 +156,32 @@ const Hiring: React.FC = () => {
       alert("New Requisition Created Successfully!");
   };
 
+  const updateCandidate = (updated: ExtendedCandidate) => {
+      setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
+      if (selectedCandidate?.id === updated.id) {
+          setSelectedCandidate(updated);
+      }
+  };
+
+  const addCandidate = (newCandidate: ExtendedCandidate) => {
+      setCandidates(prev => [...prev, newCandidate]);
+      addLog(`Added new candidate: ${newCandidate.name}`);
+  };
+
+  // Hover logic for History
+  const handleHistoryEnter = () => {
+      if (historyTimer.current) clearTimeout(historyTimer.current);
+      setShowHistory(true);
+  };
+  const handleHistoryLeave = () => {
+      historyTimer.current = window.setTimeout(() => setShowHistory(false), 1000);
+  };
+
   // -- Drag & Drop Logic --
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
       setDraggedId(id);
       e.dataTransfer.effectAllowed = "move";
-      // Hide tooltip on drag
       setHoveredNote(null);
   };
 
@@ -162,20 +198,19 @@ const Hiring: React.FC = () => {
 
       const currentStage = candidate.stage;
 
-      // 1. Strict Rule: Can only enter 'Onboarding' from 'Hired'
+      // Strict Rule
       if (targetStage === 'Onboarding') {
           if (currentStage !== 'Hired') {
               alert("Candidates must be 'Hired' before they can be Onboarded.");
               setDraggedId(null);
               return;
           }
-          // Valid transition: Trigger Verification Modal
           setVerificationModal({ show: true, type: 'verify', candidateId: candidate.id });
           setDraggedId(null);
           return;
       }
 
-      // 2. Revoke Rule: Moving BACK from Hired/Onboarding to Recruiting stages
+      // Revoke Rule
       const recruitmentStages = ['Screening', 'Interview', 'Offer'];
       if ((currentStage === 'Hired' || currentStage === 'Onboarding') && recruitmentStages.includes(targetStage)) {
           setVerificationModal({ show: true, type: 'revoke', candidateId: candidate.id });
@@ -183,12 +218,12 @@ const Hiring: React.FC = () => {
           return;
       }
 
-      // 3. Standard Move
+      // Standard Move
       const updated = { ...candidate, stage: targetStage, lastUpdated: new Date().toISOString() };
       setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
       addLog(`Moved ${candidate.name} to ${targetStage}`);
 
-      // 4. Hired Trigger
+      // Hired Trigger
       if (targetStage === 'Hired') {
           setHiredCandidateId(candidate.id);
           setShowConfetti(true);
@@ -205,13 +240,11 @@ const Hiring: React.FC = () => {
       if (!c) return;
 
       if (type === 'verify') {
-          // Move to Onboarding
           const updated = { ...c, stage: 'Onboarding', lastUpdated: new Date().toISOString() };
           setCandidates(prev => prev.map(x => x.id === c.id ? updated : x));
           addLog(`Verified & Onboarded ${c.name}`);
           alert(`${c.name} has been added to the People Directory.`);
       } else {
-          // Revoke to Offer (Default fallback)
           const updated = { ...c, stage: 'Offer', lastUpdated: new Date().toISOString() };
           setCandidates(prev => prev.map(x => x.id === c.id ? updated : x));
           addLog(`Revoked ${c.name} back to Recruitment`);
@@ -220,10 +253,16 @@ const Hiring: React.FC = () => {
       setVerificationModal({ show: false, type: 'verify', candidateId: null });
   };
 
+  const rejectCandidate = (id: string) => {
+      setCandidates(prev => prev.map(c => c.id === id ? { ...c, stage: 'Rejected', lastUpdated: new Date().toISOString() } : c));
+      addLog('Rejected candidate');
+      setSelectedCandidate(null);
+  };
+
   return (
     <div className="p-8 h-full flex flex-col text-[var(--text-main)] animate-fade-in overflow-hidden relative">
       
-      {/* Tooltip Portal (Root Level) */}
+      {/* Tooltip Portal */}
       {hoveredNote && !draggedId && (
           <div 
             className="fixed z-[9999] pointer-events-none animate-fade-in bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl border border-white/10 max-w-[250px] backdrop-blur-md"
@@ -231,12 +270,11 @@ const Hiring: React.FC = () => {
           >
               <div className="font-bold text-indigo-300 mb-1 flex items-center gap-1"><Note weight="fill" /> Latest Note:</div>
               <div className="italic opacity-80 line-clamp-3 leading-relaxed">"{hoveredNote.text}"</div>
-              {/* Arrow */}
               <div className="absolute bottom-0 left-4 translate-y-full border-[6px] border-transparent border-t-slate-800"></div>
           </div>
       )}
 
-      {/* Confetti Banner */}
+      {/* Confetti */}
       {showConfetti && hiredCandidate && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-bounce-in">
               <div className="bg-indigo-900 text-white pl-6 pr-2 py-2 rounded-full shadow-2xl flex items-center gap-4 border border-indigo-500/50">
@@ -252,32 +290,53 @@ const Hiring: React.FC = () => {
 
       {/* Header */}
       <header className="mb-6 shrink-0 space-y-4">
-        <div className="flex justify-between items-end">
+        {/* FIX: Layout for smaller screens: flex-col on mobile, flex-row on desktop */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3">Talent Pipeline <span className="text-xs bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-2 py-1 rounded-full font-bold shadow-sm">ATS v2.5</span></h1>
-              <div className="flex gap-6 mt-4 text-sm font-medium opacity-70">
-                  <span className="flex items-center gap-2"><User weight="fill" className="text-blue-500" /> {candidates.length} Total</span>
+              <div className="flex gap-6 mt-4 text-sm font-medium opacity-70 items-center">
+                  <span className="flex items-center gap-2"><User weight="fill" className="text-blue-500" /> {candidates.filter(c => c.stage !== 'Rejected').length} Active</span>
                   <span className="flex items-center gap-2"><CheckCircle weight="fill" className="text-emerald-500" /> {candidates.filter(c => c.stage === 'Hired').length} Hired</span>
+                  <button onClick={() => setShowRejections(true)} className="flex items-center gap-2 hover:text-indigo-500 transition"><Archive weight="bold" /> {rejectedCandidates.length} Rejected (30d)</button>
               </div>
             </div>
-            <button onClick={() => setShowRequisitions(true)} className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 group"><Files weight="bold" size={18} /> <span>Requisitions</span></button>
+            
+            <div className="flex gap-3">
+                <button onClick={() => setShowAddCandidateModal(true)} className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-[#1e293b] text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl font-bold transition hover:bg-indigo-50 dark:hover:bg-indigo-500/10 whitespace-nowrap"><UserPlus weight="bold" size={18} /> <span>Add Candidate</span></button>
+                <button onClick={() => setShowRequisitions(true)} className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 group whitespace-nowrap"><Files weight="bold" size={18} /> <span>Requisitions</span></button>
+            </div>
         </div>
 
         <div className="flex gap-4">
-            <div className="relative flex-1 max-w-md group">
-                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" weight="bold" />
+            {/* Search */}
+            <div className="relative flex-1 max-w-md group flex items-center">
+                <MagnifyingGlass size={18} className="absolute left-3 text-gray-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none z-10" weight="bold" />
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 transition backdrop-blur-sm shadow-sm" />
             </div>
-            <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar items-center mask-fade-right">
-                {allTags.map(tag => (
-                    <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition whitespace-nowrap ${selectedTags.includes(tag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-white/5 border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10'}`}>
-                        {tag}
-                    </button>
-                ))}
-            </div>
-            <div className="relative">
-                <button onClick={() => setShowLogs(!showLogs)} className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showLogs ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}><ClockCounterClockwise weight="bold" /> History</button>
-                {showLogs && <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-[#1e293b] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up"><h4 className="text-xs font-bold uppercase opacity-50 mb-3">Activity Log</h4><div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar">{logs.map(log => (<div key={log.id} className="text-xs border-l-2 border-indigo-500 pl-2"><div className="font-medium opacity-80">{log.text}</div><div className="opacity-40 text-[10px]">{log.timestamp}</div></div>))}</div></div>}
+            
+            {/* Filter Toggle */}
+            <button 
+                onClick={() => setShowFilters(!showFilters)} 
+                className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${selectedTags.length > 0 ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}
+            >
+                <Funnel weight="bold" /> Filter
+                {selectedTags.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-500"></span>}
+            </button>
+
+            {/* Tags (Conditional) */}
+            {showFilters && (
+                <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar items-center mask-fade-right animate-fade-in-right">
+                    {allTags.map(tag => (
+                        <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition whitespace-nowrap ${selectedTags.includes(tag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-white/5 border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10'}`}>
+                            {tag}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            <div className="relative ml-auto" onMouseEnter={handleHistoryEnter} onMouseLeave={handleHistoryLeave}>
+                <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}><ClockCounterClockwise weight="bold" /> History</button>
+                {showHistory && <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-[#1e293b] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up"><h4 className="text-xs font-bold uppercase opacity-50 mb-3">Activity Log</h4><div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar">{logs.map(log => (<div key={log.id} className="text-xs border-l-2 border-indigo-500 pl-2"><div className="font-medium opacity-80">{log.text}</div><div className="opacity-40 text-[10px]">{log.timestamp}</div></div>))}</div></div>}
             </div>
         </div>
       </header>
@@ -320,11 +379,55 @@ const Hiring: React.FC = () => {
       </div>
 
       {/* Modals */}
-      {selectedCandidate && <CandidateModal candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} onUpdate={(u) => { setCandidates(prev => prev.map(c => c.id === u.id ? u : c)); addLog(`Updated ${u.name}`); }} onReject={(id) => { setCandidates(prev => prev.filter(c => c.id !== id)); addLog('Rejected candidate'); setSelectedCandidate(null); }} />}
+      {selectedCandidate && (
+          <CandidateModal 
+            candidate={selectedCandidate} 
+            onClose={() => setSelectedCandidate(null)} 
+            onUpdate={(u) => { 
+                updateCandidate(u as ExtendedCandidate); 
+                addLog(`Updated ${u.name}`); 
+            }}
+            onReject={(id) => { rejectCandidate(id); }}
+          />
+      )}
+      
       {verificationModal.show && verificationModal.candidateId && (() => { const c = candidates.find(x => x.id === verificationModal.candidateId); return c ? <VerificationModal candidate={c} type={verificationModal.type} onConfirm={handleConfirmVerification} onClose={() => setVerificationModal({ ...verificationModal, show: false })} /> : null; })()}
       
       {showRequisitions && <RequisitionsModal onClose={() => setShowRequisitions(false)} />}
       
+      {/* New Add Candidate Modal */}
+      {showAddCandidateModal && (
+          <AddCandidateModal 
+            onClose={() => setShowAddCandidateModal(false)}
+            onAdd={(c) => { addCandidate(c as ExtendedCandidate); }}
+          />
+      )}
+
+      {/* New Rejection Modal / List */}
+      {showRejections && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowRejections(false)}>
+              <div className="bg-white dark:bg-[#1e293b] w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10 p-6 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                  <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-bold font-['Montserrat']">Rejected Candidates <span className="text-xs opacity-50 font-normal">(Last 30 Days)</span></h2>
+                      <button onClick={() => setShowRejections(false)}><XCircle size={24} /></button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
+                      {rejectedCandidates.length === 0 ? <div className="text-center opacity-50 py-10">No rejections in the last 30 days.</div> : 
+                        rejectedCandidates.map(c => (
+                            <div key={c.id} className="p-4 rounded-xl border border-red-500/10 bg-red-500/5 flex justify-between items-center">
+                                <div>
+                                    <div className="font-bold">{c.name}</div>
+                                    <div className="text-xs opacity-60">{c.role} • Rejected on {new Date(c.lastUpdated).toLocaleDateString()}</div>
+                                </div>
+                                <span className="text-xs font-bold text-red-500 uppercase">Archived</span>
+                            </div>
+                        ))
+                      }
+                  </div>
+              </div>
+          </div>
+      )}
+
       {showNewReqModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowNewReqModal(false)}>
               <div className="bg-white dark:bg-[#1e293b] w-full max-w-md rounded-2xl shadow-2xl border border-white/10 p-6" onClick={e => e.stopPropagation()}>

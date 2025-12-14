@@ -50,15 +50,32 @@ export default function CandidateModal({ candidate, onClose, onUpdate, onReject 
             date: new Date().toLocaleString(),
             author: 'You'
         };
-        onUpdate({ ...candidate, notes: [newNote, ...candidate.notes], lastUpdated: new Date().toISOString() });
+        // Update immediately
+        onUpdate({ 
+            ...candidate, 
+            notes: [newNote, ...candidate.notes], 
+            lastUpdated: new Date().toISOString() 
+        });
         setNoteInput('');
     };
 
     const addTag = () => {
         if (!newTag.trim()) return;
-        onUpdate({ ...candidate, tags: [...candidate.tags, newTag], lastUpdated: new Date().toISOString() });
+        onUpdate({ 
+            ...candidate, 
+            tags: [...candidate.tags, newTag.trim()], 
+            lastUpdated: new Date().toISOString() 
+        });
         setNewTag('');
         setIsTagInput(false);
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        onUpdate({
+            ...candidate,
+            tags: candidate.tags.filter(t => t !== tagToRemove),
+            lastUpdated: new Date().toISOString()
+        });
     };
 
     return (
@@ -101,15 +118,16 @@ export default function CandidateModal({ candidate, onClose, onUpdate, onReject 
                                     <h3 className="text-xs font-bold uppercase opacity-50 mb-4 flex items-center gap-2"><Tag /> Skills & Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {candidate.tags.map(tag => (
-                                            <span key={tag} className="px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 rounded-full text-xs font-bold flex items-center gap-2 group">
+                                            <span key={tag} className="px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 rounded-full text-xs font-bold flex items-center gap-2 group cursor-default">
                                                 {tag}
-                                                <button onClick={() => onUpdate({ ...candidate, tags: candidate.tags.filter(t => t !== tag) })} className="opacity-0 group-hover:opacity-100 hover:text-red-500"><X weight="bold" /></button>
+                                                <button onClick={() => removeTag(tag)} className="opacity-0 group-hover:opacity-100 hover:text-red-500 transition"><X weight="bold" /></button>
                                             </span>
                                         ))}
                                         {isTagInput ? (
                                             <div className="flex items-center gap-2">
                                                 <input autoFocus value={newTag} onChange={e => setNewTag(e.target.value)} onKeyDown={e => e.key === 'Enter' && addTag()} className="w-24 px-2 py-1 text-xs rounded border border-indigo-500 outline-none bg-transparent" placeholder="New tag..." />
                                                 <button onClick={addTag} className="text-emerald-500"><Check weight="bold" /></button>
+                                                <button onClick={() => setIsTagInput(false)} className="text-red-500"><X weight="bold" /></button>
                                             </div>
                                         ) : (
                                             <button onClick={() => setIsTagInput(true)} className="px-3 py-1 border border-dashed border-gray-400 opacity-50 rounded-full text-xs font-bold hover:opacity-100 hover:border-indigo-500 transition">+ Add</button>
