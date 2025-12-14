@@ -4,24 +4,21 @@
 
 /* --- THEME VARIABLES --- */
 :root {
-    /* Light Mode */
     --bg-body: #f3f4f6;
     --bg-island: #ffffff;
     --bg-sidebar: #f8fafc;
     --bg-main-gradient: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    /* Made glass card slightly more opaque/white in light mode for contrast */
     --bg-glass-card: rgba(255, 255, 255, 0.95);
     --bg-panel: #ffffff;
     --text-main: #111827;
     --text-muted: #6b7280;
-    --border-color: rgba(0,0,0,0.1); /* Darker border in light mode */
+    --border-color: rgba(0,0,0,0.1); 
     --accent-primary: #4f46e5;
     --accent-hover: #4338ca;
     --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .dark {
-    /* Dark Mode */
     --bg-body: #0f172a;
     --bg-island: #111827;
     --bg-sidebar: #0f172a;
@@ -36,145 +33,91 @@
     --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
-/* Base Body Styles */
-html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+body { font-family: 'Raleway', sans-serif; background-color: var(--bg-body); display: block; padding: 0; transition: background-color 0.3s ease; }
 
-body { 
-    font-family: 'Raleway', sans-serif; 
-    background-color: var(--bg-body); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    padding: 1rem;
-    transition: background-color 0.3s ease; 
+/* --- PROFESSIONAL SCROLLBAR --- */
+/* A subtle, functional scrollbar that feels like native OS UI */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-/* --- UTILITY CLASSES --- */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
 
+::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.3); /* Neutral Gray, low opacity */
+    border-radius: 4px;
+    border: 2px solid transparent; /* Creates a 'floating' padding effect */
+    background-clip: content-box;
+    transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(99, 102, 241, 0.6); /* Indigo on interaction */
+}
+
+/* Firefox Fallback */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+}
+
+/* --- APP LAYOUT --- */
 .app-island { 
-    width: 100%; 
-    height: 100%; 
-    max-width: 1920px; 
-    background: var(--bg-island); 
-    border-radius: 20px; 
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); 
-    overflow: hidden; 
-    display: flex; 
-    position: relative; 
-    z-index: 10; 
-    border: 1px solid var(--border-color); 
+    width: 100vw; height: 100vh; max-width: none; background: var(--bg-island); 
+    border-radius: 0; box-shadow: none; overflow: hidden; display: flex; 
+    position: relative; z-index: 10; border: none;
 }
 
-/* CRITICAL FIX: Prevent Layout Shift */
 main {
-    /* Always show scrollbar track to prevent width jumping */
-    overflow-y: scroll; 
-    /* Ensure colors are applied to the scrollable area */
+    overflow-y: scroll;
+    overflow-x: hidden;
     background: var(--bg-main-gradient);
     color: var(--text-main);
+    scrollbar-gutter: stable; /* Prevents content jumping when scrollbar appears */
+    
+    /* PROFESSIONAL SNAP LOGIC */
+    /* 'proximity' is key: it snaps only if you are close, but lets you scroll freely otherwise. */
+    /* 'mandatory' feels jerky and unprofessional for apps. */
+    scroll-snap-type: y proximity; 
+    scroll-padding-top: 2rem;
 }
 
+/* Forces the container to vanish from the DOM tree so 'main' sees the children directly */
+.snap-container {
+    display: contents; 
+}
+
+.snap-card {
+    scroll-snap-align: start;
+    scroll-margin-top: 1.5rem; /* Breathing room at top when snapped */
+}
+
+/* Remove scrollbar for sidebar specifically */
 .no-scrollbar::-webkit-scrollbar { width: 0px; }
 
-/* Navigation Item Styling */
-.nav-item { 
-    width: 44px; 
-    height: 44px; 
-    border-radius: 12px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: var(--text-muted); 
-    cursor: pointer; 
-    transition: all 0.2s ease; 
-    margin-bottom: 0.5rem; 
-    flex-shrink: 0; 
-    position: relative; 
-}
+/* --- COMPONENTS --- */
+.nav-item { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; margin-bottom: 0.5rem; flex-shrink: 0; position: relative; }
 .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); }
 .nav-item.active { background: var(--accent-primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 
-/* Tooltip */
-.nav-item-tooltip {
-    position: absolute;
-    left: 120%;
-    background: #1f2937; /* Always dark tooltip for readability */
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: 0.2s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.1);
-    z-index: 100;
-}
+.nav-item-tooltip { position: absolute; left: 120%; background: #1f2937; color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); z-index: 100; }
 .nav-item:hover .nav-item-tooltip { opacity: 1; left: 130%; }
 
-/* Cards */
-.glass-card { 
-    background: var(--bg-glass-card); 
-    backdrop-filter: blur(16px); 
-    border: 1px solid var(--border-color); 
-    border-radius: 20px; 
-    padding: 1.5rem; 
-    box-shadow: var(--shadow-card); 
-    transition: all 0.3s ease; 
-    position: relative; 
-    overflow: hidden; 
-    color: var(--text-main); /* Ensure text color inherits correctly */
-}
-
-/* Inputs */
-.input-glass { 
-    background: rgba(150, 150, 150, 0.05); 
-    border: 1px solid var(--border-color); 
-    color: var(--text-main); 
-    padding: 0.75rem 1rem; 
-    border-radius: 12px; 
-    width: 100%; 
-    outline: none; 
-    transition: all 0.2s; 
-}
+.glass-card { background: var(--bg-glass-card); backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow-card); transition: all 0.3s ease; position: relative; overflow: hidden; color: var(--text-main); }
+.input-glass { background: rgba(150, 150, 150, 0.05); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.75rem 1rem; border-radius: 12px; width: 100%; outline: none; transition: all 0.2s; }
 .input-glass:focus { border-color: var(--accent-primary); background: rgba(150, 150, 150, 0.1); }
-
 h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
-
-/* Pills */
 .pill { padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
 .pill-green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
 .pill-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 .pill-yellow { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .pill-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-
-/* Map Styles */
-.map-card-container { 
-    position: relative; 
-    width: 100%; 
-    aspect-ratio: 1.8 / 1; 
-    background: #1e1b4b; 
-    border-radius: 16px; 
-    overflow: hidden; 
-    border: 1px solid var(--border-color); 
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.5); 
-}
-.map-image { 
-    width: 100%; height: 100%; object-fit: cover; 
-    filter: invert(1) hue-rotate(180deg) brightness(0.7) contrast(1.1) grayscale(0.2); 
-    transition: transform 0.5s ease; 
-}
-.map-dot { 
-    position: absolute; transform: translate(-50%, -50%); background: #60a5fa; 
-    border-radius: 99px; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; 
-    color: #0f172a; box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3); 
-    cursor: pointer; z-index: 10; white-space: nowrap; 
-}
+.map-card-container { position: relative; width: 100%; aspect-ratio: 1.8 / 1; background: #1e1b4b; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: inset 0 0 40px rgba(0,0,0,0.5); }
+.map-image { width: 100%; height: 100%; object-fit: cover; filter: invert(1) hue-rotate(180deg) brightness(0.7) contrast(1.1) grayscale(0.2); transition: transform 0.5s ease; }
+.map-dot { position: absolute; transform: translate(-50%, -50%); background: #60a5fa; border-radius: 99px; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; color: #0f172a; box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3); cursor: pointer; z-index: 10; white-space: nowrap; }
 .map-dot.active { animation: pulse-dot 2s infinite; }
-@keyframes pulse-dot { 
-    0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); } 
-    70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); } 
-    100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); } 
-}
+@keyframes pulse-dot { 0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); } 100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); } }

@@ -14,19 +14,23 @@ import Chat from './pages/Chat';
 import ClientProfile from './pages/ClientProfile';
 import Admin from './pages/Admin';
 import Growth from './pages/Growth';
-import Documents from './pages/Documents'; // NEW
+import Documents from './pages/Documents'; 
 
-// New Layout Component specifically for App.tsx structure
-const AppLayout = () => (
-  <div className="h-screen w-full bg-[#f3f4f6] dark:bg-[#0f172a] p-0 flex items-center justify-center font-['Raleway'] overflow-hidden transition-colors duration-300">
-    <div className="app-island w-full h-full max-w-[1920px] bg-white dark:bg-[#111827] rounded-none md:rounded-[20px] shadow-2xl overflow-hidden flex relative border border-gray-200 dark:border-white/10">
-      <Sidebar />
-      <main className="flex-1 h-full overflow-y-auto relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1e1b4b] dark:to-[#111827]">
-        <Outlet />
-      </main>
+const AppLayout = () => {
+  return (
+    <div className="h-screen w-screen bg-[#f3f4f6] dark:bg-[#0f172a] p-0 font-['Raleway'] overflow-hidden transition-colors duration-300">
+      <div className="app-island w-full h-full bg-white dark:bg-[#111827] rounded-none shadow-none overflow-hidden flex relative border-none">
+        <Sidebar />
+        
+        {/* Main Content Area */}
+        <main className="flex-1 h-full overflow-y-auto overflow-x-auto min-w-0 relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1e1b4b] dark:to-[#111827]">
+            {/* The Outlet renders the page content directly inside main */}
+            <Outlet />
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { session, loading } = useAuth();

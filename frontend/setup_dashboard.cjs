@@ -1,3 +1,131 @@
+/* frontend/fix_ui_v13.cjs */
+const fs = require('fs');
+const path = require('path');
+
+const PAGES_PATH = path.join(__dirname, 'src', 'pages');
+const COMPONENTS_PATH = path.join(__dirname, 'src', 'components');
+
+// --- 1. FIX SIDEBAR TOOLTIPS ---
+// Problem: 'fixed' position inside a transformed or scrolling parent can behave unexpectedly.
+// Fix: Ensure z-index is maxed and removed 'transform' interference from the tooltip container.
+const SIDEBAR_PATH = path.join(COMPONENTS_PATH, 'Sidebar.tsx');
+const sidebarContent = `
+import { NavLink, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { 
+  SquaresFour, Users, Briefcase, Clock, ChatCircleDots, SignOut, 
+  Moon, Sun, CurrencyDollar, TrendUp, Globe, Files, Gear 
+} from '@phosphor-icons/react';
+import { useState, useEffect } from 'react';
+import { getSystemConfig, SystemConfig, getCurrentRole, UserRole } from '../utils/dashboardConfig';
+
+export default function Sidebar() {
+  const { signOut } = useAuth();
+  const [theme, setTheme] = useState<string>(localStorage.getItem('theme') || 'dark');
+  
+  const [config, setConfig] = useState<SystemConfig>(getSystemConfig());
+  const [currentRole, setCurrentRoleState] = useState<UserRole>(getCurrentRole());
+
+  useEffect(() => {
+    document.documentElement.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+      const handleConfig = () => setConfig(getSystemConfig());
+      const handleRole = () => setCurrentRoleState(getCurrentRole());
+      
+      window.addEventListener('sys-config-updated', handleConfig);
+      window.addEventListener('role-updated', handleRole);
+      return () => {
+          window.removeEventListener('sys-config-updated', handleConfig);
+          window.removeEventListener('role-updated', handleRole);
+      };
+  }, []);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+
+  const Item = ({ to, icon: Icon, title, id }: { to: string, icon: any, title: string, id: string }) => {
+      const roleConfig = config.layout[currentRole];
+      if (!roleConfig || !roleConfig.tabs[id as keyof typeof roleConfig.tabs]) return null;
+
+      return (
+        <NavLink 
+          to={to} 
+          className={({ isActive }) => \`nav-item group relative flex items-center justify-center \${isActive ? 'active' : ''}\`}
+        >
+          <Icon weight="bold" style={{ fontSize: '1.4rem' }} className="relative z-10" />
+          
+          {/* Tooltip: Fixed to viewport, high Z-Index, pushed right */}
+          <div className="fixed left-[70px] bg-[#1f2937] text-white px-3 py-1.5 rounded-md shadow-[0_4px_20px_rgba(0,0,0,0.5)] border border-white/10 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-[100] ml-4">
+            {title}
+            {/* Arrow */}
+            <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[6px] border-transparent border-r-[#1f2937]"></div>
+          </div>
+        </NavLink>
+      );
+  };
+
+  return (
+    <aside 
+        className="h-full flex flex-col items-center py-6 border-r z-50 overflow-visible bg-[var(--bg-sidebar)] border-[var(--border-color)] w-[80px]"
+    >
+      <Link 
+        to="/context"
+        className="mb-6 flex items-center justify-center font-extrabold text-xl cursor-pointer hover:scale-105 transition-transform w-12 h-12 rounded-xl bg-[var(--bg-panel)] text-[var(--accent-primary)] shadow-lg z-50"
+        title="Workspace Hub"
+      >
+        PB
+      </Link>
+      
+      <div className="w-8 border-t mb-6 border-[var(--border-color)]"></div>
+
+      {/* Navigation Items Container - Allow overflow for tooltips if needed */}
+      <div className="flex-1 w-full flex flex-col items-center overflow-y-auto no-scrollbar space-y-2 pb-4">
+          <Item to="/dashboard" icon={SquaresFour} title="Dashboard" id="dashboard" />
+          <Item to="/hiring" icon={Briefcase} title="Hiring" id="hiring" />
+          <Item to="/people" icon={Users} title="People" id="people" />
+          <Item to="/time" icon={Clock} title="Time" id="time" />
+          <Item to="/finance" icon={CurrencyDollar} title="Finance" id="finance" />
+          <Item to="/growth" icon={TrendUp} title="Growth" id="growth" />
+          <Item to="/compliance" icon={Globe} title="Compliance" id="compliance" />
+          <Item to="/docs" icon={Files} title="Documents" id="docs" />
+          <Item to="/chat" icon={ChatCircleDots} title="Chat" id="chat" />
+          
+          <div className="mt-4 pt-4 border-t border-[var(--border-color)] w-8"></div>
+          <Item to="/admin" icon={Gear} title="Admin Settings" id="admin" />
+      </div>
+
+      <div className="flex-col gap-4 mt-auto flex items-center pb-2">
+          <button onClick={toggleTheme} className="nav-item group relative">
+            {theme === 'dark' ? <Moon weight="fill" style={{ fontSize: '1.4rem' }} /> : <Sun weight="fill" style={{ fontSize: '1.4rem' }} />}
+            <div className="fixed left-[70px] bg-[#1f2937] text-white px-3 py-1.5 rounded-md shadow-xl border border-white/10 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] ml-4">
+                Toggle Theme
+                <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[6px] border-transparent border-r-[#1f2937]"></div>
+            </div>
+          </button>
+          
+          <button 
+            onClick={signOut} 
+            className="nav-item text-red-400 hover:text-red-500 hover:bg-red-500/10 group relative"
+          >
+            <SignOut weight="bold" style={{ fontSize: '1.4rem' }} />
+            <div className="fixed left-[70px] bg-red-900/90 text-white px-3 py-1.5 rounded-md shadow-xl border border-red-500/30 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] ml-4">
+                Sign Out
+                <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[6px] border-transparent border-r-red-900/90"></div>
+            </div>
+          </button>
+      </div>
+    </aside>
+  );
+}
+`;
+
+// --- 2. FIX CLIENT PROFILE (SYSTEM INTELLIGENCE MODAL) ---
+// Problem: 'absolute' positioning during slide-in caused overlap/cropping.
+// Fix: Use CSS Grid columns exclusively for the layout shift (col-span-12 vs col-span-8).
+const CLIENT_PROFILE_PATH = path.join(PAGES_PATH, 'ClientProfile.tsx');
+const clientProfileContent = `
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -48,7 +176,7 @@ export default function ClientProfile() {
 
       setTimeout(() => {
           const dateStr = lastOnline.split(' ')[0];
-          const mockResponse = `Welcome back. Since ${dateStr}, system activity has been normal. Priority: Check new compliance alerts in Germany regarding Visa updates.`;
+          const mockResponse = \`Welcome back. Since \${dateStr}, system activity has been normal. Priority: Check new compliance alerts in Germany regarding Visa updates.\`;
           
           setAiAnalysis(mockResponse);
           
@@ -96,7 +224,7 @@ export default function ClientProfile() {
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-16 h-auto min-h-[300px]">
               
               {/* Main Briefing Area: Expands/Contracts using Col Span */}
-              <div className={`glass-card border border-indigo-500/20 shadow-2xl relative overflow-hidden flex flex-col justify-center items-center text-center transition-[grid-column] duration-500 ease-in-out ${showAction ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
+              <div className={\`glass-card border border-indigo-500/20 shadow-2xl relative overflow-hidden flex flex-col justify-center items-center text-center transition-[grid-column] duration-500 ease-in-out \${showAction ? 'lg:col-span-8' : 'lg:col-span-12'}\`}>
                   
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/10 to-purple-900/10 pointer-events-none"></div>
                   
@@ -134,14 +262,14 @@ export default function ClientProfile() {
               {/* Dynamic Action Slide-in (No longer absolute positioning that causes overlap) */}
               {showAction && suggestedAction && (
                   <div className="glass-card bg-gradient-to-br from-indigo-500/10 to-transparent border-indigo-500/20 border lg:col-span-4 flex flex-col justify-center items-center text-center p-8 animate-fade-in-right">
-                      <div className={`w-20 h-20 rounded-2xl bg-${suggestedAction.color}-500 flex items-center justify-center text-white shadow-2xl mb-6 animate-bounce-slow`}>
+                      <div className={\`w-20 h-20 rounded-2xl bg-\${suggestedAction.color}-500 flex items-center justify-center text-white shadow-2xl mb-6 animate-bounce-slow\`}>
                           <suggestedAction.icon size={40} weight="duotone" />
                       </div>
                       <h4 className="text-xl font-bold mb-2">Priority Item</h4>
                       <p className="text-sm opacity-70 mb-8 max-w-[200px] leading-relaxed">System flagged this module for immediate review.</p>
                       <button 
                           onClick={() => navigate(suggestedAction.route)}
-                          className={`w-full py-4 rounded-xl bg-${suggestedAction.color}-600 hover:bg-${suggestedAction.color}-700 text-white font-bold shadow-lg transition flex items-center justify-center gap-2 group text-sm tracking-wide`}
+                          className={\`w-full py-4 rounded-xl bg-\${suggestedAction.color}-600 hover:bg-\${suggestedAction.color}-700 text-white font-bold shadow-lg transition flex items-center justify-center gap-2 group text-sm tracking-wide\`}
                       >
                           {suggestedAction.label} <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                       </button>
@@ -174,11 +302,19 @@ export default function ClientProfile() {
 const ActionBtn = ({ onClick, icon: Icon, color, label }: any) => (
     <button 
         onClick={onClick}
-        className={`glass-card p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all group border border-white/5 hover:border-${color}-500/30 hover:-translate-y-1 duration-300`}
+        className={\`glass-card p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all group border border-white/5 hover:border-\${color}-500/30 hover:-translate-y-1 duration-300\`}
     >
-        <div className={`p-4 rounded-full bg-${color}-500/10 text-${color}-500 group-hover:bg-${color}-500 group-hover:text-white transition-colors duration-300 shadow-sm`}>
+        <div className={\`p-4 rounded-full bg-\${color}-500/10 text-\${color}-500 group-hover:bg-\${color}-500 group-hover:text-white transition-colors duration-300 shadow-sm\`}>
             <Icon weight="fill" size={24} />
         </div>
         <span className="text-sm font-bold">{label}</span>
     </button>
 );
+`;
+
+fs.writeFileSync(SIDEBAR_PATH, sidebarContent.trim());
+fs.writeFileSync(CLIENT_PROFILE_PATH, clientProfileContent.trim());
+
+console.log("✅ Applied Fixes:");
+console.log("   1. Sidebar Tooltips: Z-Index maxed, removed constraints.");
+console.log("   2. System Modal: Fixed cropping/overlap issue via Grid Layout.");

@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/EntryList.tsx
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChartBar, Plus, Trash, Info, FirstAid, Smiley, User, Flag, Clock, CaretDown, CaretUp, Stack } from '@phosphor-icons/react';
 import type { TimeEntry } from '../../../types'; 
@@ -84,13 +83,12 @@ export default function EntryList({
 
     const activeSick = leaveRequests.find(l => l.type === 'Sick' && selectedDateStr >= l.startDate && selectedDateStr <= l.endDate);
 
-    // --- GROUPING LOGIC ---
     const threshold = 3;
     const shouldGroup = displayEntries.length > threshold;
     const recentEntries = displayEntries.slice(0, threshold);
     const olderEntries = displayEntries.slice(threshold);
 
-    // --- SCROLL CHECK LOGIC ---
+    // Only needed on desktop where overflow might happen
     const checkScroll = () => {
         if (scrollContainerRef.current) {
             const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
@@ -103,7 +101,6 @@ export default function EntryList({
         return () => clearTimeout(t);
     }, [displayEntries, showOlder]);
 
-    // --- INTERACTION HANDLERS ---
     const clearCloseTimer = () => {
         if (closeTimerRef.current) { 
             clearTimeout(closeTimerRef.current); 
@@ -128,7 +125,6 @@ export default function EntryList({
         setShowOlder(prev => !prev);
     };
 
-    // --- RENDER ENTRY HELPER ---
     const renderEntry = (entry: any, idx: number) => {
         const isHovered = hoveredEntryId === entry.id;
 
@@ -191,9 +187,8 @@ export default function EntryList({
     };
 
     return (
-        // UPDATED: h-full to take remaining vertical space in the parent flex column
-        <div className="glass-card p-0 overflow-hidden flex flex-col h-full !shadow-none relative">
-            {/* Header */}
+        // CHANGED: 'h-auto' on mobile forces component to respect content height. 'lg:h-full' locks it on desktop.
+        <div className="glass-card p-0 overflow-hidden flex flex-col h-auto lg:h-full !shadow-none relative">
             <div className="p-6 pb-2 shrink-0 z-10">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold flex items-center gap-2">Entries for {selectedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</h3>
@@ -204,13 +199,13 @@ export default function EntryList({
                 </div>
             </div>
             
-            {/* Scrollable Content */}
+            {/* CHANGED: 'overflow-visible' on mobile removes internal scrollbar. 'lg:overflow-y-auto' enables it on desktop. */}
+            {/* CHANGED: 'lg:flex-1' allows it to fill space on desktop, but auto-height on mobile. */}
             <div 
                 ref={scrollContainerRef}
                 onScroll={checkScroll}
-                className="overflow-y-auto px-6 pb-6 relative custom-scrollbar space-y-2 flex-1"
+                className="px-6 pb-6 relative custom-scrollbar space-y-2 overflow-visible lg:overflow-y-auto lg:flex-1"
             >
-                {/* 1. SICK LEAVE ALERT */}
                 {activeSick && (
                     <div className="text-center font-bold text-red-500 bg-red-500/10 p-2 rounded-lg mb-4 border border-red-500/20">
                         Sick Leave Active
@@ -218,7 +213,6 @@ export default function EntryList({
                     </div>
                 )}
 
-                {/* 2. LIVE RECORDING BOX */}
                 {isToday && isRunning && startTime && (
                     <div className="p-4 rounded-xl border border-orange-500/50 bg-orange-500/10 mb-4 animate-pulse relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
@@ -247,10 +241,8 @@ export default function EntryList({
                     </div>
                 )}
 
-                {/* 3. RECENT ENTRIES */}
                 {recentEntries.map((e, i) => renderEntry(e, i))}
 
-                {/* 4. OLDER ENTRIES GROUP */}
                 {shouldGroup && (
                     <div 
                         className="mt-4 border-t border-gray-200 dark:border-white/10 pt-2"
@@ -280,8 +272,8 @@ export default function EntryList({
                             </div>
                         </div>
 
-                        {/* Collapsible Content */}
-                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showOlder ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        {/* CHANGED: Increased max-height to 5000px to ensure full expansion on mobile for long lists */}
+                        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showOlder ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}`}>
                             <div className="pl-4 border-l-2 border-dashed border-gray-200 dark:border-white/10 pt-2">
                                 {olderEntries.map((e, i) => renderEntry(e, i + threshold))}
                             </div>
@@ -289,7 +281,6 @@ export default function EntryList({
                     </div>
                 )}
 
-                {/* 5. EMPTY STATE */}
                 {displayEntries.length === 0 && !isRunning && (
                     <div className="text-center py-12 opacity-30 text-sm font-medium flex flex-col items-center gap-2">
                         <div className="w-12 h-12 rounded-full bg-gray-500/10 flex items-center justify-center">
@@ -300,10 +291,8 @@ export default function EntryList({
                 )}
             </div>
 
-            {/* Bottom Fade */}
             <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white dark:from-[#1e1b4b] to-transparent pointer-events-none opacity-80" />
             
-            {/* Scroll Down Indicator Arrow */}
             {hasScrollBelow && (
                 <div className="absolute bottom-2 left-6 z-20 animate-bounce text-indigo-500 dark:text-indigo-400 opacity-70 pointer-events-none">
                     <CaretDown weight="bold" size={20} />

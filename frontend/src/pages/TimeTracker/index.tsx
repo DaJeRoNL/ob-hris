@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/index.tsx
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getLocalDateStr } from './utils';
@@ -22,17 +21,14 @@ import TimezoneDisplay from './components/TimezoneDisplay';
 export default function TimeTracker() {
   const { currentClientId } = useAuth();
   
-  // -- Logic Hooks --
   const timeEntries = useTimeEntries(currentClientId);
   const timer = useTimer(currentClientId, timeEntries.addEntryDirectly);
   const leave = useLeaveRequest();
   
-  // -- Page State --
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showTimeline, setShowTimeline] = useState(false);
   const [calendarCondensed, setCalendarCondensed] = useState(false);
 
-  // -- Handlers --
   const handleToggleTimer = () => {
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -57,8 +53,9 @@ export default function TimeTracker() {
   const isSelectedDateFuture = getLocalDateStr(selectedDate) > getLocalDateStr(new Date());
 
   return (
-    // UPDATED: h-full and flex-col to enable full-height layout
-    <div className="p-8 animate-fade-in text-[var(--text-main)] relative h-full flex flex-col">
+    // CONTAINER: 'min-h-screen' ensures it fills the view but can grow. 
+    // 'flex-col' stacks header and grid.
+    <div className="p-4 md:p-8 animate-fade-in text-[var(--text-main)] relative min-h-screen flex flex-col">
       <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 shrink-0">
         <div>
             <h1 className="text-2xl font-bold font-['Montserrat']">Time & Monitoring</h1>
@@ -67,13 +64,16 @@ export default function TimeTracker() {
         <TimezoneDisplay />
       </header>
       
-      {/* UPDATED: flex-1 and min-h-0 ensure this section fills the remaining height but doesn't overflow parent */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start flex-1 min-h-0">
+      {/* GRID: 
+          - 'items-start' is CRITICAL. It prevents the columns from forcing each other to be the same height.
+            This allows the Sticky behavior to work because the container is taller than the sticky element.
+      */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start flex-1">
         
-        {/* LEFT COLUMN: Now a Flex Column to manage Calendar/EntryList height distribution */}
-        <div className="lg:col-span-2 flex flex-col gap-6 h-full transition-all duration-500">
-            
-            {/* Calendar: shrink-0 ensures it keeps its natural height */}
+        {/* LEFT COLUMN: 
+            - No height restrictions. It grows as EntryList grows.
+        */}
+        <div className="lg:col-span-2 flex flex-col gap-6 w-full transition-all duration-500">
             <div className="shrink-0">
                 <CalendarWidget 
                     selectedDate={selectedDate} 
@@ -86,8 +86,7 @@ export default function TimeTracker() {
                 />
             </div>
 
-            {/* EntryList: flex-1 ensures it fills all remaining vertical space */}
-            <div className="flex-1 min-h-0">
+            <div className="flex-1">
                 <EntryList 
                     selectedDate={selectedDate}
                     entries={timeEntries.entries}
@@ -107,8 +106,13 @@ export default function TimeTracker() {
             </div>
         </div>
 
-        {/* RIGHT COLUMN: Just scrollable naturally if needed */}
-        <div className="space-y-4 lg:col-span-1 h-full overflow-y-auto custom-scrollbar pr-2">
+        {/* RIGHT COLUMN: 
+            - 'h-fit': Ensures the div is only as tall as its content (doesn't stretch).
+            - 'lg:sticky': Only applies on Desktop.
+            - 'lg:bottom-6': This is the magic. It sticks to the BOTTOM of the viewport (with 1.5rem padding).
+              This means if the column is tall, you scroll down until the bottom is visible, and THEN it sticks.
+        */}
+        <div className="space-y-4 lg:col-span-1 w-full h-fit lg:sticky lg:bottom-6">
             <StatsSidebar 
                 entries={timeEntries.entries} 
                 currentClientId={currentClientId}
