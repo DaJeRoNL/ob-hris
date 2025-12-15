@@ -5,17 +5,23 @@ import {
     Plus, CheckCircle, XCircle, User, Clock, 
     ChatCenteredText, MagnifyingGlass, Funnel, 
     UserPlus, ArrowRight, CaretLeft, CaretRight, Note, 
-    ClockCounterClockwise, ShieldCheck, Files, Archive
+    ClockCounterClockwise, ShieldCheck, Files, Archive,
+    Sparkle, EnvelopeSimple, Phone, CalendarPlus, DotsThree,
+    UserGear, Lightning, Warning
 } from '@phosphor-icons/react';
 import CandidateModal, { CandidateDetails } from './components/CandidateModal';
 import VerificationModal from './components/VerificationModal';
+import EmployeeSetupModal from './components/EmployeeSetupModal';
 import RequisitionsModal from './components/RequisitionsModal';
 import AddCandidateModal from './components/AddCandidateModal';
-
+import HiringForesightPanel from './components/HiringForesightPanel';
 
 // --- Types ---
 interface ExtendedCandidate extends CandidateDetails {
     originalId: string;
+    aiMatch: number;
+    aiReason: string; // The "Opinion"
+    daysInStage: number; // For "Time Awareness"
 }
 
 interface LogEntry {
@@ -26,28 +32,71 @@ interface LogEntry {
 
 const STAGES = ['Screening', 'Interview', 'Offer', 'Hired', 'Onboarding'];
 
+// --- HYDRATION with "Magic" Data ---
 const hydrateCandidates = (baseCandidates: any[]): ExtendedCandidate[] => {
     return baseCandidates.map(c => {
-        const randomDays = Math.floor(Math.random() * 5);
+        const daysInStage = Math.floor(Math.random() * 10);
         const d = new Date();
-        d.setDate(d.getDate() - randomDays);
+        d.setDate(d.getDate() - daysInStage);
+        
+        // AI Opinions
+        const aiMatch = Math.floor(Math.random() * (99 - 75) + 75);
+        let aiReason = "Strong skill match.";
+        if (aiMatch > 90) aiReason = "Top 1% Trajectory. Highly Recommended.";
+        else if (aiMatch > 85) aiReason = "Solid skills, but check salary expectations.";
+        else aiReason = "Good cultural fit, missing some React exp.";
+
         return {
             id: c.id,
             originalId: c.id,
             name: c.name,
             role: c.role,
             stage: c.stage,
-            tags: ['Senior', 'Remote'],
-            notes: [{ id: 'n1', text: 'Initial screening passed. Strong comms.', date: d.toLocaleString(), author: 'Recruiter' }],
-            files: [{ name: 'Resume_2024.pdf', size: '2.4 MB', date: 'Oct 12', type: 'PDF' }],
+            tags: ['Senior', 'Remote', 'Top Talent'],
+            notes: [{ id: 'n1', text: 'Initial screening passed.', date: d.toLocaleString(), author: 'Recruiter' }],
+            files: [],
             email: `${c.name.split(' ')[0].toLowerCase()}@example.com`,
             phone: '+1 (555) 000-0000',
             location: 'New York, USA',
             lastUpdated: d.toISOString(),
             summary: "Strong candidate with experience in relevant fields.",
-            rating: 0 
+            rating: 0,
+            aiMatch,
+            aiReason,
+            daysInStage
         };
     });
+};
+
+// --- CONFETTI COMPONENT ---
+const ConfettiRain = () => {
+    return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-[100]">
+            <style>
+                {`
+                @keyframes fall {
+                    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+                    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+                }
+                `}
+            </style>
+            {[...Array(50)].map((_, i) => (
+                <div 
+                    key={i}
+                    className="absolute top-[-20px]"
+                    style={{
+                        left: `${Math.random() * 100}%`,
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'][Math.floor(Math.random() * 5)],
+                        width: `${Math.random() * 8 + 4}px`,
+                        height: `${Math.random() * 8 + 4}px`,
+                        animation: `fall ${Math.random() * 2 + 1.5}s linear forwards`,
+                        animationDelay: `${Math.random() * 0.5}s`,
+                        borderRadius: Math.random() > 0.5 ? '50%' : '2px'
+                    }}
+                />
+            ))}
+        </div>
+    );
 };
 
 const Hiring: React.FC = () => {
@@ -56,15 +105,29 @@ const Hiring: React.FC = () => {
   // -- State --
   const [candidates, setCandidates] = useState<ExtendedCandidate[]>([]);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<ExtendedCandidate | null>(null);
   const [search, setSearch] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
   const [hiredCandidateId, setHiredCandidateId] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  
+  // NEW: State for "Magical Link" between Panel and Board
+  const [highlightedForesightId, setHighlightedForesightId] = useState<string | null>(null);
+
+  // Modals
   const [showRequisitions, setShowRequisitions] = useState(false);
   const [showNewReqModal, setShowNewReqModal] = useState(false);
   const [showAddCandidateModal, setShowAddCandidateModal] = useState(false);
-  const [verificationModal, setVerificationModal] = useState<{ show: boolean, type: 'verify' | 'revoke', candidateId: string | null }>({ show: false, type: 'verify', candidateId: null });
+  const [setupModalCandidate, setSetupModalCandidate] = useState<ExtendedCandidate | null>(null);
+  
+  const [verificationModal, setVerificationModal] = useState<{ 
+      show: boolean, 
+      type: 'verify' | 'revoke', 
+      candidateId: string | null,
+      targetStage?: string 
+  }>({ show: false, type: 'verify', candidateId: null });
+  
   const [newReqForm, setNewReqForm] = useState({ title: '', dept: '', budget: '' });
   
   // UI State
@@ -72,17 +135,11 @@ const Hiring: React.FC = () => {
   const [showRejections, setShowRejections] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const historyTimer = useRef<number | null>(null);
-
-  // Scroll & Tooltip
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({ canLeft: false, canRight: true });
-  const [hoveredNote, setHoveredNote] = useState<{ text: string, x: number, y: number } | null>(null);
-
-  // Tag Filters
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   // Derived Data
-  // FIX: Only consider active (non-rejected) candidates for the filter list
   const activeCandidates = useMemo(() => candidates.filter(c => c.stage !== 'Rejected'), [candidates]);
   const allTags = useMemo(() => Array.from(new Set(activeCandidates.flatMap(c => c.tags))), [activeCandidates]);
 
@@ -131,11 +188,6 @@ const Hiring: React.FC = () => {
 
   const addLog = (text: string) => setLogs(prev => [{ id: Math.random().toString(), text, timestamp: new Date().toLocaleTimeString() }, ...prev]);
 
-  const handleCardHover = (e: React.MouseEvent, note: string) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      setHoveredNote({ text: note, x: rect.left, y: rect.top - 15 });
-  };
-
   const scrollBoard = (dir: 'left' | 'right') => {
       if (scrollContainerRef.current) {
           const amount = dir === 'left' ? -400 : 400;
@@ -168,13 +220,16 @@ const Hiring: React.FC = () => {
       addLog(`Added new candidate: ${newCandidate.name}`);
   };
 
-  // Hover logic for History
+  // --- REVISED HISTORY LOGIC: Buffer for scrolling ---
   const handleHistoryEnter = () => {
       if (historyTimer.current) clearTimeout(historyTimer.current);
       setShowHistory(true);
   };
   const handleHistoryLeave = () => {
-      historyTimer.current = window.setTimeout(() => setShowHistory(false), 1000);
+      // 400ms buffer to allow user to move mouse into the dropdown
+      historyTimer.current = window.setTimeout(() => {
+          setShowHistory(false); 
+      }, 400); 
   };
 
   // -- Drag & Drop Logic --
@@ -182,75 +237,109 @@ const Hiring: React.FC = () => {
   const handleDragStart = (e: React.DragEvent, id: string) => {
       setDraggedId(id);
       e.dataTransfer.effectAllowed = "move";
-      setHoveredNote(null);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, stage: string) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
+      if (dragOverStage !== stage) setDragOverStage(stage);
   };
+
+  const handleDragLeave = () => {
+      setDragOverStage(null);
+  }
 
   const handleDrop = (e: React.DragEvent, targetStage: string) => {
       e.preventDefault();
+      setDragOverStage(null);
       if (!draggedId) return;
       const candidate = candidates.find(c => c.id === draggedId);
       if (!candidate || candidate.stage === targetStage) return;
 
       const currentStage = candidate.stage;
 
-      // Strict Rule
+      // 1. Strict Rule: Cannot Onboard unless Hired first
       if (targetStage === 'Onboarding') {
           if (currentStage !== 'Hired') {
               alert("Candidates must be 'Hired' before they can be Onboarded.");
               setDraggedId(null);
               return;
           }
-          setVerificationModal({ show: true, type: 'verify', candidateId: candidate.id });
+          setVerificationModal({ show: true, type: 'verify', candidateId: candidate.id, targetStage });
           setDraggedId(null);
           return;
       }
 
-      // Revoke Rule
+      // 2. Revoke Rule
       const recruitmentStages = ['Screening', 'Interview', 'Offer'];
-      if ((currentStage === 'Hired' || currentStage === 'Onboarding') && recruitmentStages.includes(targetStage)) {
-          setVerificationModal({ show: true, type: 'revoke', candidateId: candidate.id });
+      const isRevokingFromHired = currentStage === 'Hired' && recruitmentStages.includes(targetStage);
+      const isRevokingFromOnboarding = currentStage === 'Onboarding' && (recruitmentStages.includes(targetStage) || targetStage === 'Hired');
+
+      if (isRevokingFromHired || isRevokingFromOnboarding) {
+          setVerificationModal({ show: true, type: 'revoke', candidateId: candidate.id, targetStage });
           setDraggedId(null);
           return;
       }
 
-      // Standard Move
-      const updated = { ...candidate, stage: targetStage, lastUpdated: new Date().toISOString() };
+      // 3. Standard Move
+      const updated = { ...candidate, stage: targetStage, lastUpdated: new Date().toISOString(), daysInStage: 0 };
       setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
       addLog(`Moved ${candidate.name} to ${targetStage}`);
 
-      // Hired Trigger
       if (targetStage === 'Hired') {
           setHiredCandidateId(candidate.id);
           setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 8000);
+          setTimeout(() => setShowConfetti(false), 5000); 
       }
       setDraggedId(null);
   };
 
-  // -- Modal Action Handlers --
-
   const handleConfirmVerification = () => {
-      const { type, candidateId } = verificationModal;
+      const { type, candidateId, targetStage } = verificationModal;
       const c = candidates.find(x => x.id === candidateId);
       if (!c) return;
 
       if (type === 'verify') {
-          const updated = { ...c, stage: 'Onboarding', lastUpdated: new Date().toISOString() };
+          const updated = { ...c, stage: 'Onboarding', lastUpdated: new Date().toISOString(), daysInStage: 0 };
           setCandidates(prev => prev.map(x => x.id === c.id ? updated : x));
           addLog(`Verified & Onboarded ${c.name}`);
-          alert(`${c.name} has been added to the People Directory.`);
+          alert(`${c.name} has been marked as verified. You can now finalize their setup.`);
       } else {
-          const updated = { ...c, stage: 'Offer', lastUpdated: new Date().toISOString() };
+          // REVOKE LOGIC: Move directly to the dropped target stage
+          // If no target provided (fallback), assume Offer or Hired depending on where they came from
+          const fallbackStage = c.stage === 'Onboarding' ? 'Hired' : 'Offer';
+          const finalStage = targetStage || fallbackStage;
+          
+          const updated = { ...c, stage: finalStage, lastUpdated: new Date().toISOString(), daysInStage: 0 };
           setCandidates(prev => prev.map(x => x.id === c.id ? updated : x));
-          addLog(`Revoked ${c.name} back to Recruitment`);
-          alert(`${c.name} removed from People Directory.`);
+          addLog(`Revoked ${c.name} status to ${finalStage}`);
+          
+          alert(`${c.name} status revoked (returned to ${finalStage}).`);
       }
       setVerificationModal({ show: false, type: 'verify', candidateId: null });
+  };
+
+  const handleFinalizeSetup = (c: ExtendedCandidate) => setSetupModalCandidate(c);
+  
+  const onSetupComplete = () => {
+      if (setupModalCandidate) {
+          alert(`${setupModalCandidate.name} is now ACTIVE in the People Directory!`);
+          setSetupModalCandidate(null);
+          addLog(`Activated employee ${setupModalCandidate.name}`);
+      }
+  };
+
+  const handleForesightAction = (candidateId: string, action: string) => {
+      const candidate = candidates.find(c => c.id === candidateId);
+      if (!candidate) return;
+
+      if (action.includes("Email") || action.includes("Contact")) {
+          alert(`Opening email draft for ${candidate.name}...`);
+      } else if (action.includes("Details") || action.includes("Review")) {
+          setSelectedCandidate(candidate);
+      } else {
+          addLog(`Action taken via Foresight: ${action} on ${candidate.name}`);
+      }
   };
 
   const rejectCandidate = (id: string) => {
@@ -261,28 +350,18 @@ const Hiring: React.FC = () => {
 
   return (
     <div className="p-8 h-full flex flex-col text-[var(--text-main)] animate-fade-in overflow-hidden relative">
-      
-      {/* Tooltip Portal */}
-      {hoveredNote && !draggedId && (
-          <div 
-            className="fixed z-[9999] pointer-events-none animate-fade-in bg-slate-800 text-white text-[10px] p-3 rounded-lg shadow-xl border border-white/10 max-w-[250px] backdrop-blur-md"
-            style={{ left: hoveredNote.x, top: hoveredNote.y, transform: 'translateY(-100%)' }}
-          >
-              <div className="font-bold text-indigo-300 mb-1 flex items-center gap-1"><Note weight="fill" /> Latest Note:</div>
-              <div className="italic opacity-80 line-clamp-3 leading-relaxed">"{hoveredNote.text}"</div>
-              <div className="absolute bottom-0 left-4 translate-y-full border-[6px] border-transparent border-t-slate-800"></div>
-          </div>
-      )}
+      {/* Real Confetti Layer */}
+      {showConfetti && <ConfettiRain />}
 
-      {/* Confetti */}
+      {/* Success Banner */}
       {showConfetti && hiredCandidate && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-bounce-in">
-              <div className="bg-indigo-900 text-white pl-6 pr-2 py-2 rounded-full shadow-2xl flex items-center gap-4 border border-indigo-500/50">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[70] animate-pop-in">
+              <div className="bg-indigo-900 text-white pl-6 pr-2 py-2 rounded-full shadow-2xl flex items-center gap-4 border border-indigo-500/50 backdrop-blur-md">
                   <div className="flex items-center gap-2">
                       <span className="bg-green-500 rounded-full p-1"><CheckCircle weight="fill" /></span>
                       <span className="font-bold text-sm">{hiredCandidate.name} Hired!</span>
                   </div>
-                  <button onClick={() => { setShowConfetti(false); setVerificationModal({ show: true, type: 'verify', candidateId: hiredCandidate.id }); }} className="bg-white text-indigo-900 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-gray-100 transition flex items-center gap-1">Verify & Onboard <ArrowRight weight="bold" /></button>
+                  <button onClick={() => { setShowConfetti(false); setVerificationModal({ show: true, type: 'verify', candidateId: hiredCandidate.id, targetStage: 'Onboarding' }); }} className="bg-white text-indigo-900 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-gray-100 transition flex items-center gap-1">Verify & Onboard <ArrowRight weight="bold" /></button>
                   <button onClick={() => setShowConfetti(false)} className="p-1 hover:bg-white/10 rounded-full"><XCircle size={18} /></button>
               </div>
           </div>
@@ -290,10 +369,14 @@ const Hiring: React.FC = () => {
 
       {/* Header */}
       <header className="mb-6 shrink-0 space-y-4">
-        {/* FIX: Layout for smaller screens: flex-col on mobile, flex-row on desktop */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3">Talent Pipeline <span className="text-xs bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-2 py-1 rounded-full font-bold shadow-sm">ATS v2.5</span></h1>
+              <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3">
+                  Talent Pipeline 
+                  <span className="text-xs bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-2 py-1 rounded-full font-bold shadow-sm flex items-center gap-1">
+                      <Sparkle weight="fill" /> AI Enhanced
+                  </span>
+              </h1>
               <div className="flex gap-6 mt-4 text-sm font-medium opacity-70 items-center">
                   <span className="flex items-center gap-2"><User weight="fill" className="text-blue-500" /> {candidates.filter(c => c.stage !== 'Rejected').length} Active</span>
                   <span className="flex items-center gap-2"><CheckCircle weight="fill" className="text-emerald-500" /> {candidates.filter(c => c.stage === 'Hired').length} Hired</span>
@@ -334,12 +417,25 @@ const Hiring: React.FC = () => {
                 </div>
             )}
 
+            {/* HISTORY BUTTON with Updated Logic and Sizing */}
             <div className="relative ml-auto" onMouseEnter={handleHistoryEnter} onMouseLeave={handleHistoryLeave}>
                 <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}><ClockCounterClockwise weight="bold" /> History</button>
-                {showHistory && <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-[#1e293b] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up"><h4 className="text-xs font-bold uppercase opacity-50 mb-3">Activity Log</h4><div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar">{logs.map(log => (<div key={log.id} className="text-xs border-l-2 border-indigo-500 pl-2"><div className="font-medium opacity-80">{log.text}</div><div className="opacity-40 text-[10px]">{log.timestamp}</div></div>))}</div></div>}
+                {showHistory && (
+                    <div className="absolute top-full right-0 mt-2 w-96 bg-white dark:bg-[#1e293b] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up">
+                        <h4 className="text-xs font-bold uppercase opacity-50 mb-3">Activity Log</h4>
+                        <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                            {logs.map(log => (
+                                <div key={log.id} className="text-xs border-l-2 border-indigo-500 pl-2">
+                                    <div className="font-medium opacity-80">{log.text}</div>
+                                    <div className="opacity-40 text-[10px]">{log.timestamp}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
-      </header>
+    </header>
 
       {/* Board */}
       <div className="flex-1 relative overflow-hidden group/board">
@@ -351,32 +447,153 @@ const Hiring: React.FC = () => {
                 const stageCandidates = filteredCandidates.filter(c => c.stage === stage).sort((a,b) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime());
                 const isHired = stage === 'Hired';
                 const isOnboarding = stage === 'Onboarding';
+                const isOffer = stage === 'Offer';
+                const isDragOver = dragOverStage === stage;
+                
+                // --- 1. COLUMN ATMOSPHERES ---
                 let colBorder = 'border-t-4 border-t-indigo-500';
                 let colBg = 'bg-gray-50/50 dark:bg-white/[0.02]';
                 
-                if (isHired) colBorder = 'border-t-4 border-t-emerald-500';
-                if (isOnboarding) { colBorder = 'border-t-4 border-t-blue-500'; colBg = 'bg-blue-500/5 dark:bg-blue-500/5 border-blue-500/10'; }
+                if (isOffer) { colBorder = 'border-t-4 border-t-amber-500'; colBg = 'bg-amber-500/5 dark:bg-amber-500/5'; }
+                if (isHired) { colBorder = 'border-t-4 border-t-emerald-500'; colBg = 'bg-emerald-500/5 dark:bg-emerald-500/5'; }
+                if (isOnboarding) { colBorder = 'border-t-4 border-t-blue-500'; colBg = 'bg-blue-500/5 dark:bg-blue-500/5'; }
+
+                // Dynamic Glow on Drag
+                if (isDragOver) {
+                    colBg = 'bg-indigo-500/10 dark:bg-indigo-500/20';
+                    colBorder = 'border-t-4 border-t-white shadow-[0_0_30px_rgba(99,102,241,0.3)]';
+                }
 
                 return (
-                <div key={stage} className={`flex-1 flex flex-col min-w-[280px] max-w-[350px] ${colBg} rounded-2xl p-3 border border-gray-200 dark:border-white/5 ${colBorder} transition-colors`} onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }} onDrop={(e) => handleDrop(e, stage)}>
-                    <div className="flex justify-between items-center mb-4 px-2 pt-2"><h3 className="font-bold text-xs uppercase opacity-80 tracking-widest">{stage}</h3><span className="bg-white dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-md opacity-60 shadow-sm">{stageCandidates.length}</span></div>
+                <div 
+                    key={stage} 
+                    className={`flex-1 flex flex-col min-w-[320px] max-w-[380px] ${colBg} rounded-2xl p-3 border border-gray-200 dark:border-white/5 ${colBorder} transition-all duration-300`} 
+                    onDragOver={(e) => handleDragOver(e, stage)} 
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, stage)}
+                >
+                    <div className="flex justify-between items-center mb-4 px-2 pt-2">
+                        <h3 className="font-bold text-xs uppercase opacity-80 tracking-widest">{stage}</h3>
+                        <span className="bg-white dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-md opacity-60 shadow-sm">{stageCandidates.length}</span>
+                    </div>
+                    
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 px-1 pb-2">
-                        {stageCandidates.length === 0 && <div className="h-full flex flex-col items-center justify-center opacity-20 text-center border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl m-1"><UserPlus size={32} weight="duotone" className="mb-2" /><span className="text-xs font-bold">Drop Here</span></div>}
-                        {stageCandidates.map(c => (
-                            <div key={c.id} className="glass-card !p-4 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-300 group relative overflow-visible !bg-white dark:!bg-[#1e293b] border border-gray-100 dark:border-white/5 hover:shadow-lg hover:border-indigo-500/30" draggable onDragStart={(e) => handleDragStart(e, c.id)} onClick={() => setSelectedCandidate(c)} onMouseEnter={(e) => c.notes.length > 0 && handleCardHover(e, c.notes[0].text)} onMouseLeave={() => setHoveredNote(null)}>
-                                <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity ${isHired ? 'bg-emerald-500' : isOnboarding ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
-                                <div className="flex justify-between items-start mb-3"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-xs font-bold shadow-inner text-gray-700 dark:text-gray-200 shrink-0">{c.name.charAt(0)}</div><div><div className="font-bold text-sm leading-tight text-gray-900 dark:text-gray-100">{c.name}</div><div className="text-[10px] opacity-60 flex items-center gap-1 mt-0.5 font-medium">{c.role}</div></div></div></div>
-                                <div className="flex flex-wrap gap-1.5 mb-3">{c.tags.slice(0, 3).map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{tag}</span>))}</div>
-                                <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex justify-between items-center text-[10px] opacity-50 font-medium"><div className="flex items-center gap-1 group-hover:text-indigo-500 transition-colors"><Clock weight="bold" /> {new Date(c.lastUpdated).toLocaleDateString()}</div><div className="flex items-center gap-1"><ChatCenteredText weight="bold" /> {c.notes.length}</div></div>
-                                {isHired && <button onClick={(e) => { e.stopPropagation(); setVerificationModal({ show: true, type: 'verify', candidateId: c.id }); }} className="mt-3 w-full py-1.5 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 rounded text-[10px] font-bold uppercase transition flex items-center justify-center gap-1"><ShieldCheck weight="fill" /> Verify & Onboard</button>}
+                        {stageCandidates.length === 0 && (
+                            <div className={`h-32 flex flex-col items-center justify-center opacity-30 text-center border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl m-1 transition-colors ${isDragOver ? 'border-indigo-400 text-indigo-400 opacity-80 bg-indigo-500/10' : ''}`}>
+                                <UserPlus size={32} weight="duotone" className="mb-2" />
+                                <span className="text-xs font-bold">{isDragOver ? 'Drop to Move' : 'Empty Stage'}</span>
                             </div>
-                        ))}
+                        )}
+                        
+                        {stageCandidates.map(c => {
+                            // --- 2. MOMENTUM PHYSICS ---
+                            const isFresh = c.daysInStage < 2;
+                            const isStale = c.daysInStage > 7;
+                            const isHot = c.aiMatch > 90;
+                            // MAGIC LINK: Check if this candidate is being hovered in the panel
+                            const isHighlighted = highlightedForesightId === c.id;
+
+                            return (
+                            <div 
+                                key={c.id} 
+                                className={`
+                                    glass-card !p-0 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-300 group relative overflow-visible 
+                                    !bg-white dark:!bg-[#1e293b] border hover:shadow-xl hover:border-indigo-500/30
+                                    ${isStale ? 'opacity-70 hover:opacity-100 border-gray-200 dark:border-white/5' : 'border-gray-100 dark:border-white/10'}
+                                    ${isFresh ? 'ring-2 ring-indigo-500/30 shadow-indigo-500/20' : ''}
+                                    ${isHighlighted ? 'ring-4 ring-indigo-400 scale-105 z-50 shadow-2xl shadow-indigo-500/40' : ''}
+                                `}
+                                draggable 
+                                onDragStart={(e) => handleDragStart(e, c.id)} 
+                                onClick={() => setSelectedCandidate(c)}
+                            >
+                                {/* Drag Handle / Color Strip */}
+                                <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity ${isHired ? 'bg-emerald-500' : isOnboarding ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
+                                
+                                {/* Quick Actions Overlay (Appears on Hover) */}
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                    <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-indigo-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Email"><EnvelopeSimple size={14} weight="bold" /></button>
+                                    <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-emerald-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Call"><Phone size={14} weight="bold" /></button>
+                                    <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-indigo-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Schedule"><CalendarPlus size={14} weight="bold" /></button>
+                                </div>
+
+                                <div className="p-4">
+                                    {/* Header */}
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-sm font-bold shadow-inner text-gray-700 dark:text-gray-200 shrink-0">
+                                                {c.name.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-sm leading-tight text-gray-900 dark:text-gray-100 group-hover:text-indigo-500 transition-colors flex items-center gap-1">
+                                                    {c.name}
+                                                    {isHot && <Lightning weight="fill" className="text-amber-400" size={12} />}
+                                                </div>
+                                                <div className="text-[10px] opacity-60 flex items-center gap-1 mt-0.5 font-medium">{c.role}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* AI Match & Tags */}
+                                    <div className="flex justify-between items-center mb-3">
+                                        <div className="flex flex-wrap gap-1">
+                                            {c.tags.slice(0, 2).map(tag => (
+                                                <span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{tag}</span>
+                                            ))}
+                                        </div>
+                                        
+                                        {/* 3. AI OPINION TOOLTIP */}
+                                        <div className="relative group/ai">
+                                            <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 cursor-help">
+                                                <Sparkle weight="fill" /> {c.aiMatch}% Match
+                                            </div>
+                                            <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-slate-900 text-white text-[10px] rounded-lg shadow-xl opacity-0 group-hover/ai:opacity-100 transition pointer-events-none z-50">
+                                                <div className="font-bold mb-1 text-indigo-300">AI Insight:</div>
+                                                {c.aiReason}
+                                                <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-slate-900 rotate-45"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer Details (Time Awareness) */}
+                                    <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex justify-between items-center text-[10px] opacity-50 font-medium">
+                                        <div className={`flex items-center gap-1 transition-colors ${isStale ? 'text-red-400 opacity-100' : 'group-hover:text-indigo-500'}`}>
+                                            {isStale ? <Warning weight="fill" /> : <Clock weight="bold" />} 
+                                            {c.daysInStage === 0 ? 'Today' : `${c.daysInStage}d in stage`}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <ChatCenteredText weight="bold" /> {c.notes.length}
+                                        </div>
+                                    </div>
+                                    
+                                    {isHired && (
+                                        <button onClick={(e) => { e.stopPropagation(); setVerificationModal({ show: true, type: 'verify', candidateId: c.id, targetStage: 'Onboarding' }); }} className="mt-3 w-full py-2 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 rounded-lg text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 border border-emerald-500/20">
+                                            <ShieldCheck weight="fill" size={14} /> Verify & Onboard
+                                        </button>
+                                    )}
+
+                                    {isOnboarding && (
+                                        <button onClick={(e) => { e.stopPropagation(); handleFinalizeSetup(c); }} className="mt-3 w-full py-2 bg-indigo-500/10 hover:bg-indigo-500 hover:text-white text-indigo-600 rounded-lg text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 border border-indigo-500/20">
+                                            <UserGear weight="fill" size={14} /> Finalize Setup
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            );
+                        })}
                     </div>
                 </div>
                 );
             })}
           </div>
       </div>
+
+      {/* --- HIRING FORESIGHT PANEL (The New Magic) --- */}
+      <HiringForesightPanel 
+          candidates={candidates} 
+          onAction={handleForesightAction} 
+          onHoverCandidate={setHighlightedForesightId} 
+      />
 
       {/* Modals */}
       {selectedCandidate && (
@@ -399,7 +616,23 @@ const Hiring: React.FC = () => {
       {showAddCandidateModal && (
           <AddCandidateModal 
             onClose={() => setShowAddCandidateModal(false)}
-            onAdd={(c) => { addCandidate(c as ExtendedCandidate); }}
+            onAdd={(c) => { 
+                addCandidate({ 
+                    ...c, 
+                    aiMatch: Math.floor(Math.random() * 30) + 70,
+                    aiReason: "New candidate analysis pending...",
+                    daysInStage: 0 
+                } as ExtendedCandidate); 
+            }}
+          />
+      )}
+
+      {/* NEW: Employee Setup Modal */}
+      {setupModalCandidate && (
+          <EmployeeSetupModal 
+            candidate={setupModalCandidate}
+            onClose={() => setSetupModalCandidate(null)}
+            onComplete={onSetupComplete}
           />
       )}
 

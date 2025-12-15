@@ -9,7 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { getCurrentRole, getSystemConfig, SystemConfig, UserRole } from '../../utils/dashboardConfig';
 import { useSystemSettings } from '../../hooks/useSystemSettings';
-import AiStatusButton from './components/AiStatusButton';
+import AiOrb from './components/AiOrb'; //
 
 const ACTION_MAP: Record<string, { route: string, tabKey: string, label: string, icon: any, color: string }> = {
     'compliance': { route: '/compliance', tabKey: 'compliance', label: 'Resolve Alert', icon: ShieldCheck, color: 'rose' },
@@ -104,21 +104,19 @@ export default function ClientProfile() {
                   <div className="p-10 relative z-10 flex flex-col items-center max-w-2xl w-full">
                       {!aiAnalysis ? (
                           <div className="flex flex-col items-center">
-                              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-white mb-6 animate-pulse border border-white/10">
-                                  <Sparkle weight="fill" size={32} />
+                              {/* --- UPDATED: Orb replaces static image and button --- */}
+                              <div className="mb-6 scale-125">
+                                  <AiOrb 
+                                      onClick={generateBriefing} 
+                                      state={loading ? 'thinking' : 'idle'} 
+                                  />
                               </div>
+                              
                               <h3 className="text-3xl font-bold mb-3">System Intelligence</h3>
                               <p className="opacity-60 mb-8 text-base leading-relaxed">
                                   Last active: <span className="font-mono text-indigo-400">{lastOnline}</span>.<br/>
-                                  Ready to analyze logs and generate your personalized executive brief.
+                                  Click the Orb to analyze logs and generate your executive brief.
                               </p>
-                              <div className="mb-8 filter drop-shadow-2xl">
-                              <AiStatusButton 
-                                  onClick={generateBriefing} 
-                                  isLoading={loading} 
-                                  isAnswered={!!aiAnalysis} 
-                              />
-                          </div>
                           </div>
                       ) : (
                           <div className="animate-fade-in w-full text-left">
