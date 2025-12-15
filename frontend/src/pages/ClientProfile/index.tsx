@@ -9,6 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { getCurrentRole, getSystemConfig, SystemConfig, UserRole } from '../../utils/dashboardConfig';
 import { useSystemSettings } from '../../hooks/useSystemSettings';
+import AiStatusButton from './components/AiStatusButton';
 
 const ACTION_MAP: Record<string, { route: string, tabKey: string, label: string, icon: any, color: string }> = {
     'compliance': { route: '/compliance', tabKey: 'compliance', label: 'Resolve Alert', icon: ShieldCheck, color: 'rose' },
@@ -111,13 +112,13 @@ export default function ClientProfile() {
                                   Last active: <span className="font-mono text-indigo-400">{lastOnline}</span>.<br/>
                                   Ready to analyze logs and generate your personalized executive brief.
                               </p>
-                              <button 
-                                  onClick={generateBriefing}
-                                  disabled={loading}
-                                  className="group px-8 py-4 bg-white dark:bg-[#1e293b] text-indigo-600 dark:text-indigo-300 font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-3 border border-indigo-500/10 text-sm tracking-wide"
-                              >
-                                  {loading ? <><Clock className="animate-spin" /> Processing Data...</> : <><Sparkle weight="fill" /> Generate Briefing</>}
-                              </button>
+                              <div className="mb-8 filter drop-shadow-2xl">
+                              <AiStatusButton 
+                                  onClick={generateBriefing} 
+                                  isLoading={loading} 
+                                  isAnswered={!!aiAnalysis} 
+                              />
+                          </div>
                           </div>
                       ) : (
                           <div className="animate-fade-in w-full text-left">
