@@ -22,8 +22,20 @@ export interface TabConfig {
 }
 
 export interface GeneralSettings {
+    // Localization
     dateFormat: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
     currency: 'USD' | 'EUR' | 'GBP';
+    
+    // Branding (New)
+    systemName: string;
+    
+    // Security (New)
+    mfaEnabled: boolean;
+    sessionTimeout: string;
+    dataRetention: string;
+    
+    // System (New)
+    maintenanceMode: boolean;
 }
 
 export interface RoleConfig {
@@ -41,7 +53,12 @@ export interface SystemConfig {
 const DEFAULT_CONFIG: SystemConfig = {
     settings: {
         dateFormat: 'MM/DD/YYYY',
-        currency: 'USD'
+        currency: 'USD',
+        systemName: 'PB // HRIS',
+        mfaEnabled: false,
+        sessionTimeout: '30m',
+        dataRetention: '1 Year',
+        maintenanceMode: false
     },
     layout: {
         'System Admin': {
@@ -54,20 +71,23 @@ const DEFAULT_CONFIG: SystemConfig = {
         },
         'Manager': {
             widgets: { revenue: false, talent: true, feed: true, global: true, ai: false },
-            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, admin: false }
+            // UPDATED: admin: true to prevent lockout during simulation
+            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, admin: true }
         },
         'HR_Admin': {
             widgets: { revenue: false, talent: true, feed: true, global: false, ai: true },
-            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, admin: false }
+            // UPDATED: admin: true
+            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, admin: true }
         },
         'Employee': {
             widgets: { revenue: false, talent: false, feed: true, global: false, ai: false },
-            tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, admin: false }
+            // UPDATED: admin: true
+            tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, admin: true }
         }
     }
 };
 
-const STORAGE_KEY = 'ob_hris_config_v4';
+const STORAGE_KEY = 'ob_hris_config_v5'; // Incremented version to force new defaults
 const ROLE_KEY = 'ob_hris_active_role';
 
 export const getSystemConfig = (): SystemConfig => {

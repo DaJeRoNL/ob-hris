@@ -148,7 +148,43 @@ export default function Admin() {
                   </div>
               )}
               
-              {activeTab === 'security' && <LockedScreen />}
+              {/* FIXED SECURITY TAB */}
+              {activeTab === 'security' && (!isUnlocked ? <LockedScreen /> : 
+                  <div className="glass-card">
+                      <h3 className="font-bold mb-6 flex items-center gap-2 text-lg"><ShieldCheck size={24} className="text-indigo-500" /> Security Policies</h3>
+                      <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                              <div>
+                                  <div className="font-bold text-sm">Enforce Two-Factor Authentication</div>
+                                  <div className="text-xs opacity-60">Require 2FA for all Admin and Manager roles.</div>
+                              </div>
+                              <button className="text-emerald-500"><ToggleRight size={32} weight="fill" /></button>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                              <div>
+                                  <div className="font-bold text-sm">Session Timeout</div>
+                                  <div className="text-xs opacity-60">Auto-logout after inactivity period.</div>
+                              </div>
+                              <select className="bg-transparent border border-gray-300 dark:border-white/20 rounded-lg px-2 py-1 text-xs font-bold text-[var(--text-main)] outline-none">
+                                  <option>15m</option>
+                                  <option>30m</option>
+                                  <option>1h</option>
+                              </select>
+                          </div>
+                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                              <div>
+                                  <div className="font-bold text-sm">Audit Log Retention</div>
+                                  <div className="text-xs opacity-60">Duration to keep system logs.</div>
+                              </div>
+                              <select className="bg-transparent border border-gray-300 dark:border-white/20 rounded-lg px-2 py-1 text-xs font-bold text-[var(--text-main)] outline-none">
+                                  <option>90 Days</option>
+                                  <option>1 Year</option>
+                                  <option>Forever</option>
+                              </select>
+                          </div>
+                      </div>
+                  </div>
+              )}
           </div>
       </div>
     </div>

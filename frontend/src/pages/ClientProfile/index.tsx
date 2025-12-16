@@ -1,3 +1,4 @@
+// frontend/src/pages/ClientProfile/index.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -9,7 +10,7 @@ import {
 } from '@phosphor-icons/react';
 import { getCurrentRole, getSystemConfig, SystemConfig, UserRole } from '../../utils/dashboardConfig';
 import { useSystemSettings } from '../../hooks/useSystemSettings';
-import AiOrb from './components/AiOrb'; //
+import AiOrb from '../../components/AiOrb';
 
 const ACTION_MAP: Record<string, { route: string, tabKey: string, label: string, icon: any, color: string }> = {
     'compliance': { route: '/compliance', tabKey: 'compliance', label: 'Resolve Alert', icon: ShieldCheck, color: 'rose' },
@@ -43,6 +44,8 @@ export default function ClientProfile() {
   }, []);
 
   const generateBriefing = () => {
+      if (loading || aiAnalysis) return; // Prevent double click or re-run
+      
       setLoading(true);
       setShowAction(false);
       setSuggestedAction(null);
@@ -93,44 +96,51 @@ export default function ClientProfile() {
               </div>
           </div>
 
-          {/* --- 2. INTELLIGENCE CONSOLE (Fixed Cropping) --- */}
+          {/* --- 2. INTELLIGENCE CONSOLE (Updated Layout) --- */}
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-16 h-auto min-h-[300px]">
               
-              {/* Main Briefing Area: Expands/Contracts using Col Span */}
+              {/* Main Briefing Area */}
               <div className={`glass-card border border-indigo-500/20 shadow-2xl relative overflow-hidden flex flex-col justify-center items-center text-center transition-[grid-column] duration-500 ease-in-out ${showAction ? 'lg:col-span-8' : 'lg:col-span-12'}`}>
                   
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/10 to-purple-900/10 pointer-events-none"></div>
                   
-                  <div className="p-10 relative z-10 flex flex-col items-center max-w-2xl w-full">
-                      {!aiAnalysis ? (
-                          <div className="flex flex-col items-center">
-                              {/* --- UPDATED: Orb replaces static image and button --- */}
-                              <div className="mb-6 scale-125">
-                                  <AiOrb 
-                                      onClick={generateBriefing} 
-                                      state={loading ? 'thinking' : 'idle'} 
-                                  />
+                  <div className="p-10 relative z-10 w-full max-w-4xl flex flex-col md:flex-row items-center gap-10">
+                      
+                      {/* Left: Orb (Persistent) */}
+                      <div className="shrink-0 scale-125">
+                          <AiOrb 
+                              onClick={generateBriefing} 
+                              // Pass 'answered' when analysis exists to trigger the purple gradient (Success state)
+                              state={aiAnalysis ? 'answered' : (loading ? 'thinking' : 'idle')} 
+                          />
+                      </div>
+
+                      {/* Right: Content Area (Swaps based on state) */}
+                      <div className="flex-1 min-w-0">
+                          {!aiAnalysis ? (
+                              <div className="animate-fade-in text-center md:text-left">
+                                  <h3 className="text-3xl font-bold mb-3">System Intelligence</h3>
+                                  <p className="opacity-60 text-base leading-relaxed">
+                                      Last active: <span className="font-mono text-indigo-400">{lastOnline}</span>.<br/>
+                                      Click the Orb to analyze logs and generate your executive brief.
+                                  </p>
                               </div>
-                              
-                              <h3 className="text-3xl font-bold mb-3">System Intelligence</h3>
-                              <p className="opacity-60 mb-8 text-base leading-relaxed">
-                                  Last active: <span className="font-mono text-indigo-400">{lastOnline}</span>.<br/>
-                                  Click the Orb to analyze logs and generate your executive brief.
-                              </p>
-                          </div>
-                      ) : (
-                          <div className="animate-fade-in w-full text-left">
-                              <div className="flex items-center gap-3 mb-4">
-                                  <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 border border-emerald-500/20"><CalendarCheck weight="fill" size={24} /></div>
-                                  <h4 className="text-xs font-bold uppercase tracking-widest opacity-60">Status Report</h4>
+                          ) : (
+                              <div className="animate-fade-in w-full text-left">
+                                  <div className="flex items-center gap-3 mb-4">
+                                      <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 border border-emerald-500/20">
+                                          <CalendarCheck weight="fill" size={24} />
+                                      </div>
+                                      <h4 className="text-xs font-bold uppercase tracking-widest opacity-60">Status Report</h4>
+                                  </div>
+                                  <p className="text-xl leading-relaxed font-medium">"{aiAnalysis}"</p>
                               </div>
-                              <p className="text-xl leading-relaxed font-medium">"{aiAnalysis}"</p>
-                          </div>
-                      )}
+                          )}
+                      </div>
                   </div>
               </div>
 
-              {/* Dynamic Action Slide-in (No longer absolute positioning that causes overlap) */}
+              {/* Dynamic Action Slide-in */}
               {showAction && suggestedAction && (
                   <div className="glass-card bg-gradient-to-br from-indigo-500/10 to-transparent border-indigo-500/20 border lg:col-span-4 flex flex-col justify-center items-center text-center p-8 animate-fade-in-right">
                       <div className={`w-20 h-20 rounded-2xl bg-${suggestedAction.color}-500 flex items-center justify-center text-white shadow-2xl mb-6 animate-bounce-slow`}>

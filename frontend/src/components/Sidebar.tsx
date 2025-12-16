@@ -6,10 +6,16 @@ import {
 } from '@phosphor-icons/react';
 import { useState, useEffect } from 'react';
 import { getSystemConfig, SystemConfig, getCurrentRole, UserRole } from '../utils/dashboardConfig';
+import { useSystemSettings } from '../hooks/useSystemSettings';
 
 export default function Sidebar() {
   const { signOut } = useAuth();
   const [theme, setTheme] = useState<string>(localStorage.getItem('theme') || 'dark');
+  
+  // FIX 1: Retrieve 'settings' first, then access systemName from it
+  // The error indicated systemName is likely nested inside settings
+  const { settings } = useSystemSettings();
+  const systemName = settings?.systemName;
   
   const [config, setConfig] = useState<SystemConfig>(getSystemConfig());
   const [currentRole, setCurrentRoleState] = useState<UserRole>(getCurrentRole());
@@ -33,6 +39,18 @@ export default function Sidebar() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
+  // Helper: Extract up to 2 initials from the system name (e.g. "Acme Corp" -> "AC")
+  // Fallback to "PB" if undefined
+  const logoText = (systemName || 'PB')
+    .split(' ')
+    .slice(0, 2)
+    // FIX 2: Explicitly type 'n' as string to fix implicit any error
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+
+  // Added React.ElementType for better strict typing on 'icon', though 'any' works too
   const Item = ({ to, icon: Icon, title, id }: { to: string, icon: any, title: string, id: string }) => {
       const roleConfig = config.layout[currentRole];
       if (!roleConfig || !roleConfig.tabs[id as keyof typeof roleConfig.tabs]) return null;
@@ -63,7 +81,7 @@ export default function Sidebar() {
         className="mb-2 flex items-center justify-center font-extrabold text-xl cursor-pointer hover:scale-105 transition-transform w-12 h-12 rounded-xl bg-[var(--bg-panel)] text-[var(--accent-primary)] shadow-lg z-50"
         title="Workspace Hub"
       >
-        PB
+        {logoText}
       </Link>
       
       {/* Grouped Dashboard with Context */}
