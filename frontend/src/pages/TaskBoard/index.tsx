@@ -8,6 +8,17 @@ import {
 import TaskFlowPanel from './components/TaskFlowPanel';
 import EditTaskModal from './components/EditTaskModal';
 
+
+interface Subtask {
+    id: string;
+    title: string;
+    desc?: string;
+    isCompleted: boolean;
+    assignee?: string;
+    isRequired?: boolean;
+    completedAt?: string;
+}
+
 interface Note {
     id: string;
     user: string;
@@ -15,22 +26,10 @@ interface Note {
     timestamp: string;
 }
 
-interface Subtask {
-    id: string;
-    title: string;
-    desc?: string;
-    isCompleted: boolean;
-    isRequired?: boolean;
-    assignee?: string;
-    completedAt?: string;
-}
-
 interface Task {
     id: string;
     title: string;
     desc: string;
-    assignee: string | null;
-    collaborators: string[];
     priority: 'Low' | 'Medium' | 'High' | 'Critical';
     status: 'New Tickets' | 'Ready' | 'In Progress' | 'Review' | 'Done';
     tags: string[];
@@ -39,8 +38,11 @@ interface Task {
     deadline?: string;
     creator?: string;
     createdAt?: string;
+    collaborators: string[];
     completedAt?: string;
+    assignee: string | null;
 }
+
 
 const INITIAL_TASKS: Task[] = [
     { 
@@ -127,7 +129,7 @@ export default function TaskBoard() {
     const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
     const [dragOverCol, setDragOverCol] = useState<string | null>(null); 
     
-    // Sort Menu State with Delay
+    // Sort Menu State
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
     const sortTimeoutRef = useRef<number | null>(null);
 
@@ -159,7 +161,7 @@ export default function TaskBoard() {
         }
     };
 
-    // Sort Menu Handlers
+    // Sort Handlers
     const handleSortEnter = () => {
         if (sortTimeoutRef.current) clearTimeout(sortTimeoutRef.current);
         setIsSortMenuOpen(true);
@@ -223,6 +225,19 @@ export default function TaskBoard() {
             newCols.splice(reviewIdx, 0, name);
             setColumns(newCols);
         }
+    };
+
+    const moveColumn = (index: number, direction: 'left' | 'right') => {
+        const newCols = [...columns];
+        const targetIndex = direction === 'left' ? index - 1 : index + 1;
+        
+        // Safety range: >0 (New Tickets) and < length-2 (Review/Done)
+        if (targetIndex < 1 || targetIndex > columns.length - 3) return;
+
+        const temp = newCols[index];
+        newCols[index] = newCols[targetIndex];
+        newCols[targetIndex] = temp;
+        setColumns(newCols);
     };
 
     const handleDeleteColumn = (col: string) => {
@@ -387,7 +402,7 @@ export default function TaskBoard() {
 
             <div 
                 ref={scrollContainerRef}
-                className="flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar"
+                className={`flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar ${isFlowOpen ? 'select-none' : ''}`} // Removed blur from container
             >
                 <div className="flex gap-6 h-full min-w-max px-2">
                     {columns.map((col, idx) => {
@@ -403,10 +418,25 @@ export default function TaskBoard() {
                             else dragClasses = 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] bg-indigo-500/5';
                         }
 
+                        // Column Borders
+                        let colBorder = 'border-t-4 border-indigo-500'; 
+                        if (col === 'Review') colBorder = 'border-t-4 border-emerald-500';
+                        if (col === 'Done') colBorder = 'border-t-4 border-amber-500';
+                        if (col !== 'New Tickets' && col !== 'Review' && col !== 'Done') colBorder = 'border-t-4 border-blue-500';
+
+                        let bgClass = 'bg-gray-100/50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5';
+
+                        if (isDragOver) {
+                             bgClass = 'bg-indigo-500/10 dark:bg-indigo-500/20';
+                             if (col === 'Review') colBorder = 'border-t-4 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]';
+                             else if (col === 'Done') colBorder = 'border-t-4 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]';
+                             else colBorder = 'border-t-4 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)]';
+                        }
+
                         return (
                             <div 
                                 key={col} 
-                                className={`w-[350px] flex flex-col bg-gray-100/50 dark:bg-white/[0.02] rounded-2xl border border-gray-200 dark:border-white/5 h-full transition-all duration-300 ${dragClasses}`}
+                                className={`w-[350px] flex flex-col rounded-2xl border ${bgClass} ${colBorder} h-full transition-all duration-300 ${dragClasses}`}
                                 onDragEnter={() => handleDragEnter(col)}
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, col)}
@@ -416,16 +446,18 @@ export default function TaskBoard() {
                                         <span className="font-bold text-sm uppercase tracking-wider">{col}</span>
                                         <span className="bg-gray-200 dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">{colTasks.length}</span>
                                     </div>
-                                    <div className="flex gap-1">
-                                        {/* FIXED: No editing of first/last col positions */}
+                                    <div className="flex gap-1 opacity-0 group-hover/col:opacity-100 transition-opacity">
                                         {!isProtected && (
-                                            <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1">
+                                            <>
+                                                <button onClick={() => moveColumn(idx, 'left')} disabled={idx <= 1} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded disabled:opacity-30"><CaretLeft weight="bold" size={12} /></button>
+                                                <button onClick={() => moveColumn(idx, 'right')} disabled={idx >= columns.length - 2} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded disabled:opacity-30"><CaretRight weight="bold" size={12} /></button>
+                                                <div className="w-px h-3 bg-gray-300 dark:bg-white/20 mx-1"></div>
                                                 <button onClick={() => {
                                                     const newName = prompt("Rename column:", col);
                                                     if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
-                                                }} className="p-1 hover:bg-black/5 rounded"><PencilSimple size={12} /></button>
+                                                }} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded"><PencilSimple size={12} /></button>
                                                 <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-red-500/10 text-red-500 rounded"><X size={12} /></button>
-                                            </div>
+                                            </>
                                         )}
                                         {isProtected && <LockKey className="opacity-30" weight="bold" />}
                                     </div>
@@ -438,19 +470,22 @@ export default function TaskBoard() {
                                         const pct = total > 0 ? (completed / total) * 100 : 0;
                                         const isActive = selectedTask?.id === task.id && isFlowOpen;
                                         
-                                        // Card Visual State
+                                        // Selective Blur: Blurred if panel open AND NOT active
                                         let cardStateClass = '';
                                         if (isFlowOpen) {
                                             if (isActive) {
+                                                // Active Card: Pop out, no blur
                                                 cardStateClass = 'ring-4 ring-indigo-500 border-transparent z-50 scale-105 shadow-2xl !blur-0 !brightness-100 !pointer-events-auto';
                                             } else {
-                                                cardStateClass = 'blur-sm brightness-50 pointer-events-none opacity-50';
+                                                // Inactive Cards: Blur, dim slightly, disable pointer events
+                                                cardStateClass = 'blur-sm opacity-80 pointer-events-none';
                                             }
                                         }
 
                                         // Dynamic Tilt on Drag
                                         const isDraggingThis = draggedTaskId === task.id;
-                                        const tiltClass = isDraggingThis ? 'rotate-3 scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
+                                        // FIXED: No rotation, just lift
+                                        const tiltClass = isDraggingThis ? 'scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
 
                                         // Determine Date Status for Card (Burnout Logic)
                                         const getUrgency = (t: Task) => {
@@ -473,7 +508,7 @@ export default function TaskBoard() {
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex flex-wrap gap-1">
-                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500">{tag}</span>))}
+                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 tracking-wider">{tag}</span>))}
                                                     </div>
                                                     <div className="flex gap-1">
                                                         <button onClick={(e) => openEditModal(task, e)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded text-gray-400 hover:text-indigo-500"><PencilSimple /></button>
@@ -485,9 +520,13 @@ export default function TaskBoard() {
                                                     </div>
                                                 </div>
 
-                                                <h3 className="font-bold text-sm mb-2 leading-tight">{task.title}</h3>
+                                                <div className="flex items-center gap-3 mb-2">
+                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold shadow-inner text-white shrink-0">
+                                                        {task.title.charAt(0)}
+                                                    </div>
+                                                    <h3 className="font-bold text-sm leading-tight">{task.title}</h3>
+                                                </div>
                                                 
-                                                {/* Deadline Badge */}
                                                 {task.deadline && (
                                                     <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2">
                                                         <CalendarBlank weight="bold" /> {task.deadline}
@@ -506,7 +545,7 @@ export default function TaskBoard() {
                                                     <div className="flex -space-x-2 overflow-hidden">
                                                         {task.collaborators.length > 0 ? (
                                                             task.collaborators.map((c, i) => (
-                                                                <div key={i} className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
+                                                                <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
                                                                     {c.charAt(0)}
                                                                 </div>
                                                             ))

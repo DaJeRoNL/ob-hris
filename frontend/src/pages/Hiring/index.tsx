@@ -20,8 +20,8 @@ import HiringForesightPanel from './components/HiringForesightPanel';
 interface ExtendedCandidate extends CandidateDetails {
     originalId: string;
     aiMatch: number;
-    aiReason: string; // The "Opinion"
-    daysInStage: number; // For "Time Awareness"
+    aiReason: string; 
+    daysInStage: number; 
 }
 
 interface LogEntry {
@@ -32,14 +32,12 @@ interface LogEntry {
 
 const STAGES = ['Screening', 'Interview', 'Offer', 'Hired', 'Onboarding'];
 
-// --- HYDRATION with "Magic" Data ---
 const hydrateCandidates = (baseCandidates: any[]): ExtendedCandidate[] => {
     return baseCandidates.map(c => {
         const daysInStage = Math.floor(Math.random() * 10);
         const d = new Date();
         d.setDate(d.getDate() - daysInStage);
         
-        // AI Opinions
         const aiMatch = Math.floor(Math.random() * (99 - 75) + 75);
         let aiReason = "Strong skill match.";
         if (aiMatch > 90) aiReason = "Top 1% Trajectory. Highly Recommended.";
@@ -68,7 +66,6 @@ const hydrateCandidates = (baseCandidates: any[]): ExtendedCandidate[] => {
     });
 };
 
-// --- CONFETTI COMPONENT ---
 const ConfettiRain = () => {
     return (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-[100]">
@@ -102,7 +99,6 @@ const ConfettiRain = () => {
 const Hiring: React.FC = () => {
   const { currentClientId } = useAuth();
   
-  // -- State --
   const [candidates, setCandidates] = useState<ExtendedCandidate[]>([]);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
@@ -112,10 +108,8 @@ const Hiring: React.FC = () => {
   const [hiredCandidateId, setHiredCandidateId] = useState<string | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   
-  // NEW: State for "Magical Link" between Panel and Board
   const [highlightedForesightId, setHighlightedForesightId] = useState<string | null>(null);
 
-  // Modals
   const [showRequisitions, setShowRequisitions] = useState(false);
   const [showNewReqModal, setShowNewReqModal] = useState(false);
   const [showAddCandidateModal, setShowAddCandidateModal] = useState(false);
@@ -130,7 +124,6 @@ const Hiring: React.FC = () => {
   
   const [newReqForm, setNewReqForm] = useState({ title: '', dept: '', budget: '' });
   
-  // UI State
   const [showFilters, setShowFilters] = useState(false);
   const [showRejections, setShowRejections] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -139,7 +132,6 @@ const Hiring: React.FC = () => {
   const [scrollState, setScrollState] = useState({ canLeft: false, canRight: true });
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
-  // Derived Data
   const activeCandidates = useMemo(() => candidates.filter(c => c.stage !== 'Rejected'), [candidates]);
   const allTags = useMemo(() => Array.from(new Set(activeCandidates.flatMap(c => c.tags))), [activeCandidates]);
 
@@ -164,8 +156,6 @@ const Hiring: React.FC = () => {
       const baseData = MOCK_DB.hiring.filter(h => h.clientId === currentClientId);
       setCandidates(hydrateCandidates(baseData));
   }, [currentClientId]);
-
-  // -- Handlers --
 
   const checkScroll = () => {
       if (scrollContainerRef.current) {
@@ -220,19 +210,15 @@ const Hiring: React.FC = () => {
       addLog(`Added new candidate: ${newCandidate.name}`);
   };
 
-  // --- REVISED HISTORY LOGIC: Buffer for scrolling ---
   const handleHistoryEnter = () => {
       if (historyTimer.current) clearTimeout(historyTimer.current);
       setShowHistory(true);
   };
   const handleHistoryLeave = () => {
-      // 400ms buffer to allow user to move mouse into the dropdown
       historyTimer.current = window.setTimeout(() => {
           setShowHistory(false); 
       }, 400); 
   };
-
-  // -- Drag & Drop Logic --
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
       setDraggedId(id);
@@ -258,7 +244,6 @@ const Hiring: React.FC = () => {
 
       const currentStage = candidate.stage;
 
-      // 1. Strict Rule: Cannot Onboard unless Hired first
       if (targetStage === 'Onboarding') {
           if (currentStage !== 'Hired') {
               alert("Candidates must be 'Hired' before they can be Onboarded.");
@@ -270,7 +255,6 @@ const Hiring: React.FC = () => {
           return;
       }
 
-      // 2. Revoke Rule
       const recruitmentStages = ['Screening', 'Interview', 'Offer'];
       const isRevokingFromHired = currentStage === 'Hired' && recruitmentStages.includes(targetStage);
       const isRevokingFromOnboarding = currentStage === 'Onboarding' && (recruitmentStages.includes(targetStage) || targetStage === 'Hired');
@@ -281,7 +265,6 @@ const Hiring: React.FC = () => {
           return;
       }
 
-      // 3. Standard Move
       const updated = { ...candidate, stage: targetStage, lastUpdated: new Date().toISOString(), daysInStage: 0 };
       setCandidates(prev => prev.map(c => c.id === updated.id ? updated : c));
       addLog(`Moved ${candidate.name} to ${targetStage}`);
@@ -305,8 +288,6 @@ const Hiring: React.FC = () => {
           addLog(`Verified & Onboarded ${c.name}`);
           alert(`${c.name} has been marked as verified. You can now finalize their setup.`);
       } else {
-          // REVOKE LOGIC: Move directly to the dropped target stage
-          // If no target provided (fallback), assume Offer or Hired depending on where they came from
           const fallbackStage = c.stage === 'Onboarding' ? 'Hired' : 'Offer';
           const finalStage = targetStage || fallbackStage;
           
@@ -350,10 +331,8 @@ const Hiring: React.FC = () => {
 
   return (
     <div className="p-8 h-full flex flex-col text-[var(--text-main)] animate-fade-in overflow-hidden relative">
-      {/* Real Confetti Layer */}
       {showConfetti && <ConfettiRain />}
 
-      {/* Success Banner */}
       {showConfetti && hiredCandidate && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[70] animate-pop-in">
               <div className="bg-indigo-900 text-white pl-6 pr-2 py-2 rounded-full shadow-2xl flex items-center gap-4 border border-indigo-500/50 backdrop-blur-md">
@@ -367,7 +346,6 @@ const Hiring: React.FC = () => {
           </div>
       )}
 
-      {/* Header */}
       <header className="mb-6 shrink-0 space-y-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -391,13 +369,11 @@ const Hiring: React.FC = () => {
         </div>
 
         <div className="flex gap-4">
-            {/* Search */}
             <div className="relative flex-1 max-w-md group flex items-center">
                 <MagnifyingGlass size={18} className="absolute left-3 text-gray-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none z-10" weight="bold" />
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 transition backdrop-blur-sm shadow-sm" />
             </div>
             
-            {/* Filter Toggle */}
             <button 
                 onClick={() => setShowFilters(!showFilters)} 
                 className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${selectedTags.length > 0 ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}
@@ -406,7 +382,6 @@ const Hiring: React.FC = () => {
                 {selectedTags.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-500"></span>}
             </button>
 
-            {/* Tags (Conditional) */}
             {showFilters && (
                 <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar items-center mask-fade-right animate-fade-in-right">
                     {allTags.map(tag => (
@@ -417,7 +392,6 @@ const Hiring: React.FC = () => {
                 </div>
             )}
 
-            {/* HISTORY BUTTON with Updated Logic and Sizing */}
             <div className="relative ml-auto" onMouseEnter={handleHistoryEnter} onMouseLeave={handleHistoryLeave}>
                 <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}><ClockCounterClockwise weight="bold" /> History</button>
                 {showHistory && (
@@ -439,8 +413,9 @@ const Hiring: React.FC = () => {
 
       {/* Board */}
       <div className="flex-1 relative overflow-hidden group/board">
-          {scrollState.canLeft && <button onClick={() => scrollBoard('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-r-2xl shadow-xl hover:pl-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110"><CaretLeft weight="bold" size={24} className="text-indigo-500" /></button>}
-          {scrollState.canRight && <button onClick={() => scrollBoard('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-l-2xl shadow-xl hover:pr-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110"><CaretRight weight="bold" size={24} className="text-indigo-500" /></button>}
+          {/* UPDATED SCROLL BUTTONS (Consistent with TaskBoard) */}
+          {scrollState.canLeft && <button onClick={() => scrollBoard('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-r-2xl shadow-xl hover:pl-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretLeft weight="bold" size={24} /></button>}
+          {scrollState.canRight && <button onClick={() => scrollBoard('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-l-2xl shadow-xl hover:pr-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretRight weight="bold" size={24} /></button>}
 
           <div ref={scrollContainerRef} className="flex gap-6 h-full overflow-x-auto overflow-y-hidden pb-4 px-1 scroll-smooth no-scrollbar">
             {STAGES.map(stage => {
@@ -450,7 +425,6 @@ const Hiring: React.FC = () => {
                 const isOffer = stage === 'Offer';
                 const isDragOver = dragOverStage === stage;
                 
-                // --- 1. COLUMN ATMOSPHERES ---
                 let colBorder = 'border-t-4 border-t-indigo-500';
                 let colBg = 'bg-gray-50/50 dark:bg-white/[0.02]';
                 
@@ -458,7 +432,6 @@ const Hiring: React.FC = () => {
                 if (isHired) { colBorder = 'border-t-4 border-t-emerald-500'; colBg = 'bg-emerald-500/5 dark:bg-emerald-500/5'; }
                 if (isOnboarding) { colBorder = 'border-t-4 border-t-blue-500'; colBg = 'bg-blue-500/5 dark:bg-blue-500/5'; }
 
-                // Dynamic Glow on Drag
                 if (isDragOver) {
                     colBg = 'bg-indigo-500/10 dark:bg-indigo-500/20';
                     colBorder = 'border-t-4 border-t-white shadow-[0_0_30px_rgba(99,102,241,0.3)]';
@@ -486,11 +459,9 @@ const Hiring: React.FC = () => {
                         )}
                         
                         {stageCandidates.map(c => {
-                            // --- 2. MOMENTUM PHYSICS ---
                             const isFresh = c.daysInStage < 2;
                             const isStale = c.daysInStage > 7;
                             const isHot = c.aiMatch > 90;
-                            // MAGIC LINK: Check if this candidate is being hovered in the panel
                             const isHighlighted = highlightedForesightId === c.id;
 
                             return (
@@ -507,10 +478,8 @@ const Hiring: React.FC = () => {
                                 onDragStart={(e) => handleDragStart(e, c.id)} 
                                 onClick={() => setSelectedCandidate(c)}
                             >
-                                {/* Drag Handle / Color Strip */}
                                 <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity ${isHired ? 'bg-emerald-500' : isOnboarding ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
                                 
-                                {/* Quick Actions Overlay (Appears on Hover) */}
                                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                     <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-indigo-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Email"><EnvelopeSimple size={14} weight="bold" /></button>
                                     <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-emerald-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Call"><Phone size={14} weight="bold" /></button>
@@ -518,10 +487,9 @@ const Hiring: React.FC = () => {
                                 </div>
 
                                 <div className="p-4">
-                                    {/* Header */}
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-sm font-bold shadow-inner text-gray-700 dark:text-gray-200 shrink-0">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold shadow-inner text-white shrink-0">
                                                 {c.name.charAt(0)}
                                             </div>
                                             <div>
@@ -534,7 +502,6 @@ const Hiring: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* AI Match & Tags */}
                                     <div className="flex justify-between items-center mb-3">
                                         <div className="flex flex-wrap gap-1">
                                             {c.tags.slice(0, 2).map(tag => (
@@ -542,7 +509,6 @@ const Hiring: React.FC = () => {
                                             ))}
                                         </div>
                                         
-                                        {/* 3. AI OPINION TOOLTIP */}
                                         <div className="relative group/ai">
                                             <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 cursor-help">
                                                 <Sparkle weight="fill" /> {c.aiMatch}% Match
@@ -555,7 +521,6 @@ const Hiring: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Footer Details (Time Awareness) */}
                                     <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex justify-between items-center text-[10px] opacity-50 font-medium">
                                         <div className={`flex items-center gap-1 transition-colors ${isStale ? 'text-red-400 opacity-100' : 'group-hover:text-indigo-500'}`}>
                                             {isStale ? <Warning weight="fill" /> : <Clock weight="bold" />} 
@@ -588,14 +553,12 @@ const Hiring: React.FC = () => {
           </div>
       </div>
 
-      {/* --- HIRING FORESIGHT PANEL (The New Magic) --- */}
       <HiringForesightPanel 
           candidates={candidates} 
           onAction={handleForesightAction} 
           onHoverCandidate={setHighlightedForesightId} 
       />
 
-      {/* Modals */}
       {selectedCandidate && (
           <CandidateModal 
             candidate={selectedCandidate} 
@@ -612,7 +575,6 @@ const Hiring: React.FC = () => {
       
       {showRequisitions && <RequisitionsModal onClose={() => setShowRequisitions(false)} />}
       
-      {/* New Add Candidate Modal */}
       {showAddCandidateModal && (
           <AddCandidateModal 
             onClose={() => setShowAddCandidateModal(false)}
@@ -627,7 +589,6 @@ const Hiring: React.FC = () => {
           />
       )}
 
-      {/* NEW: Employee Setup Modal */}
       {setupModalCandidate && (
           <EmployeeSetupModal 
             candidate={setupModalCandidate}
@@ -636,7 +597,6 @@ const Hiring: React.FC = () => {
           />
       )}
 
-      {/* New Rejection Modal / List */}
       {showRejections && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowRejections(false)}>
               <div className="bg-white dark:bg-[#1e293b] w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10 p-6 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>

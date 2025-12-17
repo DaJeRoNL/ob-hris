@@ -16,15 +16,12 @@ const write = (relPath, content) => {
     console.log(`✅ Updated: ${relPath}`);
 };
 
-// ============================================================================
-// 1. EDIT TASK MODAL (Unchanged)
-// ============================================================================
-const EDIT_TASK_MODAL = `import { useState, useEffect } from 'react';
-import { 
-    X, Plus, Trash, CalendarBlank, CheckSquare, Square, 
-    CaretUp, CaretDown, TextT 
-} from '@phosphor-icons/react';
+console.log("🚀 Starting System Upgrade...");
 
+// ============================================================================
+// SHARED TYPES
+// ============================================================================
+const SHARED_TYPES = `
 interface Subtask {
     id: string;
     title: string;
@@ -58,6 +55,18 @@ interface Task {
     completedAt?: string;
     assignee: string | null;
 }
+`;
+
+// ============================================================================
+// 1. EDIT TASK MODAL
+// ============================================================================
+const EDIT_TASK_MODAL = `import { useState, useEffect } from 'react';
+import { 
+    X, Plus, Trash, CalendarBlank, CheckSquare, Square, 
+    CaretUp, CaretDown, TextT 
+} from '@phosphor-icons/react';
+
+${SHARED_TYPES}
 
 interface Props {
     task?: Task | null;
@@ -88,7 +97,6 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
     const [newSubtaskDesc, setNewSubtaskDesc] = useState('');
     const [showSubtaskDescInput, setShowSubtaskDescInput] = useState(false);
     
-    // Tag State
     const [tagInput, setTagInput] = useState('');
     const [showTagMenu, setShowTagMenu] = useState(false);
 
@@ -300,7 +308,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
 `;
 
 // ============================================================================
-// 2. TASK FLOW PANEL (Unchanged)
+// 2. TASK FLOW PANEL
 // ============================================================================
 const TASK_FLOW_PANEL = `import { useState, useRef, useEffect } from 'react';
 import { 
@@ -310,38 +318,7 @@ import {
     UsersThree, Plus, PaperPlaneRight, Chats, Check, Fire, Pulse
 } from '@phosphor-icons/react';
 
-interface Note {
-    id: string;
-    user: string;
-    text: string;
-    timestamp: string;
-}
-
-interface Subtask {
-    id: string;
-    title: string;
-    desc?: string;
-    isCompleted: boolean;
-    isRequired?: boolean;
-    assignee?: string;
-    completedAt?: string;
-}
-
-interface Task {
-    id: string;
-    title: string;
-    desc: string;
-    priority: 'Low' | 'Medium' | 'High' | 'Critical';
-    status: 'New Tickets' | 'Ready' | 'In Progress' | 'Review' | 'Done';
-    deadline?: string;
-    subtasks: Subtask[];
-    collaborators: string[];
-    notes?: Note[];
-    creator?: string;
-    createdAt?: string;
-    completedAt?: string;
-    assignee: string | null;
-}
+${SHARED_TYPES}
 
 interface Props {
     task: Task | null;
@@ -417,7 +394,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
     return (
         <>
             <div 
-                className={\`fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-500 z-30 \${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}\`}
+                className={\`fixed inset-0 bg-black/20 backdrop-blur-[2px] transition-opacity duration-500 z-30 \${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}\`}
                 onClick={() => setIsOpen(false)}
             />
 
@@ -432,6 +409,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                 style={{ left: '80px' }} 
                 onClick={() => !isOpen && setIsOpen(true)}
             >
+                {/* --- HEADER --- */}
                 <div className={\`w-full h-14 flex items-center justify-between px-8 shrink-0 relative z-20 bg-white/50 dark:bg-white/5 backdrop-blur-sm border-b border-gray-200 dark:border-white/5 \${isOpen ? 'rounded-tl-[32px]' : ''}\`}>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
@@ -465,9 +443,12 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     </div>
                 </div>
 
+                {/* --- CONTENT --- */}
                 <div className={\`flex-1 overflow-hidden p-0 transition-opacity duration-300 relative flex \${isOpen ? 'opacity-100 delay-100' : 'opacity-0 pointer-events-none'}\`}>
                     
+                    {/* 1. STICKY MAIN CARD (Left) */}
                     <div className="w-[420px] shrink-0 border-r border-gray-200 dark:border-white/5 flex flex-col bg-white dark:bg-[#111827] shadow-xl z-20">
+                        {/* Purple Section (Details) */}
                         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 text-white shrink-0 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                             <div className="relative z-10">
@@ -490,6 +471,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                             </div>
                         </div>
 
+                        {/* Grey Section (Desc & Notes) */}
                         <div className="flex-1 bg-gray-50 dark:bg-[#0f172a] flex flex-col overflow-hidden">
                             <div className="p-6 border-b border-gray-200 dark:border-white/5 shrink-0 max-h-[150px] overflow-y-auto custom-scrollbar">
                                 <h4 className="text-[10px] uppercase font-bold opacity-40 mb-2">Description</h4>
@@ -528,6 +510,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                         </div>
                     </div>
 
+                    {/* 2. SCROLLABLE FLOW (Right) */}
                     <div 
                         ref={scrollRef}
                         className="flex-1 flex flex-col overflow-x-auto overflow-y-hidden no-scrollbar pb-12 relative bg-gray-50/50 dark:bg-[#0b1121]"
@@ -535,6 +518,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     >
                         <div className="flex items-center gap-8 min-w-max px-12 h-full pt-4">
                             
+                            {/* Start Node */}
                             <div className="flex flex-col items-center justify-center opacity-40">
                                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 dark:border-white/30 flex items-center justify-center mb-2 bg-gray-100 dark:bg-white/5">
                                     <span className="text-[10px] font-bold">START</span>
@@ -687,7 +671,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
 `;
 
 // ============================================================================
-// 3. TASK BOARD (Improved Blur Logic)
+// 3. TASK BOARD
 // ============================================================================
 const TASKBOARD_PAGE = `import { useState, useMemo, useRef, useEffect } from 'react';
 import { 
@@ -699,39 +683,7 @@ import {
 import TaskFlowPanel from './components/TaskFlowPanel';
 import EditTaskModal from './components/EditTaskModal';
 
-interface Note {
-    id: string;
-    user: string;
-    text: string;
-    timestamp: string;
-}
-
-interface Subtask {
-    id: string;
-    title: string;
-    desc?: string;
-    isCompleted: boolean;
-    isRequired?: boolean;
-    assignee?: string;
-    completedAt?: string;
-}
-
-interface Task {
-    id: string;
-    title: string;
-    desc: string;
-    assignee: string | null;
-    collaborators: string[];
-    priority: 'Low' | 'Medium' | 'High' | 'Critical';
-    status: 'New Tickets' | 'Ready' | 'In Progress' | 'Review' | 'Done';
-    tags: string[];
-    subtasks: Subtask[];
-    notes?: Note[];
-    deadline?: string;
-    creator?: string;
-    createdAt?: string;
-    completedAt?: string;
-}
+${SHARED_TYPES}
 
 const INITIAL_TASKS: Task[] = [
     { 
@@ -818,7 +770,7 @@ export default function TaskBoard() {
     const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
     const [dragOverCol, setDragOverCol] = useState<string | null>(null); 
     
-    // Sort Menu State with Delay
+    // Sort Menu State
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
     const sortTimeoutRef = useRef<number | null>(null);
 
@@ -850,7 +802,7 @@ export default function TaskBoard() {
         }
     };
 
-    // Sort Menu Handlers
+    // Sort Handlers
     const handleSortEnter = () => {
         if (sortTimeoutRef.current) clearTimeout(sortTimeoutRef.current);
         setIsSortMenuOpen(true);
@@ -914,6 +866,19 @@ export default function TaskBoard() {
             newCols.splice(reviewIdx, 0, name);
             setColumns(newCols);
         }
+    };
+
+    const moveColumn = (index: number, direction: 'left' | 'right') => {
+        const newCols = [...columns];
+        const targetIndex = direction === 'left' ? index - 1 : index + 1;
+        
+        // Safety range: >0 (New Tickets) and < length-2 (Review/Done)
+        if (targetIndex < 1 || targetIndex > columns.length - 3) return;
+
+        const temp = newCols[index];
+        newCols[index] = newCols[targetIndex];
+        newCols[targetIndex] = temp;
+        setColumns(newCols);
     };
 
     const handleDeleteColumn = (col: string) => {
@@ -1078,7 +1043,7 @@ export default function TaskBoard() {
 
             <div 
                 ref={scrollContainerRef}
-                className="flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar"
+                className={\`flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar \${isFlowOpen ? 'select-none' : ''}\`} // Removed blur from container
             >
                 <div className="flex gap-6 h-full min-w-max px-2">
                     {columns.map((col, idx) => {
@@ -1094,10 +1059,25 @@ export default function TaskBoard() {
                             else dragClasses = 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] bg-indigo-500/5';
                         }
 
+                        // Column Borders
+                        let colBorder = 'border-t-4 border-indigo-500'; 
+                        if (col === 'Review') colBorder = 'border-t-4 border-emerald-500';
+                        if (col === 'Done') colBorder = 'border-t-4 border-amber-500';
+                        if (col !== 'New Tickets' && col !== 'Review' && col !== 'Done') colBorder = 'border-t-4 border-blue-500';
+
+                        let bgClass = 'bg-gray-100/50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5';
+
+                        if (isDragOver) {
+                             bgClass = 'bg-indigo-500/10 dark:bg-indigo-500/20';
+                             if (col === 'Review') colBorder = 'border-t-4 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]';
+                             else if (col === 'Done') colBorder = 'border-t-4 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]';
+                             else colBorder = 'border-t-4 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)]';
+                        }
+
                         return (
                             <div 
                                 key={col} 
-                                className={\`w-[350px] flex flex-col bg-gray-100/50 dark:bg-white/[0.02] rounded-2xl border border-gray-200 dark:border-white/5 h-full transition-all duration-300 \${dragClasses}\`}
+                                className={\`w-[350px] flex flex-col rounded-2xl border \${bgClass} \${colBorder} h-full transition-all duration-300 \${dragClasses}\`}
                                 onDragEnter={() => handleDragEnter(col)}
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, col)}
@@ -1107,16 +1087,18 @@ export default function TaskBoard() {
                                         <span className="font-bold text-sm uppercase tracking-wider">{col}</span>
                                         <span className="bg-gray-200 dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">{colTasks.length}</span>
                                     </div>
-                                    <div className="flex gap-1">
-                                        {/* FIXED: No editing of first/last col positions */}
+                                    <div className="flex gap-1 opacity-0 group-hover/col:opacity-100 transition-opacity">
                                         {!isProtected && (
-                                            <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1">
+                                            <>
+                                                <button onClick={() => moveColumn(idx, 'left')} disabled={idx <= 1} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded disabled:opacity-30"><CaretLeft weight="bold" size={12} /></button>
+                                                <button onClick={() => moveColumn(idx, 'right')} disabled={idx >= columns.length - 2} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded disabled:opacity-30"><CaretRight weight="bold" size={12} /></button>
+                                                <div className="w-px h-3 bg-gray-300 dark:bg-white/20 mx-1"></div>
                                                 <button onClick={() => {
                                                     const newName = prompt("Rename column:", col);
                                                     if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
-                                                }} className="p-1 hover:bg-black/5 rounded"><PencilSimple size={12} /></button>
+                                                }} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded"><PencilSimple size={12} /></button>
                                                 <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-red-500/10 text-red-500 rounded"><X size={12} /></button>
-                                            </div>
+                                            </>
                                         )}
                                         {isProtected && <LockKey className="opacity-30" weight="bold" />}
                                     </div>
@@ -1129,19 +1111,22 @@ export default function TaskBoard() {
                                         const pct = total > 0 ? (completed / total) * 100 : 0;
                                         const isActive = selectedTask?.id === task.id && isFlowOpen;
                                         
-                                        // Card Visual State
+                                        // Selective Blur: Blurred if panel open AND NOT active
                                         let cardStateClass = '';
                                         if (isFlowOpen) {
                                             if (isActive) {
+                                                // Active Card: Pop out, no blur
                                                 cardStateClass = 'ring-4 ring-indigo-500 border-transparent z-50 scale-105 shadow-2xl !blur-0 !brightness-100 !pointer-events-auto';
                                             } else {
-                                                cardStateClass = 'blur-sm brightness-50 pointer-events-none opacity-50';
+                                                // Inactive Cards: Blur, dim slightly, disable pointer events
+                                                cardStateClass = 'blur-sm opacity-80 pointer-events-none';
                                             }
                                         }
 
                                         // Dynamic Tilt on Drag
                                         const isDraggingThis = draggedTaskId === task.id;
-                                        const tiltClass = isDraggingThis ? 'rotate-3 scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
+                                        // FIXED: No rotation, just lift
+                                        const tiltClass = isDraggingThis ? 'scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
 
                                         // Determine Date Status for Card (Burnout Logic)
                                         const getUrgency = (t: Task) => {
@@ -1164,7 +1149,7 @@ export default function TaskBoard() {
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex flex-wrap gap-1">
-                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500">{tag}</span>))}
+                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 tracking-wider">{tag}</span>))}
                                                     </div>
                                                     <div className="flex gap-1">
                                                         <button onClick={(e) => openEditModal(task, e)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded text-gray-400 hover:text-indigo-500"><PencilSimple /></button>
@@ -1176,9 +1161,13 @@ export default function TaskBoard() {
                                                     </div>
                                                 </div>
 
-                                                <h3 className="font-bold text-sm mb-2 leading-tight">{task.title}</h3>
+                                                <div className="flex items-center gap-3 mb-2">
+                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold shadow-inner text-white shrink-0">
+                                                        {task.title.charAt(0)}
+                                                    </div>
+                                                    <h3 className="font-bold text-sm leading-tight">{task.title}</h3>
+                                                </div>
                                                 
-                                                {/* Deadline Badge */}
                                                 {task.deadline && (
                                                     <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2">
                                                         <CalendarBlank weight="bold" /> {task.deadline}
@@ -1197,7 +1186,7 @@ export default function TaskBoard() {
                                                     <div className="flex -space-x-2 overflow-hidden">
                                                         {task.collaborators.length > 0 ? (
                                                             task.collaborators.map((c, i) => (
-                                                                <div key={i} className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
+                                                                <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
                                                                     {c.charAt(0)}
                                                                 </div>
                                                             ))
@@ -1269,4 +1258,4 @@ write('src/pages/TaskBoard/components/EditTaskModal.tsx', EDIT_TASK_MODAL);
 write('src/pages/TaskBoard/components/TaskFlowPanel.tsx', TASK_FLOW_PANEL);
 write('src/pages/TaskBoard/index.tsx', TASKBOARD_PAGE);
 
-console.log("✅ UPGRADE COMPLETE: Task Board Visualization Logic Updated.");
+console.log("✅ UPGRADE COMPLETE: Task Board Full Suite Installed.");

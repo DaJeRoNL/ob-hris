@@ -4,6 +4,7 @@ import {
     CaretUp, CaretDown, TextT 
 } from '@phosphor-icons/react';
 
+
 interface Subtask {
     id: string;
     title: string;
@@ -38,6 +39,7 @@ interface Task {
     assignee: string | null;
 }
 
+
 interface Props {
     task?: Task | null;
     onClose: () => void;
@@ -67,7 +69,6 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
     const [newSubtaskDesc, setNewSubtaskDesc] = useState('');
     const [showSubtaskDescInput, setShowSubtaskDescInput] = useState(false);
     
-    // Tag State
     const [tagInput, setTagInput] = useState('');
     const [showTagMenu, setShowTagMenu] = useState(false);
 

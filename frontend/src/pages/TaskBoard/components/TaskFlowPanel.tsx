@@ -6,21 +6,22 @@ import {
     UsersThree, Plus, PaperPlaneRight, Chats, Check, Fire, Pulse
 } from '@phosphor-icons/react';
 
-interface Note {
-    id: string;
-    user: string;
-    text: string;
-    timestamp: string;
-}
 
 interface Subtask {
     id: string;
     title: string;
     desc?: string;
     isCompleted: boolean;
-    isRequired?: boolean;
     assignee?: string;
+    isRequired?: boolean;
     completedAt?: string;
+}
+
+interface Note {
+    id: string;
+    user: string;
+    text: string;
+    timestamp: string;
 }
 
 interface Task {
@@ -29,15 +30,17 @@ interface Task {
     desc: string;
     priority: 'Low' | 'Medium' | 'High' | 'Critical';
     status: 'New Tickets' | 'Ready' | 'In Progress' | 'Review' | 'Done';
-    deadline?: string;
+    tags: string[];
     subtasks: Subtask[];
-    collaborators: string[];
     notes?: Note[];
+    deadline?: string;
     creator?: string;
     createdAt?: string;
+    collaborators: string[];
     completedAt?: string;
     assignee: string | null;
 }
+
 
 interface Props {
     task: Task | null;
@@ -113,7 +116,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
     return (
         <>
             <div 
-                className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-500 z-30 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                className={`fixed inset-0 bg-black/20 backdrop-blur-[2px] transition-opacity duration-500 z-30 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                 onClick={() => setIsOpen(false)}
             />
 
@@ -128,6 +131,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                 style={{ left: '80px' }} 
                 onClick={() => !isOpen && setIsOpen(true)}
             >
+                {/* --- HEADER --- */}
                 <div className={`w-full h-14 flex items-center justify-between px-8 shrink-0 relative z-20 bg-white/50 dark:bg-white/5 backdrop-blur-sm border-b border-gray-200 dark:border-white/5 ${isOpen ? 'rounded-tl-[32px]' : ''}`}>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
@@ -161,9 +165,12 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     </div>
                 </div>
 
+                {/* --- CONTENT --- */}
                 <div className={`flex-1 overflow-hidden p-0 transition-opacity duration-300 relative flex ${isOpen ? 'opacity-100 delay-100' : 'opacity-0 pointer-events-none'}`}>
                     
+                    {/* 1. STICKY MAIN CARD (Left) */}
                     <div className="w-[420px] shrink-0 border-r border-gray-200 dark:border-white/5 flex flex-col bg-white dark:bg-[#111827] shadow-xl z-20">
+                        {/* Purple Section (Details) */}
                         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 text-white shrink-0 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                             <div className="relative z-10">
@@ -186,6 +193,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                             </div>
                         </div>
 
+                        {/* Grey Section (Desc & Notes) */}
                         <div className="flex-1 bg-gray-50 dark:bg-[#0f172a] flex flex-col overflow-hidden">
                             <div className="p-6 border-b border-gray-200 dark:border-white/5 shrink-0 max-h-[150px] overflow-y-auto custom-scrollbar">
                                 <h4 className="text-[10px] uppercase font-bold opacity-40 mb-2">Description</h4>
@@ -224,6 +232,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                         </div>
                     </div>
 
+                    {/* 2. SCROLLABLE FLOW (Right) */}
                     <div 
                         ref={scrollRef}
                         className="flex-1 flex flex-col overflow-x-auto overflow-y-hidden no-scrollbar pb-12 relative bg-gray-50/50 dark:bg-[#0b1121]"
@@ -231,6 +240,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     >
                         <div className="flex items-center gap-8 min-w-max px-12 h-full pt-4">
                             
+                            {/* Start Node */}
                             <div className="flex flex-col items-center justify-center opacity-40">
                                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 dark:border-white/30 flex items-center justify-center mb-2 bg-gray-100 dark:bg-white/5">
                                     <span className="text-[10px] font-bold">START</span>
