@@ -11,6 +11,7 @@ import TimeTracker from './pages/TimeTracker';
 import Finance from './pages/Finance';
 import Compliance from './pages/Compliance';
 import Chat from './pages/Chat';
+import TaskBoard from './pages/TaskBoard'; // NEW IMPORT
 import ClientProfile from './pages/ClientProfile';
 import Admin from './pages/Admin';
 import Growth from './pages/Growth';
@@ -42,7 +43,6 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          
           <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/dashboard" />} />
             <Route path="context" element={<ClientProfile />} />
@@ -52,12 +52,12 @@ export default function App() {
             <Route path="time" element={<TimeTracker />} />
             <Route path="finance" element={<Finance />} />
             <Route path="chat" element={<Chat />} />
+            <Route path="tasks" element={<TaskBoard />} /> {/* NEW ROUTE */}
             <Route path="compliance" element={<Compliance />} />
             <Route path="growth" element={<Growth />} />
             <Route path="docs" element={<Documents />} />
             <Route path="admin" element={<Admin />} />
           </Route>
-
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>

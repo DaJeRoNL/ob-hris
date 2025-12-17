@@ -18,23 +18,17 @@ export interface TabConfig {
     compliance: boolean;
     docs: boolean;
     chat: boolean;
+    tasks: boolean; // NEW TAB
     admin: boolean;
 }
 
 export interface GeneralSettings {
-    // Localization
     dateFormat: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
     currency: 'USD' | 'EUR' | 'GBP';
-    
-    // Branding (New)
     systemName: string;
-    
-    // Security (New)
     mfaEnabled: boolean;
     sessionTimeout: string;
     dataRetention: string;
-    
-    // System (New)
     maintenanceMode: boolean;
 }
 
@@ -63,38 +57,34 @@ const DEFAULT_CONFIG: SystemConfig = {
     layout: {
         'System Admin': {
             widgets: { revenue: true, talent: true, feed: true, global: true, ai: true },
-            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, admin: true }
+            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Executive': {
             widgets: { revenue: true, talent: true, feed: true, global: true, ai: true },
-            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, admin: true }
+            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Manager': {
             widgets: { revenue: false, talent: true, feed: true, global: true, ai: false },
-            // UPDATED: admin: true to prevent lockout during simulation
-            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, admin: true }
+            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'HR_Admin': {
             widgets: { revenue: false, talent: true, feed: true, global: false, ai: true },
-            // UPDATED: admin: true
-            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, admin: true }
+            tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Employee': {
             widgets: { revenue: false, talent: false, feed: true, global: false, ai: false },
-            // UPDATED: admin: true
-            tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, admin: true }
+            tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, tasks: true, admin: true }
         }
     }
 };
 
-const STORAGE_KEY = 'ob_hris_config_v5'; // Incremented version to force new defaults
+const STORAGE_KEY = 'ob_hris_config_v6'; // Incremented to force new config
 const ROLE_KEY = 'ob_hris_active_role';
 
 export const getSystemConfig = (): SystemConfig => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return DEFAULT_CONFIG;
     const parsed = JSON.parse(saved);
-    // Deep merge safe guard
     return { 
         settings: { ...DEFAULT_CONFIG.settings, ...parsed.settings },
         layout: { ...DEFAULT_CONFIG.layout, ...parsed.layout }
@@ -112,7 +102,6 @@ export const resetSystemConfig = () => {
     return DEFAULT_CONFIG;
 };
 
-// Role Management
 export const getCurrentRole = (): UserRole => {
     return (localStorage.getItem(ROLE_KEY) as UserRole) || 'System Admin';
 };
