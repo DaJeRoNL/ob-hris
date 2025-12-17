@@ -1,110 +1,194 @@
 import { useState } from 'react';
-import { FilePdf, FileDoc, FileXls, DownloadSimple, DotsThreeVertical, Folder, MagnifyingGlass, CloudArrowUp, Clock } from '@phosphor-icons/react';
+import { 
+    GoogleLogo, DropboxLogo, CloudArrowUp, 
+    FilePdf, FileLock, HardDrives, 
+    MagnifyingGlass, CheckCircle, Warning, 
+    Users, ShieldCheck, Folder, CaretDown, CaretRight,
+    UploadSimple, FileXls, PaperPlaneRight, Eye, X,
+    FileText, ShareNetwork, Link as LinkIcon, Timer,
+    Clock, ChartPieSlice, House, DownloadSimple
+} from '@phosphor-icons/react';
 
-const MOCK_DOCS = [
-    { id: 1, name: "Employee_Handbook_2024.pdf", type: "pdf", size: "2.4 MB", date: "Oct 24", category: "HR" },
-    { id: 2, name: "Q4_Financial_Report.xlsx", type: "xls", size: "1.1 MB", date: "Nov 01", category: "Finance" },
-    { id: 3, name: "NDA_Template_v2.docx", type: "doc", size: "850 KB", date: "Sep 15", category: "Legal" },
-    { id: 4, name: "Onboarding_Checklist.pdf", type: "pdf", size: "1.2 MB", date: "Oct 05", category: "HR" },
-    { id: 5, name: "Payroll_Summary_Oct.xlsx", type: "xls", size: "900 KB", date: "Nov 05", category: "Finance" },
-    { id: 6, name: "Project_Alpha_Specs.pdf", type: "pdf", size: "4.5 MB", date: "Aug 20", category: "Product" },
+// --- MOCK FILESYSTEM ---
+const FOLDERS = [
+    { id: 'legal', name: 'Legal Contracts', count: 12 },
+    { id: 'fin', name: 'Financial Reports', count: 8 },
+    { id: 'hr', name: 'Employee Records', count: 45 },
 ];
 
-export default function Documents() {
-  const [filter, setFilter] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
+const FILES = [
+    { id: 1, name: "Employment_Contract_A_Johnson.pdf", size: "2.4 MB", date: "Oct 24", folder: 'legal', type: 'pdf', risk: "Low", views: 3, lastViewed: "2h ago" },
+    { id: 2, name: "Visa_Application_Form.pdf", size: "1.1 MB", date: "Nov 01", folder: 'hr', type: 'pdf', risk: "High", views: 12, lastViewed: "10m ago" },
+    { id: 3, name: "Q3_Revenue_Sheet.xlsx", size: "4.5 MB", date: "Oct 15", folder: 'fin', type: 'xls', risk: "None", views: 1, lastViewed: "Yesterday" },
+];
 
-  const categories = ['All', 'HR', 'Finance', 'Legal', 'Product'];
-  
-  const docs = MOCK_DOCS.filter(d => 
-    (activeCategory === 'All' || d.category === activeCategory) &&
-    d.name.toLowerCase().includes(filter.toLowerCase())
-  );
+export default function DataVault() {
+    const [viewMode, setViewMode] = useState<'browser' | 'compliance'>('browser'); 
+    const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<any>(null);
 
-  const getIcon = (type: string) => {
-    switch(type) {
-        case 'pdf': return <FilePdf size={42} weight="duotone" className="text-red-500" />;
-        case 'xls': return <FileXls size={42} weight="duotone" className="text-emerald-500" />;
-        default: return <FileDoc size={42} weight="duotone" className="text-blue-500" />;
-    }
-  };
+    const filteredFiles = currentFolder ? FILES.filter(f => f.folder === currentFolder) : FILES;
 
-  return (
-    <div className="p-8 animate-fade-in text-[var(--text-main)] h-full flex flex-col">
-      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0">
-        <div>
-            <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight mb-2">Documents</h1>
-            <p className="text-sm opacity-70 font-medium">Secure repository for contracts, policies, and reports.</p>
-        </div>
-        <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-700 transition">
-                <CloudArrowUp size={18} weight="bold" /> Upload
-            </button>
-        </div>
-      </header>
-
-      {/* Filter Bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8 shrink-0">
-        <div className="relative flex-1">
-            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-                placeholder="Search files..." 
-                className="w-full bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 transition backdrop-blur-sm"
-                onChange={(e) => setFilter(e.target.value)}
-            />
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-            {categories.map(cat => (
-                <button 
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition whitespace-nowrap ${activeCategory === cat ? 'bg-indigo-500 text-white shadow-md' : 'bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10'}`}
-                >
-                    {cat}
-                </button>
-            ))}
-        </div>
-      </div>
-
-      {/* Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 overflow-y-auto pb-8 custom-scrollbar">
-        
-        {/* Mock Folder */}
-        <div className="glass-card !bg-amber-100/50 dark:!bg-amber-900/20 border-amber-200 dark:border-amber-700/30 p-4 flex flex-col items-center text-center group cursor-pointer hover:scale-105 transition-transform duration-300 min-h-[180px] justify-between">
-            <div className="w-full flex justify-end"><DotsThreeVertical className="opacity-0 group-hover:opacity-50" /></div>
-            <Folder size={64} weight="fill" className="text-amber-400 drop-shadow-md" />
-            <div className="w-full">
-                <div className="text-sm font-bold text-amber-900 dark:text-amber-100">Archived 2023</div>
-                <div className="text-[10px] opacity-60 font-bold uppercase mt-1">12 Files</div>
-            </div>
-        </div>
-
-        {docs.map(doc => (
-            <div key={doc.id} className="glass-card p-4 flex flex-col items-center text-center group cursor-pointer hover:border-indigo-500/50 hover:shadow-xl transition-all duration-300 min-h-[180px] relative">
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-black/5 rounded">
-                    <DotsThreeVertical />
+    return (
+        <div className="p-8 text-[var(--text-main)] animate-fade-in h-full flex flex-col relative">
+            <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0">
+                <div>
+                    <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight mb-2 flex items-center gap-3">
+                        Data Vault
+                        <span className="text-xs bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded-full border border-emerald-500/20 font-bold uppercase tracking-widest flex items-center gap-1">
+                            <HardDrives weight="fill" /> 2.4GB Used
+                        </span>
+                    </h1>
+                    <p className="text-sm opacity-70 font-medium max-w-lg">
+                        Centralized repository with automated compliance scanning.
+                    </p>
                 </div>
-                
-                <div className="flex-1 flex items-center justify-center mt-2 group-hover:-translate-y-2 transition-transform duration-300">
-                    {getIcon(doc.type)}
-                </div>
-                
-                <div className="w-full mt-4">
-                    <div className="text-xs font-bold truncate w-full mb-1" title={doc.name}>{doc.name}</div>
-                    <div className="flex justify-between items-center text-[10px] opacity-50 font-medium">
-                        <span>{doc.size}</span>
-                        <span className="flex items-center gap-1"><Clock size={10} /> {doc.date}</span>
-                    </div>
-                </div>
-
-                <div className="absolute inset-x-4 bottom-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <button className="w-full py-2 text-[10px] font-bold bg-indigo-600 text-white rounded-lg shadow-lg flex items-center justify-center gap-2">
-                        <DownloadSimple size={14} /> Download
+                <div className="flex bg-gray-200 dark:bg-white/5 p-1 rounded-xl">
+                    <button onClick={() => setViewMode('browser')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${viewMode === 'browser' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
+                        <Folder weight="bold" /> Explorer
+                    </button>
+                    <button onClick={() => setViewMode('compliance')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${viewMode === 'compliance' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
+                        <ShieldCheck weight="bold" /> Compliance
                     </button>
                 </div>
+            </header>
+
+            <div className="flex-1 min-h-0 flex gap-6">
+                
+                {/* LEFT: NAVIGATION */}
+                {viewMode === 'browser' && (
+                    <div className="w-64 flex flex-col gap-2 shrink-0">
+                        <button onClick={() => { setCurrentFolder(null); setSelectedFile(null); }} className={`p-3 rounded-xl flex items-center gap-3 font-bold text-sm transition ${!currentFolder ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+                            <House weight="fill" /> Home Root
+                        </button>
+                        <div className="my-2 border-b border-gray-200 dark:border-white/10"></div>
+                        <div className="text-[10px] font-bold uppercase opacity-50 mb-2 px-2">Folders</div>
+                        {FOLDERS.map(folder => (
+                            <button 
+                                key={folder.id} 
+                                onClick={() => { setCurrentFolder(folder.id); setSelectedFile(null); }}
+                                className={`p-3 rounded-xl flex items-center justify-between font-bold text-sm transition ${currentFolder === folder.id ? 'bg-white dark:bg-[#1e293b] shadow-md text-indigo-500' : 'hover:bg-gray-100 dark:hover:bg-white/5 opacity-70'}`}
+                            >
+                                <span className="flex items-center gap-3"><Folder weight="duotone" /> {folder.name}</span>
+                                <span className="text-[10px] bg-gray-200 dark:bg-black/20 px-2 rounded-full">{folder.count}</span>
+                            </button>
+                        ))}
+                        
+                        {/* Storage Widget */}
+                        <div className="mt-auto glass-card p-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold">Storage</span>
+                                <span className="text-[10px] opacity-60">24%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-full w-1/4 bg-indigo-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* MIDDLE: FILE GRID */}
+                {viewMode === 'browser' && (
+                    <div className="flex-1 glass-card p-0 flex flex-col overflow-hidden">
+                        {/* Breadcrumbs */}
+                        <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center gap-2 text-sm font-bold opacity-60">
+                            <span className="hover:text-indigo-500 cursor-pointer">Vault</span>
+                            <CaretRight size={12} />
+                            <span>{currentFolder ? FOLDERS.find(f => f.id === currentFolder)?.name : 'All Files'}</span>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="text-[10px] font-bold uppercase opacity-50 border-b border-gray-200 dark:border-white/10">
+                                    <tr>
+                                        <th className="p-3 pl-4">Name</th>
+                                        <th className="p-3">Risk</th>
+                                        <th className="p-3 text-right">Size</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredFiles.map(f => (
+                                        <tr 
+                                            key={f.id} 
+                                            onClick={() => setSelectedFile(f)}
+                                            className={`group transition-colors cursor-pointer border-b border-gray-100 dark:border-white/5 ${selectedFile?.id === f.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                        >
+                                            <td className="p-3 pl-4 flex items-center gap-3">
+                                                {f.type === 'pdf' ? <FilePdf size={24} className="text-red-500" weight="duotone" /> : <FileXls size={24} className="text-emerald-500" weight="duotone" />}
+                                                <span className="font-bold text-sm">{f.name}</span>
+                                            </td>
+                                            <td className="p-3">
+                                                <span className={`text-[10px] font-bold px-2 py-1 rounded ${f.risk === 'High' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                                                    {f.risk}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-right font-mono text-xs opacity-60">{f.size}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* RIGHT: SMART INSPECTOR */}
+                {viewMode === 'browser' && selectedFile && (
+                    <div className="w-80 glass-card p-0 flex flex-col overflow-hidden animate-fade-in-right">
+                        <div className="p-6 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                            <div className="flex justify-center mb-4">
+                                {selectedFile.type === 'pdf' ? <FilePdf size={64} className="text-red-500 drop-shadow-lg" weight="duotone" /> : <FileXls size={64} className="text-emerald-500 drop-shadow-lg" weight="duotone" />}
+                            </div>
+                            <h3 className="text-center font-bold text-sm leading-tight mb-2">{selectedFile.name}</h3>
+                            <div className="flex justify-center gap-2">
+                                <button className="p-2 bg-white dark:bg-[#1e293b] rounded-lg shadow-sm hover:text-indigo-500 transition"><Eye size={18} /></button>
+                                <button className="p-2 bg-white dark:bg-[#1e293b] rounded-lg shadow-sm hover:text-indigo-500 transition"><ShareNetwork size={18} /></button>
+                                <button className="p-2 bg-white dark:bg-[#1e293b] rounded-lg shadow-sm hover:text-indigo-500 transition"><DownloadSimple size={18} /></button>
+                            </div>
+                        </div>
+                        
+                        <div className="p-6 space-y-6 overflow-y-auto">
+                            <div>
+                                <div className="text-[10px] font-bold uppercase opacity-50 mb-2">Properties</div>
+                                <div className="grid grid-cols-2 gap-y-2 text-xs">
+                                    <span className="opacity-60">Type</span><span className="font-bold uppercase">{selectedFile.type}</span>
+                                    <span className="opacity-60">Size</span><span className="font-bold">{selectedFile.size}</span>
+                                    <span className="opacity-60">Created</span><span className="font-bold">{selectedFile.date}</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="text-[10px] font-bold uppercase opacity-50 mb-2">Activity Log</div>
+                                <div className="space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold mt-0.5">M</div>
+                                        <div>
+                                            <div className="text-xs font-bold">Marcus opened file</div>
+                                            <div className="text-[10px] opacity-50">{selectedFile.lastViewed}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold mt-0.5">S</div>
+                                        <div>
+                                            <div className="text-xs font-bold">System scanned risk</div>
+                                            <div className="text-[10px] opacity-50">2 days ago</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* COMPLIANCE VIEW (Simplified for V12 to focus on Files) */}
+                {viewMode === 'compliance' && (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center opacity-50">
+                        <ShieldCheck size={64} className="mb-4" />
+                        <h3 className="text-xl font-bold">Compliance Dashboard</h3>
+                        <p className="max-w-md mt-2">Switch back to Explorer to manage documents. The audit runs automatically in the background.</p>
+                    </div>
+                )}
+
             </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

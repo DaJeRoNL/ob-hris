@@ -1,146 +1,250 @@
-import { useState, useRef, useEffect } from 'react';
-import { MOCK_DB } from '../../utils/mockData';
-import { useAuth } from '../../context/AuthContext';
-import { PaperPlaneRight, LockKey, MagnifyingGlass, Phone, VideoCamera, Info, Smiley, Paperclip, Check } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { 
+    SlackLogo, MicrosoftTeamsLogo, Envelope, 
+    Lightning, CheckCircle, X, 
+    ArrowRight, Robot, 
+    CalendarPlus, Receipt, Hash, ArrowSquareOut,
+    User, ChatCircleDots, Clock, Phone,
+    PlugsConnected, Gear, Users,
+    MagicWand, PaperPlaneRight, Tag, Money,
+    ListChecks, Kanban, Warning, Check, UserPlus,
+    DotsThree
+} from '@phosphor-icons/react';
 
-export default function Chat() {
-  const { currentClientId } = useAuth();
-  const [activeUser, setActiveUser] = useState<string | null>(null);
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<{text: string, fromMe: boolean, time: string}[]>([
-      { text: "Hey, did you see the new compliance report?", fromMe: false, time: "09:41 AM" },
-      { text: "Yes! Looks great. Just need to sign off on the German entity.", fromMe: true, time: "09:42 AM" }
-  ]);
-  const scrollRef = useRef<HTMLDivElement>(null);
+// --- TYPES ---
+interface StreamMessage {
+    id: number;
+    source: string;
+    user: string;
+    text: string;
+    time: string;
+    intent: string;
+    priority: string;
+    aiAnalysis: string;
+    resolved?: boolean; // Optional property for UI state
+}
 
-  const people = MOCK_DB.people.filter(p => p.clientId === currentClientId);
-  const activePerson = people.find(p => p.id === activeUser);
+interface Task {
+    id: string;
+    title: string;
+    assignee: string;
+    status: 'To Do' | 'In Progress' | 'Done';
+    priority: string;
+}
 
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
+// --- MOCK DATA ---
+const INITIAL_STREAM: StreamMessage[] = [
+    { 
+        id: 1, source: 'slack', user: 'Marcus (Dev)', 
+        text: 'Hey, I woke up feeling terrible. Not gonna make standup, taking a sick day.', 
+        time: '5m ago', intent: 'leave_request', priority: 'high',
+        aiAnalysis: 'Intent: Sick Leave. Confidence: 92%.',
+    },
+    { 
+        id: 2, source: 'email', user: 'Vendor: AWS', 
+        text: 'Invoice #9921 is overdue. Amount: $4,200. Please process immediately.', 
+        time: '32m ago', intent: 'invoice', priority: 'critical',
+        aiAnalysis: 'Intent: Invoice Payment. Entity: AWS.',
+    },
+    { 
+        id: 3, source: 'teams', user: 'Sarah (HR)', 
+        text: 'Can someone review the offer letter for Alex? It needs approval before 2pm.', 
+        time: '1h ago', intent: 'review', priority: 'medium',
+        aiAnalysis: 'Action: Document Review. Deadline: 2:00 PM.',
+    },
+];
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if(!message.trim()) return;
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setMessages([...messages, { text: message, fromMe: true, time }]);
-    setMessage('');
-  };
+const INITIAL_TASKS: Task[] = [
+    { id: 't1', title: 'Process AWS Invoice', assignee: 'Finance', status: 'To Do', priority: 'Critical' },
+    { id: 't2', title: 'Onboard Alex M.', assignee: 'HR Team', status: 'In Progress', priority: 'High' },
+];
 
-  return (
-    <div className="h-full flex overflow-hidden animate-fade-in bg-white dark:bg-[#0f172a]">
-      {/* Sidebar List */}
-      <div className="w-80 border-r border-gray-200 dark:border-white/10 flex flex-col bg-gray-50/50 dark:bg-[#111827]">
-        <div className="p-5 border-b border-gray-200 dark:border-white/10">
-          <h2 className="text-xl font-bold font-['Montserrat'] mb-4">Messages</h2>
-          <div className="relative">
-            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input className="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 text-sm outline-none focus:border-indigo-500 transition" placeholder="Search..." />
-          </div>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-          <div onClick={() => setActiveUser(null)} className={`p-3 rounded-xl cursor-pointer flex items-center gap-3 transition ${activeUser === null ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-200 dark:hover:bg-white/5'}`}>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold">#</div>
-            <div className="flex-1">
-                <div className="text-sm font-bold">General Team</div>
-                <div className="text-xs opacity-70 truncate">Alice: Meeting in 5 mins?</div>
-            </div>
-          </div>
-          
-          <div className="px-3 py-2 text-[10px] font-bold uppercase opacity-40 mt-2">Direct Messages</div>
-          
-          {people.map(p => (
-            <div key={p.id} onClick={() => setActiveUser(p.id)} className={`p-3 rounded-xl cursor-pointer flex items-center gap-3 transition group ${activeUser === p.id ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-200 dark:hover:bg-white/5'}`}>
-              <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-200 group-hover:scale-105 transition-transform">
-                    {p.name[0]}
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-[#111827] rounded-full"></div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center">
-                    <div className="text-sm font-bold truncate">{p.name}</div>
-                    <div className="text-[10px] opacity-60">12m</div>
+export default function CommLink() {
+    const [activeTab, setActiveTab] = useState<'stream' | 'tasks' | 'team'>('stream');
+    const [stream, setStream] = useState<StreamMessage[]>(INITIAL_STREAM);
+    const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+    const [selectedMsg, setSelectedMsg] = useState<StreamMessage | null>(null);
+    const [replyText, setReplyText] = useState('');
+
+    // --- ACTIONS ---
+    const convertToTask = (msg: StreamMessage) => {
+        const newTask: Task = {
+            id: `t-${Date.now()}`,
+            title: `Resolve: ${msg.intent} from ${msg.user}`,
+            assignee: 'Unassigned',
+            status: 'To Do',
+            priority: msg.priority === 'critical' ? 'Critical' : 'Normal'
+        };
+        setTasks([newTask, ...tasks]);
+        setStream(prev => prev.map(m => m.id === msg.id ? { ...m, resolved: true } : m));
+        setSelectedMsg(null);
+        alert('Ticket Created & Added to Task Board');
+    };
+
+    const handleAssign = (taskId: string, person: string) => {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, assignee: person } : t));
+    };
+
+    return (
+        <div className="p-6 md:p-8 text-[var(--text-main)] animate-fade-in h-full flex flex-col max-w-[1600px] mx-auto relative">
+            
+            <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0">
+                <div>
+                    <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3">
+                        CommLink
+                        <span className="text-xs bg-indigo-500/10 text-indigo-500 px-2 py-1 rounded-full border border-indigo-500/20 font-bold uppercase tracking-widest flex items-center gap-1">
+                            <ListChecks weight="fill" /> Operations
+                        </span>
+                    </h1>
+                    <p className="text-sm opacity-70 font-medium max-w-2xl mt-2 leading-relaxed">
+                        The bridge between communication and execution. Convert noise into tasks.
+                    </p>
                 </div>
-                <div className="text-xs opacity-60 truncate">{p.role}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-[#f8fafc] dark:bg-transparent relative">
-        {/* Chat Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-white/80 dark:bg-[#111827]/80 backdrop-blur-md z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold shadow-md">
-              {activePerson ? activePerson.name[0] : '#'}
-            </div>
-            <div>
-              <div className="font-bold text-sm text-[var(--text-main)]">{activePerson ? activePerson.name : 'General Channel'}</div>
-              <div className="text-xs opacity-60 flex items-center gap-1 text-emerald-500 font-medium">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div> Online
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-4 text-indigo-500">
-            <button className="p-2 hover:bg-indigo-50 dark:hover:bg-white/5 rounded-full transition"><Phone weight="fill" size={20} /></button>
-            <button className="p-2 hover:bg-indigo-50 dark:hover:bg-white/5 rounded-full transition"><VideoCamera weight="fill" size={20} /></button>
-            <button className="p-2 hover:bg-indigo-50 dark:hover:bg-white/5 rounded-full transition"><Info weight="bold" size={20} /></button>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6" ref={scrollRef}>
-          <div className="flex justify-center my-4">
-            <span className="text-[10px] font-bold bg-gray-200 dark:bg-white/10 px-3 py-1 rounded-full opacity-60">Today</span>
-          </div>
-          
-          <div className="text-center opacity-40 text-xs mb-8 flex flex-col items-center gap-2">
-            <LockKey size={24} />
-            <span>Messages are end-to-end encrypted. No one outside of this chat, not even Admin, can read them.</span>
-          </div>
-
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.fromMe ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] flex flex-col ${m.fromMe ? 'items-end' : 'items-start'}`}>
-                  <div className={`px-5 py-3 rounded-2xl text-sm shadow-sm relative ${
-                    m.fromMe 
-                      ? 'bg-indigo-600 text-white rounded-tr-none' 
-                      : 'bg-white dark:bg-[#1e293b] text-[var(--text-main)] border border-gray-100 dark:border-white/5 rounded-tl-none'
-                  }`}>
-                    {m.text}
-                  </div>
-                  <div className="text-[10px] opacity-40 mt-1 flex items-center gap-1 font-bold">
-                    {m.time} {m.fromMe && <Check weight="bold" />}
-                  </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Input */}
-        <div className="p-4 bg-white dark:bg-[#111827] border-t border-gray-200 dark:border-white/10">
-            <form onSubmit={sendMessage} className="flex gap-2 items-end">
-                <div className="flex-1 bg-gray-100 dark:bg-black/20 rounded-2xl p-2 flex items-center gap-2 border border-transparent focus-within:border-indigo-500/50 transition">
-                    <button type="button" className="p-2 text-gray-400 hover:text-indigo-500 transition"><Paperclip size={20} /></button>
-                    <input 
-                        value={message}
-                        onChange={e => setMessage(e.target.value)}
-                        className="flex-1 bg-transparent border-none outline-none text-sm max-h-32 py-2"
-                        placeholder="Type a message..."
-                    />
-                    <button type="button" className="p-2 text-gray-400 hover:text-indigo-500 transition"><Smiley size={20} /></button>
+                
+                <div className="flex bg-gray-200 dark:bg-white/5 p-1 rounded-xl shrink-0">
+                    <button onClick={() => setActiveTab('stream')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${activeTab === 'stream' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
+                        <ChatCircleDots weight="bold" /> Stream
+                    </button>
+                    <button onClick={() => setActiveTab('tasks')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${activeTab === 'tasks' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
+                        <Kanban weight="bold" /> Tasks <span className="bg-indigo-500 text-white px-1.5 rounded-full text-[9px]">{tasks.length}</span>
+                    </button>
                 </div>
-                <button className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg transition hover:scale-105 active:scale-95 mb-1">
-                    <PaperPlaneRight size={20} weight="fill" />
-                </button>
-            </form>
+            </header>
+
+            {/* STREAM VIEW */}
+            {activeTab === 'stream' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
+                    <div className={`flex flex-col gap-4 transition-all duration-500 ${selectedMsg ? 'lg:col-span-7' : 'lg:col-span-12'}`}>
+                        <div className="glass-card flex-1 flex flex-col p-0 overflow-hidden">
+                            <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 flex justify-between items-center">
+                                <span className="text-xs font-bold opacity-60">Incoming Signals</span>
+                                <div className="flex gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-[10px] font-bold uppercase opacity-50">Listening</span>
+                                </div>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
+                                {stream.map(msg => (
+                                    <div 
+                                        key={msg.id} 
+                                        onClick={() => setSelectedMsg(msg)}
+                                        className={`
+                                            group p-4 rounded-xl border cursor-pointer transition-all duration-300 relative overflow-hidden
+                                            ${selectedMsg?.id === msg.id ? 'bg-indigo-50/80 dark:bg-indigo-500/10 border-indigo-500 ring-1 ring-indigo-500' : 'bg-white dark:bg-[#1e293b] border-gray-200 dark:border-white/5 hover:border-indigo-300'}
+                                            ${msg.resolved ? 'opacity-60 grayscale' : ''}
+                                        `}
+                                    >
+                                        <div className="flex gap-4">
+                                            <div className="mt-1">
+                                                {msg.source === 'slack' && <SlackLogo size={20} className="text-[#E01E5A]" weight="fill" />}
+                                                {msg.source === 'email' && <Envelope size={20} className="text-blue-500" weight="fill" />}
+                                                {msg.source === 'teams' && <MicrosoftTeamsLogo size={20} className="text-[#6264A7]" weight="fill" />}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between mb-1">
+                                                    <span className="font-bold text-sm">{msg.user}</span>
+                                                    <span className="text-[10px] opacity-50 font-mono">{msg.time}</span>
+                                                </div>
+                                                <p className="text-xs opacity-80 line-clamp-2">{msg.text}</p>
+                                                {msg.priority === 'critical' && <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded"><Warning weight="fill" /> Critical</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {selectedMsg && (
+                        <div className="lg:col-span-5 flex flex-col h-full animate-fade-in-right">
+                            <div className="glass-card h-full flex flex-col p-0 overflow-hidden border-indigo-500/20 shadow-2xl">
+                                <div className="p-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shrink-0">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-2 text-indigo-200 text-xs font-bold uppercase tracking-widest">
+                                                <Robot weight="fill" /> Context Engine
+                                            </div>
+                                            <h2 className="text-lg font-bold leading-tight">{selectedMsg.aiAnalysis}</h2>
+                                        </div>
+                                        <button onClick={() => setSelectedMsg(null)} className="p-1 hover:bg-white/20 rounded-full"><X size={20} /></button>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1 p-6 bg-gray-50 dark:bg-[#0f172a]/50 flex flex-col">
+                                    <div className="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-white/5 mb-6">
+                                        <div className="text-[10px] uppercase font-bold opacity-40 mb-2">Original Text</div>
+                                        <p className="text-sm italic opacity-80">"{selectedMsg.text}"</p>
+                                    </div>
+
+                                    {!selectedMsg.resolved ? (
+                                        <div className="space-y-3">
+                                            <button 
+                                                onClick={() => convertToTask(selectedMsg)}
+                                                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2"
+                                            >
+                                                <ListChecks weight="bold" /> Convert to Task
+                                            </button>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button className="py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-xs hover:bg-gray-100 dark:hover:bg-white/5">
+                                                    Ignore
+                                                </button>
+                                                <button className="py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-xs hover:bg-gray-100 dark:hover:bg-white/5">
+                                                    Snooze 1h
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-10 opacity-50">
+                                            <CheckCircle size={48} className="mx-auto mb-2 text-emerald-500" weight="fill" />
+                                            <div className="font-bold">Ticket Resolved</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* TASKS VIEW */}
+            {activeTab === 'tasks' && (
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {['To Do', 'In Progress', 'Done'].map(status => (
+                            <div key={status} className="flex flex-col gap-4">
+                                <h3 className="font-bold text-sm uppercase opacity-50 tracking-widest pl-2 border-b border-gray-200 dark:border-white/10 pb-2">{status}</h3>
+                                {tasks.filter(t => t.status === status).map(task => (
+                                    <div key={task.id} className="glass-card p-4 hover:border-indigo-500/30 transition group">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${task.priority === 'Critical' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                                                {task.priority}
+                                            </span>
+                                            <button className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-indigo-500 transition"><DotsThree size={20} weight="bold" /></button>
+                                        </div>
+                                        <h4 className="font-bold text-sm mb-3">{task.title}</h4>
+                                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold">
+                                                    {task.assignee.charAt(0)}
+                                                </div>
+                                                <span className="text-xs opacity-60">{task.assignee}</span>
+                                            </div>
+                                            {task.assignee === 'Unassigned' && (
+                                                <button onClick={() => handleAssign(task.id, 'Me')} className="text-[10px] font-bold text-indigo-500 hover:underline">
+                                                    Take It
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                                {tasks.filter(t => t.status === status).length === 0 && (
+                                    <div className="h-24 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-xl flex items-center justify-center text-xs opacity-30 font-bold uppercase">Empty</div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
-      </div>
-    </div>
-  );
+    );
 }

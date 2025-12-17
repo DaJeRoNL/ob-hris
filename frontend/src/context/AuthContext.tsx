@@ -18,10 +18,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentClientId, setCurrentClientId] = useState<string>('c1');
 
   useEffect(() => {
-    const isDev = sessionStorage.getItem('dev_bypass') === 'true';
+    // SECURITY PATCH: Only allow bypass in strict DEV mode
+    const isDev = import.meta.env.DEV && sessionStorage.getItem('dev_bypass') === 'true';
 
     if (isDev) {
-      // Create a fake session object for dev mode
+      console.warn("⚠️ DEV BYPASS ACTIVE - DO NOT SHIP TO PROD ⚠️");
       setSession({
         access_token: 'dev-token',
         refresh_token: 'dev-refresh',

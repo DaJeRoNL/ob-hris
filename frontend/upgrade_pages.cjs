@@ -1,168 +1,276 @@
+// frontend/upgrade_v14.cjs
 const fs = require('fs');
 const path = require('path');
 
-// --- PATHS ---
-const CLIENT_PROFILE_DIR = path.join(__dirname, 'src', 'pages', 'ClientProfile');
-const COMPONENT_DIR = path.join(CLIENT_PROFILE_DIR, 'components');
-const GLOBAL_CSS = path.join(__dirname, 'src', 'index.css');
+const ensureDir = (filePath) => {
+    const dirname = path.dirname(filePath);
+    if (fs.existsSync(dirname)) return true;
+    ensureDir(dirname);
+    fs.mkdirSync(dirname);
+};
 
-const ORB_COMPONENT = `import { useEffect, useState, useMemo } from 'react';
-import { Check, Diamond, Square, Triangle, Circle } from '@phosphor-icons/react';
+const write = (relPath, content) => {
+    const absPath = path.join(__dirname, relPath);
+    ensureDir(absPath);
+    fs.writeFileSync(absPath, content);
+    console.log(`✅ Updated: ${relPath}`);
+};
 
-interface Props {
-    onClick: () => void;
-    state: 'idle' | 'loading' | 'thinking' | 'answered';
-    thinkingIntensity?: number; // 0.0 to 1.0
+// ============================================================================
+// 1. COMM LINK V14 - TYPE DEFINITIONS RESTORED
+// ============================================================================
+const CHAT_PAGE = `import { useState } from 'react';
+import { 
+    SlackLogo, MicrosoftTeamsLogo, Envelope, 
+    Lightning, CheckCircle, X, 
+    ArrowRight, Robot, 
+    CalendarPlus, Receipt, Hash, ArrowSquareOut,
+    User, ChatCircleDots, Clock, Phone,
+    PlugsConnected, Gear, Users,
+    MagicWand, PaperPlaneRight, Tag, Money,
+    ListChecks, Kanban, Warning, Check, UserPlus,
+    DotsThree
+} from '@phosphor-icons/react';
+
+// --- TYPES ---
+interface StreamMessage {
+    id: number;
+    source: string;
+    user: string;
+    text: string;
+    time: string;
+    intent: string;
+    priority: string;
+    aiAnalysis: string;
+    resolved?: boolean; // Optional property for UI state
 }
 
-export default function AiOrb({ onClick, state, thinkingIntensity = 0.5 }: Props) {
-    const [visualState, setVisualState] = useState<'idle' | 'active' | 'converging' | 'success'>('idle');
-    const [isPressed, setIsPressed] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
+interface Task {
+    id: string;
+    title: string;
+    assignee: string;
+    status: 'To Do' | 'In Progress' | 'Done';
+    priority: string;
+}
 
-    // Handle State Transitions
-    useEffect(() => {
-        if (state === 'idle') setVisualState('idle');
-        else if (state === 'loading' || state === 'thinking') setVisualState('active');
-        else if (state === 'answered') {
-            setVisualState('converging');
-            const timer = setTimeout(() => setVisualState('success'), 450);
-            return () => clearTimeout(timer);
-        }
-    }, [state]);
+// --- MOCK DATA ---
+const INITIAL_STREAM: StreamMessage[] = [
+    { 
+        id: 1, source: 'slack', user: 'Marcus (Dev)', 
+        text: 'Hey, I woke up feeling terrible. Not gonna make standup, taking a sick day.', 
+        time: '5m ago', intent: 'leave_request', priority: 'high',
+        aiAnalysis: 'Intent: Sick Leave. Confidence: 92%.',
+    },
+    { 
+        id: 2, source: 'email', user: 'Vendor: AWS', 
+        text: 'Invoice #9921 is overdue. Amount: $4,200. Please process immediately.', 
+        time: '32m ago', intent: 'invoice', priority: 'critical',
+        aiAnalysis: 'Intent: Invoice Payment. Entity: AWS.',
+    },
+    { 
+        id: 3, source: 'teams', user: 'Sarah (HR)', 
+        text: 'Can someone review the offer letter for Alex? It needs approval before 2pm.', 
+        time: '1h ago', intent: 'review', priority: 'medium',
+        aiAnalysis: 'Action: Document Review. Deadline: 2:00 PM.',
+    },
+];
 
-    const isIdle = visualState === 'idle';
-    const isActive = visualState === 'active';
-    const isConverging = visualState === 'converging';
-    const isSuccess = visualState === 'success';
+const INITIAL_TASKS: Task[] = [
+    { id: 't1', title: 'Process AWS Invoice', assignee: 'Finance', status: 'To Do', priority: 'Critical' },
+    { id: 't2', title: 'Onboard Alex M.', assignee: 'HR Team', status: 'In Progress', priority: 'High' },
+];
 
-    // --- DYNAMIC PHYSICS ---
+export default function CommLink() {
+    const [activeTab, setActiveTab] = useState<'stream' | 'tasks' | 'team'>('stream');
+    const [stream, setStream] = useState<StreamMessage[]>(INITIAL_STREAM);
+    const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+    const [selectedMsg, setSelectedMsg] = useState<StreamMessage | null>(null);
+    const [replyText, setReplyText] = useState('');
 
-    // Rotation Speed
-    const spinDuration = useMemo(() => {
-        if (isActive) return \`\${2.5 - (thinkingIntensity * 2)}s\`;
-        if (isHovered) return '4s';
-        return '12s';
-    }, [isActive, isHovered, thinkingIntensity]);
-    
-    // Blur Intensity
-    const liquidBlur = useMemo(() => \`\${thinkingIntensity * 4}px\`, [thinkingIntensity]);
+    // --- ACTIONS ---
+    const convertToTask = (msg: StreamMessage) => {
+        const newTask: Task = {
+            id: \`t-\${Date.now()}\`,
+            title: \`Resolve: \${msg.intent} from \${msg.user}\`,
+            assignee: 'Unassigned',
+            status: 'To Do',
+            priority: msg.priority === 'critical' ? 'Critical' : 'Normal'
+        };
+        setTasks([newTask, ...tasks]);
+        setStream(prev => prev.map(m => m.id === msg.id ? { ...m, resolved: true } : m));
+        setSelectedMsg(null);
+        alert('Ticket Created & Added to Task Board');
+    };
 
-    // Glow Intensity
-    const glowOpacity = useMemo(() => isIdle ? 0.2 : 0.3 + (thinkingIntensity * 0.4), [isIdle, thinkingIntensity]);
+    const handleAssign = (taskId: string, person: string) => {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, assignee: person } : t));
+    };
 
     return (
-        <div 
-            onMouseDown={() => setIsPressed(true)}
-            onMouseUp={() => setIsPressed(false)}
-            onMouseLeave={() => { setIsPressed(false); setIsHovered(false); }}
-            onMouseEnter={() => setIsHovered(true)}
-            onClick={isIdle ? onClick : undefined}
-            className={\`
-                relative w-32 h-32 flex items-center justify-center perspective-1000 
-                cursor-pointer transition-transform duration-300 ease-out select-none
-                \${isPressed ? 'scale-90' : 'scale-100'}
-                \${isIdle && !isPressed ? 'hover:scale-105' : ''}
-            \`}
-        >
-            {/* --- 1. ETHEREAL GLOW --- */}
-            <div 
-                className="absolute inset-0 rounded-full blur-[45px] transition-all duration-700 ease-out"
-                style={{
-                    backgroundColor: isSuccess ? 'rgba(52, 211, 153, 0.4)' : 'rgba(165, 180, 252, 0.6)', 
-                    opacity: isSuccess ? 0.6 : glowOpacity,
-                    transform: isConverging ? 'scale(0.1)' : \`scale(\${isSuccess ? 1.3 : (isHovered ? 1.1 : 0.9)})\`
-                }}
-            ></div>
-
-            {/* --- 2. ORBITAL RINGS (Restored & Persistent) --- */}
-            <div className={\`absolute inset-0 scale-90 pointer-events-none z-10 transition-all duration-500 \${isConverging ? 'opacity-0 scale-50' : 'opacity-100'}\`}>
-                <div 
-                    className="absolute w-full h-full rounded-full border border-slate-200/10 border-t-cyan-100/60 animate-spin-dynamic"
-                    style={{ animationDuration: spinDuration }}
-                ></div>
-                <div 
-                    className="absolute w-[85%] h-[85%] top-[7.5%] left-[7.5%] rounded-full border border-purple-200/10 border-b-purple-100/60 animate-spin-reverse-dynamic"
-                    style={{ animationDuration: spinDuration }}
-                ></div>
-            </div>
-
-            {/* --- 3. THE CRYSTAL CORE --- */}
-            <div className="absolute z-20 flex items-center justify-center w-full h-full">
+        <div className="p-6 md:p-8 text-[var(--text-main)] animate-fade-in h-full flex flex-col max-w-[1600px] mx-auto relative">
+            
+            <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shrink-0">
+                <div>
+                    <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3">
+                        CommLink
+                        <span className="text-xs bg-indigo-500/10 text-indigo-500 px-2 py-1 rounded-full border border-indigo-500/20 font-bold uppercase tracking-widest flex items-center gap-1">
+                            <ListChecks weight="fill" /> Operations
+                        </span>
+                    </h1>
+                    <p className="text-sm opacity-70 font-medium max-w-2xl mt-2 leading-relaxed">
+                        The bridge between communication and execution. Convert noise into tasks.
+                    </p>
+                </div>
                 
-                {/* A. BACKGROUND: 3D WIREFRAME --- */}
-                <div className={\`absolute w-12 h-24 transform-style-3d transition-all duration-700 \${
-                    isConverging ? 'scale-0 opacity-0' : 
-                    isActive ? 'opacity-30 scale-125' : 
-                    'opacity-20 scale-100'
-                }\`}>
-                    <div className={\`absolute inset-0 w-full h-full transform-style-3d \${isActive ? 'animate-crystal-tumble-fast' : 'animate-crystal-tumble-slow'}\`}>
-                        <div className="absolute top-0 left-0 w-full h-1/2 transform-style-3d origin-bottom">
-                            {[0, 90, 180, 270].map((deg, i) => (
-                                <div key={i} className="absolute inset-0 w-full h-full border border-indigo-100/30 bg-white/5 pyramid-face translate-z-10" style={{ transform: \`rotateY(\${deg}deg) rotateX(30deg)\` }}></div>
-                            ))}
+                <div className="flex bg-gray-200 dark:bg-white/5 p-1 rounded-xl shrink-0">
+                    <button onClick={() => setActiveTab('stream')} className={\`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 \${activeTab === 'stream' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}\`}>
+                        <ChatCircleDots weight="bold" /> Stream
+                    </button>
+                    <button onClick={() => setActiveTab('tasks')} className={\`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 \${activeTab === 'tasks' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}\`}>
+                        <Kanban weight="bold" /> Tasks <span className="bg-indigo-500 text-white px-1.5 rounded-full text-[9px]">{tasks.length}</span>
+                    </button>
+                </div>
+            </header>
+
+            {/* STREAM VIEW */}
+            {activeTab === 'stream' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
+                    <div className={\`flex flex-col gap-4 transition-all duration-500 \${selectedMsg ? 'lg:col-span-7' : 'lg:col-span-12'}\`}>
+                        <div className="glass-card flex-1 flex flex-col p-0 overflow-hidden">
+                            <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 flex justify-between items-center">
+                                <span className="text-xs font-bold opacity-60">Incoming Signals</span>
+                                <div className="flex gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-[10px] font-bold uppercase opacity-50">Listening</span>
+                                </div>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
+                                {stream.map(msg => (
+                                    <div 
+                                        key={msg.id} 
+                                        onClick={() => setSelectedMsg(msg)}
+                                        className={\`
+                                            group p-4 rounded-xl border cursor-pointer transition-all duration-300 relative overflow-hidden
+                                            \${selectedMsg?.id === msg.id ? 'bg-indigo-50/80 dark:bg-indigo-500/10 border-indigo-500 ring-1 ring-indigo-500' : 'bg-white dark:bg-[#1e293b] border-gray-200 dark:border-white/5 hover:border-indigo-300'}
+                                            \${msg.resolved ? 'opacity-60 grayscale' : ''}
+                                        \`}
+                                    >
+                                        <div className="flex gap-4">
+                                            <div className="mt-1">
+                                                {msg.source === 'slack' && <SlackLogo size={20} className="text-[#E01E5A]" weight="fill" />}
+                                                {msg.source === 'email' && <Envelope size={20} className="text-blue-500" weight="fill" />}
+                                                {msg.source === 'teams' && <MicrosoftTeamsLogo size={20} className="text-[#6264A7]" weight="fill" />}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between mb-1">
+                                                    <span className="font-bold text-sm">{msg.user}</span>
+                                                    <span className="text-[10px] opacity-50 font-mono">{msg.time}</span>
+                                                </div>
+                                                <p className="text-xs opacity-80 line-clamp-2">{msg.text}</p>
+                                                {msg.priority === 'critical' && <span className="mt-2 inline-flex items-center gap-1 text-[9px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded"><Warning weight="fill" /> Critical</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full h-1/2 transform-style-3d origin-top">
-                            {[0, 90, 180, 270].map((deg, i) => (
-                                <div key={i} className="absolute inset-0 w-full h-full border border-indigo-100/30 bg-white/5 pyramid-face-inv translate-z-10" style={{ transform: \`rotateY(\${deg}deg) rotateX(30deg)\` }}></div>
-                            ))}
+                    </div>
+
+                    {selectedMsg && (
+                        <div className="lg:col-span-5 flex flex-col h-full animate-fade-in-right">
+                            <div className="glass-card h-full flex flex-col p-0 overflow-hidden border-indigo-500/20 shadow-2xl">
+                                <div className="p-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shrink-0">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-2 text-indigo-200 text-xs font-bold uppercase tracking-widest">
+                                                <Robot weight="fill" /> Context Engine
+                                            </div>
+                                            <h2 className="text-lg font-bold leading-tight">{selectedMsg.aiAnalysis}</h2>
+                                        </div>
+                                        <button onClick={() => setSelectedMsg(null)} className="p-1 hover:bg-white/20 rounded-full"><X size={20} /></button>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1 p-6 bg-gray-50 dark:bg-[#0f172a]/50 flex flex-col">
+                                    <div className="bg-white dark:bg-[#1e293b] p-4 rounded-xl border border-gray-200 dark:border-white/5 mb-6">
+                                        <div className="text-[10px] uppercase font-bold opacity-40 mb-2">Original Text</div>
+                                        <p className="text-sm italic opacity-80">"{selectedMsg.text}"</p>
+                                    </div>
+
+                                    {!selectedMsg.resolved ? (
+                                        <div className="space-y-3">
+                                            <button 
+                                                onClick={() => convertToTask(selectedMsg)}
+                                                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2"
+                                            >
+                                                <ListChecks weight="bold" /> Convert to Task
+                                            </button>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button className="py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-xs hover:bg-gray-100 dark:hover:bg-white/5">
+                                                    Ignore
+                                                </button>
+                                                <button className="py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-xs hover:bg-gray-100 dark:hover:bg-white/5">
+                                                    Snooze 1h
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-10 opacity-50">
+                                            <CheckCircle size={48} className="mx-auto mb-2 text-emerald-500" weight="fill" />
+                                            <div className="font-bold">Ticket Resolved</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                {/* B. IDLE: STATIC DIAMOND --- */}
-                <div className={\`absolute transition-all duration-500 ease-out \${
-                    isIdle ? 'opacity-100 scale-100 animate-idle-float' : 'opacity-0 scale-50 blur-md'
-                }\`}>
-                     <Diamond 
-                        weight="regular"
-                        className="text-white w-10 h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-                     />
-                </div>
-
-                {/* C. ACTIVE: BIOLOGICAL SHAPE SHIFTER (Sequential Blend) --- */}
-                <div 
-                    className={\`absolute flex items-center justify-center w-16 h-16 transition-all duration-300 \${
-                        isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-                    } \${isConverging ? 'scale-0 opacity-0' : ''}\`}
-                    style={{ filter: \`blur(\${liquidBlur})\` }}
-                >
-                    <div className="absolute inset-0 flex items-center justify-center animate-bio-morph-1 mix-blend-screen">
-                        <Square weight="bold" className="w-10 h-10 text-cyan-200" />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center animate-bio-morph-2 mix-blend-screen">
-                        <Triangle weight="bold" className="w-12 h-12 text-purple-200 mb-1" />
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center animate-bio-morph-3 mix-blend-screen">
-                        <Circle weight="bold" className="w-10 h-10 text-white" />
-                    </div>
-                </div>
-
-            </div>
-
-            {/* --- 4. BLINKING PARTICLES (RESTORED) --- */}
-            {isActive && !isConverging && (
-                <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-0 w-1.5 h-1.5 bg-white/80 rounded-full animate-ping" style={{ left: '50%', animationDelay: '0s' }}></div>
-                    <div className="absolute bottom-0 w-1.5 h-1.5 bg-white/80 rounded-full animate-ping" style={{ left: '50%', animationDelay: '0.8s' }}></div>
-                    <div className="absolute left-0 w-1.5 h-1.5 bg-white/80 rounded-full animate-ping" style={{ top: '50%', animationDelay: '0.4s' }}></div>
-                    <div className="absolute right-0 w-1.5 h-1.5 bg-white/80 rounded-full animate-ping" style={{ top: '50%', animationDelay: '1.2s' }}></div>
+                    )}
                 </div>
             )}
 
-            {/* --- 5. SUCCESS STATE --- */}
-            <div className={\`absolute z-30 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) \${
-                isSuccess ? 'opacity-100 scale-110' : 'opacity-0 scale-50 translate-y-4'
-            }\`}>
-                <div className="relative flex items-center justify-center">
-                    <div className="absolute inset-0 bg-emerald-100/50 blur-xl rounded-full scale-150 animate-pulse-slow"></div>
-                    <Check weight="bold" size={44} className="text-emerald-500 drop-shadow-[0_2px_10px_rgba(16,185,129,0.5)]" />
+            {/* TASKS VIEW */}
+            {activeTab === 'tasks' && (
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {['To Do', 'In Progress', 'Done'].map(status => (
+                            <div key={status} className="flex flex-col gap-4">
+                                <h3 className="font-bold text-sm uppercase opacity-50 tracking-widest pl-2 border-b border-gray-200 dark:border-white/10 pb-2">{status}</h3>
+                                {tasks.filter(t => t.status === status).map(task => (
+                                    <div key={task.id} className="glass-card p-4 hover:border-indigo-500/30 transition group">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className={\`text-[10px] font-bold px-2 py-0.5 rounded \${task.priority === 'Critical' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}\`}>
+                                                {task.priority}
+                                            </span>
+                                            <button className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-indigo-500 transition"><DotsThree size={20} weight="bold" /></button>
+                                        </div>
+                                        <h4 className="font-bold text-sm mb-3">{task.title}</h4>
+                                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold">
+                                                    {task.assignee.charAt(0)}
+                                                </div>
+                                                <span className="text-xs opacity-60">{task.assignee}</span>
+                                            </div>
+                                            {task.assignee === 'Unassigned' && (
+                                                <button onClick={() => handleAssign(task.id, 'Me')} className="text-[10px] font-bold text-indigo-500 hover:underline">
+                                                    Take It
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                                {tasks.filter(t => t.status === status).length === 0 && (
+                                    <div className="h-24 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-xl flex items-center justify-center text-xs opacity-30 font-bold uppercase">Empty</div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
 `;
 
-fs.writeFileSync(path.join(COMPONENT_DIR, 'AiOrb.tsx'), ORB_COMPONENT);
-console.log("✅ AiOrb.tsx updated: Restored 4 Dots + Sequential Shape Blending.");
+write('src/pages/Chat/index.tsx', CHAT_PAGE);
+
+console.log("✅ UPGRADE V14 COMPLETE: Fixed Type Errors in CommLink.");
