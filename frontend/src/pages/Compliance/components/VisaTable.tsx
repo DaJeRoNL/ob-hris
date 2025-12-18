@@ -21,7 +21,7 @@ export default function VisaTable({ people, onAddUser, onUserClick }: Props) {
 
     return (
         <div className="glass-card h-full flex flex-col p-0 overflow-hidden">
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 dark:bg-white/5">
+            <div className="p-4 border-b border-gray-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 dark:bg-[var(--color-surface)]/50">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
                         <IdentificationCard size={18} weight="fill" />
@@ -53,7 +53,7 @@ export default function VisaTable({ people, onAddUser, onUserClick }: Props) {
             
             <div className="overflow-y-auto flex-1 custom-scrollbar">
                 <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white dark:bg-[#1e293b] z-10 shadow-sm">
+                    <thead className="sticky top-0 bg-[var(--color-surface)] z-10 shadow-sm">
                         <tr className="text-left text-[10px] uppercase font-bold tracking-wider opacity-50">
                             <th className="py-3 px-4">Employee</th>
                             <th className="py-3 px-4">Location</th>
@@ -66,7 +66,7 @@ export default function VisaTable({ people, onAddUser, onUserClick }: Props) {
                             <tr 
                                 key={p.id} 
                                 onClick={() => onUserClick(p)} // Row Click!
-                                className="group hover:bg-indigo-50/50 dark:hover:bg-white/5 transition cursor-pointer"
+                                className="group hover:bg-indigo-50/50 dark:hover:bg-[var(--color-surface)]/50 transition cursor-pointer"
                             >
                                 <td className="py-3 px-4">
                                     <div className="font-bold text-xs text-gray-900 dark:text-gray-100">{p.name}</div>

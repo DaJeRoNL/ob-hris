@@ -44,7 +44,7 @@ export default function AddCandidateModal({ onClose, onAdd }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[150] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
                 
                 {/* Header */}
                 <div className="bg-indigo-600 p-6 text-white flex justify-between items-center">
@@ -104,7 +104,7 @@ export default function AddCandidateModal({ onClose, onAdd }: Props) {
                     </div>
 
                     <div className="pt-4 flex justify-end gap-3 border-t border-gray-100 dark:border-white/5">
-                        <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition">Cancel</button>
+                        <button type="button" onClick={onClose} className="px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50 transition">Cancel</button>
                         <button type="submit" className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition transform active:scale-95">Add Candidate</button>
                     </div>
                 </form>

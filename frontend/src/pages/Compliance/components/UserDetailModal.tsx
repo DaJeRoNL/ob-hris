@@ -32,7 +32,7 @@ export default function UserDetailModal({ person, onClose, onRemove }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[80] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
                 
                 {/* Hero Header */}
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 text-white relative">
@@ -56,10 +56,10 @@ export default function UserDetailModal({ person, onClose, onRemove }: Props) {
                 </div>
 
                 {/* Content */}
-                <div className="p-8 bg-gray-50 dark:bg-[#0f172a]/50 flex-1">
+                <div className="p-8 bg-gray-50 dark:bg-[var(--color-surface)]/50 flex-1">
                     
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="p-4 bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm">
+                        <div className="p-4 bg-[var(--color-surface)] rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm">
                             <div className="text-xs uppercase font-bold opacity-50 mb-2 flex items-center gap-2">
                                 <MapPin className="text-blue-500" /> Location
                             </div>
@@ -67,7 +67,7 @@ export default function UserDetailModal({ person, onClose, onRemove }: Props) {
                                 <FlagDot country={person.loc} size="md" /> {person.loc}
                             </div>
                         </div>
-                        <div className="p-4 bg-white dark:bg-[#1e293b] rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm">
+                        <div className="p-4 bg-[var(--color-surface)] rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm">
                             <div className="text-xs uppercase font-bold opacity-50 mb-2 flex items-center gap-2">
                                 <IdentificationCard className="text-purple-500" /> Visa Type
                             </div>
@@ -88,7 +88,7 @@ export default function UserDetailModal({ person, onClose, onRemove }: Props) {
 
                     {/* Actions */}
                     <div className="flex gap-3">
-                        <button className="flex-1 py-3 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-gray-50 dark:hover:bg-white/5 transition flex items-center justify-center gap-2">
+                        <button className="flex-1 py-3 bg-[var(--color-surface)] border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50 transition flex items-center justify-center gap-2">
                             <User /> Edit Profile
                         </button>
                         
@@ -97,7 +97,7 @@ export default function UserDetailModal({ person, onClose, onRemove }: Props) {
                             className={`flex-1 py-3 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 ${
                                 canDelete 
                                 ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20' 
-                                : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed border border-transparent'
+                                : 'bg-gray-100 dark:bg-[var(--color-surface)]/50 text-gray-400 cursor-not-allowed border border-transparent'
                             }`}
                             title={!canDelete ? "Cannot delete active visa holder" : "Remove User"}
                         >

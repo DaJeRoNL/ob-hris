@@ -51,10 +51,10 @@ export default function CommLink() {
     };
 
     return (
-        <div className="h-full flex gap-0 bg-white dark:bg-[#020617] text-[var(--text-main)] animate-fade-in overflow-hidden relative">
+        <div className="h-full flex gap-0 bg-white  text-[var(--text-main)] animate-fade-in overflow-hidden relative">
             
             {/* SIDEBAR: INBOX LIST */}
-            <div className="w-96 border-r border-gray-200 dark:border-white/10 flex flex-col bg-gray-50/50 dark:bg-[#0f172a]">
+            <div className="w-96 border-r border-gray-200 dark:border-white/10 flex flex-col bg-gray-50/50 dark:bg-[var(--color-surface)]">
                 <div className="p-6 pb-4 border-b border-gray-200 dark:border-white/10">
                     <h2 className="text-xl font-black font-['Montserrat'] flex items-center gap-2">
                         <ChatCircleDots className="text-indigo-500" weight="duotone" />
@@ -68,7 +68,7 @@ export default function CommLink() {
                         <div 
                             key={msg.id}
                             onClick={() => setSelectedMsg(msg)}
-                            className={`p-4 border-b border-gray-100 dark:border-white/5 cursor-pointer transition-all hover:bg-white dark:hover:bg-white/5 ${selectedMsg?.id === msg.id ? 'bg-white dark:bg-white/5 border-l-4 border-l-indigo-500' : 'border-l-4 border-l-transparent'}`}
+                            className={`p-4 border-b border-gray-100 dark:border-white/5 cursor-pointer transition-all hover:bg-white dark:hover:bg-[var(--color-surface)]/50 ${selectedMsg?.id === msg.id ? 'bg-white dark:bg-[var(--color-surface)]/50 border-l-4 border-l-indigo-500' : 'border-l-4 border-l-transparent'}`}
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function CommLink() {
             </div>
 
             {/* MAIN CONTENT: MESSAGE DETAIL */}
-            <div className="flex-1 flex flex-col bg-white dark:bg-[#020617] relative">
+            <div className="flex-1 flex flex-col bg-white  relative">
                 {selectedMsg ? (
                     <>
                         {/* Header */}
@@ -130,12 +130,12 @@ export default function CommLink() {
                         </div>
 
                         {/* Action Bar */}
-                        <div className="p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#0f172a] flex justify-between items-center">
+                        <div className="p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[var(--color-surface)] flex justify-between items-center">
                             <div className="flex gap-4">
-                                <button className="px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-white dark:hover:bg-white/5 transition flex items-center gap-2">
+                                <button className="px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-white dark:hover:bg-[var(--color-surface)]/50 transition flex items-center gap-2">
                                     <PaperPlaneRight weight="bold" /> Reply
                                 </button>
-                                <button className="px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-white dark:hover:bg-white/5 transition text-red-500 hover:border-red-200">
+                                <button className="px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-white dark:hover:bg-[var(--color-surface)]/50 transition text-red-500 hover:border-red-200">
                                     Ignore
                                 </button>
                             </div>

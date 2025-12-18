@@ -43,11 +43,11 @@ export default function DataVault() {
                         Centralized repository with automated compliance scanning.
                     </p>
                 </div>
-                <div className="flex bg-gray-200 dark:bg-white/5 p-1 rounded-xl">
-                    <button onClick={() => setViewMode('browser')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${viewMode === 'browser' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
+                <div className="flex bg-gray-200 dark:bg-[var(--color-surface)]/50 p-1 rounded-xl">
+                    <button onClick={() => setViewMode('browser')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${viewMode === 'browser' ? 'bg-[var(--color-surface)] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
                         <Folder weight="bold" /> Explorer
                     </button>
-                    <button onClick={() => setViewMode('compliance')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${viewMode === 'compliance' ? 'bg-white dark:bg-[#1e293b] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
+                    <button onClick={() => setViewMode('compliance')} className={`px-5 py-2.5 rounded-lg text-xs font-bold transition flex items-center gap-2 ${viewMode === 'compliance' ? 'bg-[var(--color-surface)] shadow-sm text-indigo-600' : 'opacity-60 hover:opacity-100'}`}>
                         <ShieldCheck weight="bold" /> Compliance
                     </button>
                 </div>
@@ -58,7 +58,7 @@ export default function DataVault() {
                 {/* LEFT: NAVIGATION */}
                 {viewMode === 'browser' && (
                     <div className="w-64 flex flex-col gap-2 shrink-0">
-                        <button onClick={() => { setCurrentFolder(null); setSelectedFile(null); }} className={`p-3 rounded-xl flex items-center gap-3 font-bold text-sm transition ${!currentFolder ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+                        <button onClick={() => { setCurrentFolder(null); setSelectedFile(null); }} className={`p-3 rounded-xl flex items-center gap-3 font-bold text-sm transition ${!currentFolder ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50'}`}>
                             <House weight="fill" /> Home Root
                         </button>
                         <div className="my-2 border-b border-gray-200 dark:border-white/10"></div>
@@ -67,7 +67,7 @@ export default function DataVault() {
                             <button 
                                 key={folder.id} 
                                 onClick={() => { setCurrentFolder(folder.id); setSelectedFile(null); }}
-                                className={`p-3 rounded-xl flex items-center justify-between font-bold text-sm transition ${currentFolder === folder.id ? 'bg-white dark:bg-[#1e293b] shadow-md text-indigo-500' : 'hover:bg-gray-100 dark:hover:bg-white/5 opacity-70'}`}
+                                className={`p-3 rounded-xl flex items-center justify-between font-bold text-sm transition ${currentFolder === folder.id ? 'bg-[var(--color-surface)] shadow-md text-indigo-500' : 'hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50 opacity-70'}`}
                             >
                                 <span className="flex items-center gap-3"><Folder weight="duotone" /> {folder.name}</span>
                                 <span className="text-[10px] bg-gray-200 dark:bg-black/20 px-2 rounded-full">{folder.count}</span>
@@ -111,7 +111,7 @@ export default function DataVault() {
                                         <tr 
                                             key={f.id} 
                                             onClick={() => setSelectedFile(f)}
-                                            className={`group transition-colors cursor-pointer border-b border-gray-100 dark:border-white/5 ${selectedFile?.id === f.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                                            className={`group transition-colors cursor-pointer border-b border-gray-100 dark:border-white/5 ${selectedFile?.id === f.id ? 'bg-indigo-50 dark:bg-indigo-500/10' : 'hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50'}`}
                                         >
                                             <td className="p-3 pl-4 flex items-center gap-3">
                                                 {f.type === 'pdf' ? <FilePdf size={24} className="text-red-500" weight="duotone" /> : <FileXls size={24} className="text-emerald-500" weight="duotone" />}
@@ -134,15 +134,15 @@ export default function DataVault() {
                 {/* RIGHT: SMART INSPECTOR */}
                 {viewMode === 'browser' && selectedFile && (
                     <div className="w-80 glass-card p-0 flex flex-col overflow-hidden animate-fade-in-right">
-                        <div className="p-6 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                        <div className="p-6 bg-gray-50 dark:bg-[var(--color-surface)]/50 border-b border-gray-200 dark:border-white/10">
                             <div className="flex justify-center mb-4">
                                 {selectedFile.type === 'pdf' ? <FilePdf size={64} className="text-red-500 drop-shadow-lg" weight="duotone" /> : <FileXls size={64} className="text-emerald-500 drop-shadow-lg" weight="duotone" />}
                             </div>
                             <h3 className="text-center font-bold text-sm leading-tight mb-2">{selectedFile.name}</h3>
                             <div className="flex justify-center gap-2">
-                                <button className="p-2 bg-white dark:bg-[#1e293b] rounded-lg shadow-sm hover:text-indigo-500 transition"><Eye size={18} /></button>
-                                <button className="p-2 bg-white dark:bg-[#1e293b] rounded-lg shadow-sm hover:text-indigo-500 transition"><ShareNetwork size={18} /></button>
-                                <button className="p-2 bg-white dark:bg-[#1e293b] rounded-lg shadow-sm hover:text-indigo-500 transition"><DownloadSimple size={18} /></button>
+                                <button className="p-2 bg-[var(--color-surface)] rounded-lg shadow-sm hover:text-indigo-500 transition"><Eye size={18} /></button>
+                                <button className="p-2 bg-[var(--color-surface)] rounded-lg shadow-sm hover:text-indigo-500 transition"><ShareNetwork size={18} /></button>
+                                <button className="p-2 bg-[var(--color-surface)] rounded-lg shadow-sm hover:text-indigo-500 transition"><DownloadSimple size={18} /></button>
                             </div>
                         </div>
                         

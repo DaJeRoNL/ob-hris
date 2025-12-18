@@ -75,16 +75,16 @@ Admin`;
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[120] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-5xl h-[85vh] rounded-2xl shadow-2xl border border-white/10 flex overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-5xl h-[85vh] rounded-2xl shadow-2xl border border-white/10 flex overflow-hidden" onClick={e => e.stopPropagation()}>
                 {/* Sidebar */}
-                <div className="w-1/3 border-r border-gray-200 dark:border-white/10 flex flex-col bg-gray-50/50 dark:bg-[#111827]/50">
+                <div className="w-1/3 border-r border-gray-200 dark:border-white/10 flex flex-col bg-gray-50/50 dark:bg-[var(--color-surface)]/50">
                     <div className="p-5 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
                         <div><h2 className="text-lg font-bold font-['Montserrat']">Requisitions</h2></div>
                         <button onClick={createNewReq} className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"><Plus weight="bold" /></button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                         {requisitions.map(req => (
-                            <div key={req.id} onClick={() => setSelectedReqId(req.id)} className={`p-3 rounded-xl border cursor-pointer group relative transition-all ${selectedReqId === req.id ? 'bg-white dark:bg-[#1e293b] border-indigo-500 shadow-md' : 'border-transparent hover:bg-white/50 dark:hover:bg-white/5'}`}>
+                            <div key={req.id} onClick={() => setSelectedReqId(req.id)} className={`p-3 rounded-xl border cursor-pointer group relative transition-all ${selectedReqId === req.id ? 'bg-[var(--color-surface)] border-indigo-500 shadow-md' : 'border-transparent hover:bg-[var(--color-surface)]/500 dark:hover:bg-[var(--color-surface)]/50'}`}>
                                 <div className="flex justify-between font-bold text-sm"><span>{req.title}</span>{req.status === 'Sent' && <CheckCircle className="text-emerald-500" weight="fill" />}</div>
                                 <div className="text-xs opacity-60">{req.id} • {req.department}</div>
                                 <button onClick={(e) => deleteReq(req.id, e)} className="absolute right-2 bottom-2 p-1.5 text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition"><Trash weight="bold" /></button>
@@ -94,7 +94,7 @@ Admin`;
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col bg-white dark:bg-[#1e293b]">
+                <div className="flex-1 flex flex-col bg-[var(--color-surface)]">
                     {selectedReq ? (<>
                         <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-start bg-gray-50/30 dark:bg-white/[0.02]">
                             <div>
@@ -111,7 +111,7 @@ Admin`;
                             <button onClick={() => setActiveTab('email')} className={`py-3 px-4 text-xs font-bold uppercase border-b-2 transition-colors ${activeTab === 'email' ? 'border-indigo-500 text-indigo-500' : 'border-transparent opacity-50 hover:opacity-100'}`}>Email Draft</button>
                         </div>
 
-                        <div className="flex-1 p-8 overflow-y-auto bg-gray-50/30 dark:bg-[#0f172a]/30">
+                        <div className="flex-1 p-8 overflow-y-auto bg-gray-50/30 dark:bg-[var(--color-surface)]/30">
                             {activeTab === 'details' ? (
                                 <div className="space-y-6 max-w-2xl animate-fade-in">
                                     <div className="grid grid-cols-2 gap-6">
@@ -122,7 +122,7 @@ Admin`;
                                 </div>
                             ) : (
                                 <div className="h-full flex flex-col animate-fade-in max-w-3xl mx-auto w-full">
-                                    <div className="bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden mb-4">
+                                    <div className="bg-[var(--color-surface)] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden mb-4">
                                         <div className="flex items-center border-b border-gray-100 dark:border-white/5 px-4 py-3">
                                             <span className="text-gray-400 font-bold text-xs w-16 uppercase tracking-wider">To</span>
                                             <input className="flex-1 bg-transparent border-none outline-none text-sm font-medium text-indigo-600 dark:text-indigo-400" value={selectedReq.emailTo} onChange={e => updateReq(selectedReq.id, {emailTo:e.target.value})} />
@@ -135,7 +135,7 @@ Admin`;
                                     
                                     <div className="flex-1 relative">
                                         <textarea 
-                                            className="w-full h-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl p-6 text-sm font-mono leading-relaxed outline-none resize-none focus:ring-2 ring-indigo-500/20 transition shadow-sm" 
+                                            className="w-full h-full bg-[var(--color-surface)] border border-gray-200 dark:border-white/10 rounded-xl p-6 text-sm font-mono leading-relaxed outline-none resize-none focus:ring-2 ring-indigo-500/20 transition shadow-sm" 
                                             value={selectedReq.emailBody} 
                                             onChange={e => updateReq(selectedReq.id, {emailBody:e.target.value})} 
                                             placeholder="Write your email..."

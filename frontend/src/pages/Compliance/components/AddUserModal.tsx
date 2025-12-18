@@ -32,9 +32,9 @@ export default function AddUserModal({ onClose, onAdd }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
                 
-                <div className="p-5 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 flex justify-between items-center">
+                <div className="p-5 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-[var(--color-surface)]/50 flex justify-between items-center">
                     <h2 className="text-lg font-bold font-['Montserrat'] flex items-center gap-2">
                         <UserPlus className="text-indigo-500" /> Add to Compliance
                     </h2>
@@ -61,7 +61,7 @@ export default function AddUserModal({ onClose, onAdd }: Props) {
                             className={`p-3 rounded-xl flex items-center justify-between cursor-pointer transition border ${
                                 selectedId === p.id 
                                 ? 'bg-indigo-500/10 border-indigo-500 text-indigo-600 dark:text-indigo-400' 
-                                : 'border-transparent hover:bg-gray-100 dark:hover:bg-white/5'
+                                : 'border-transparent hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50'
                             }`}
                         >
                             <div className="flex items-center gap-3">

@@ -18,10 +18,10 @@ export default function UserDistributionModal({ type, people, onClose, onSelectC
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-sm rounded-2xl shadow-2xl p-0 border border-white/10 overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-sm rounded-2xl shadow-2xl p-0 border border-white/10 overflow-hidden" onClick={e => e.stopPropagation()}>
                 
                 {/* Header */}
-                <div className="p-5 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
+                <div className="p-5 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-[var(--color-surface)]/50">
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg ${type === 'Remote' ? 'bg-blue-500' : 'bg-indigo-500'}`}>
                             <Users size={20} weight="duotone" />

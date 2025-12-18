@@ -34,7 +34,7 @@ export default function StatsOverview({ stats, onOpenDistribution, onOpenPending
             <div className="grid grid-cols-2 gap-3">
                 <div 
                     onClick={() => onOpenDistribution('Hybrid')}
-                    className="bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/10 cursor-pointer transition text-center group relative overflow-hidden"
+                    className="bg-gray-50 dark:bg-[var(--color-surface)]/50 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-indigo-500/50 hover:bg-indigo-500/10 cursor-pointer transition text-center group relative overflow-hidden"
                 >
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <CaretRight size={12} className="text-indigo-500" />
@@ -46,7 +46,7 @@ export default function StatsOverview({ stats, onOpenDistribution, onOpenPending
 
                 <div 
                     onClick={() => onOpenDistribution('Remote')}
-                    className="bg-gray-50 dark:bg-white/5 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-blue-500/10 cursor-pointer transition text-center group relative overflow-hidden"
+                    className="bg-gray-50 dark:bg-[var(--color-surface)]/50 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-blue-500/10 cursor-pointer transition text-center group relative overflow-hidden"
                 >
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <CaretRight size={12} className="text-blue-500" />

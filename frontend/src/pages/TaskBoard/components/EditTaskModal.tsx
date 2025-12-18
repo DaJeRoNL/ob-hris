@@ -176,7 +176,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
                 
                 {/* --- PURPLE ACTION BUTTON (The "Idea") --- */}
                 <div 
@@ -190,7 +190,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
                     {showLinkMenu && (
                         <div 
-                            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-white dark:bg-[#0f172a] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-2 w-48 animate-fade-in-right origin-left"
+                            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-white dark:bg-[var(--color-surface)] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-2 w-48 animate-fade-in-right origin-left"
                             onMouseEnter={handleLinkEnter} // Keep open if moving to menu
                             onMouseLeave={handleLinkLeave}
                         >
@@ -205,7 +205,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                             
                             <button 
                                 onClick={() => setShowExistingSelector(true)}
-                                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-xs font-bold transition flex items-center gap-2"
+                                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50 rounded-lg text-xs font-bold transition flex items-center gap-2"
                             >
                                 <LinkIcon weight="bold" /> Select Existing
                             </button>
@@ -218,7 +218,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                                         <button 
                                             key={t.id}
                                             onClick={() => addLink(t.id)}
-                                            className="w-full text-left px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-white/5 rounded text-[10px] font-medium truncate transition"
+                                            className="w-full text-left px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50 rounded text-[10px] font-medium truncate transition"
                                         >
                                             {t.title}
                                         </button>
@@ -229,7 +229,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     )}
                 </div>
 
-                <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
+                <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-[var(--color-surface)]/50">
                     <h2 className="text-lg font-bold font-['Montserrat']">{task ? 'Edit Task' : 'New Ticket'}</h2>
                     <button onClick={onClose}><X size={20} /></button>
                 </div>
@@ -269,13 +269,13 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                                     <button onClick={() => toggleTag(tag)} className="hover:text-red-500"><X weight="bold" /></button>
                                 </span>
                             ))}
-                            <button onClick={() => setShowTagMenu(!showTagMenu)} className="bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition">
+                            <button onClick={() => setShowTagMenu(!showTagMenu)} className="bg-gray-100 dark:bg-[var(--color-surface)]/50 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition">
                                 <Plus weight="bold" /> Add Tag
                             </button>
                         </div>
                         
                         {showTagMenu && (
-                            <div className="bg-white dark:bg-[#0f172a] border border-gray-200 dark:border-white/10 rounded-xl p-3 shadow-lg mb-4 animate-fade-in-down">
+                            <div className="bg-white dark:bg-[var(--color-surface)] border border-gray-200 dark:border-white/10 rounded-xl p-3 shadow-lg mb-4 animate-fade-in-down">
                                 <div className="flex gap-2 mb-2">
                                     <input 
                                         className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1 text-xs outline-none" 
@@ -331,7 +331,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                         <div className="bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-dashed border-gray-300 dark:border-white/10 mb-3">
                             <div className="flex gap-2 mb-2">
                                 <input 
-                                    className="flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none" 
+                                    className="flex-1 bg-white dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none" 
                                     placeholder="New subtask title..." 
                                     value={newSubtaskTitle}
                                     onChange={e => setNewSubtaskTitle(e.target.value)}
@@ -342,7 +342,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                             </div>
                             {showSubtaskDescInput && (
                                 <input 
-                                    className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none animate-fade-in" 
+                                    className="w-full bg-white dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none animate-fade-in" 
                                     placeholder="Optional short description..." 
                                     value={newSubtaskDesc}
                                     onChange={e => setNewSubtaskDesc(e.target.value)}
@@ -353,7 +353,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
                         <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
                             {form.subtasks.map((s, idx) => (
-                                <div key={s.id} className="flex flex-col gap-1 p-2 border border-gray-100 dark:border-white/5 rounded-lg group bg-white dark:bg-[#1e293b]">
+                                <div key={s.id} className="flex flex-col gap-1 p-2 border border-gray-100 dark:border-white/5 rounded-lg group bg-[var(--color-surface)]">
                                     <div className="flex items-center gap-2">
                                         <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button onClick={() => moveSubtask(idx, 'up')} disabled={idx === 0} className="hover:text-indigo-500 disabled:opacity-30"><CaretUp size={12} weight="bold" /></button>
@@ -378,7 +378,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                 </div>
 
                 <div className="p-4 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3 bg-gray-50/50 dark:bg-black/20">
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl font-bold text-sm hover:bg-black/5 dark:hover:bg-white/5 transition">Cancel</button>
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl font-bold text-sm hover:bg-black/5 dark:hover:bg-[var(--color-surface)]/50 transition">Cancel</button>
                     <button onClick={handleSave} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg">Save Task</button>
                 </div>
             </div>

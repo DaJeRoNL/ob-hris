@@ -134,15 +134,15 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                 onWheel={handleWheel}
                 className={`
                     fixed bottom-0 right-0 z-40 
-                    bg-[#f8fafc] dark:bg-[#0f172a] border-t-2 border-indigo-500/30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]
+                    bg-[var(--color-bg)] dark:bg-[var(--color-surface)] border-t-2 border-indigo-500/30 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.5)]
                     transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) flex flex-col
-                    ${isOpen ? 'h-[650px] rounded-tl-[32px]' : 'h-14 cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1e293b] rounded-tl-none'}
+                    ${isOpen ? 'h-[650px] rounded-tl-[32px]' : 'h-14 cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--color-surface)] rounded-tl-none'}
                 `}
                 style={{ left: '80px' }} 
                 onClick={() => !isOpen && setIsOpen(true)}
             >
                 {/* --- HEADER --- */}
-                <div className={`w-full h-14 flex items-center justify-between px-8 shrink-0 relative z-20 bg-white/50 dark:bg-white/5 backdrop-blur-sm border-b border-gray-200 dark:border-white/5 ${isOpen ? 'rounded-tl-[32px]' : ''}`}>
+                <div className={`w-full h-14 flex items-center justify-between px-8 shrink-0 relative z-20 bg-[var(--color-surface)]/500 dark:bg-[var(--color-surface)]/50 backdrop-blur-sm border-b border-gray-200 dark:border-white/5 ${isOpen ? 'rounded-tl-[32px]' : ''}`}>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                             <TreeStructure weight="duotone" className="text-indigo-500" size={20} />
@@ -185,7 +185,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                 <span className="text-xs font-bold opacity-60">
                                     {task.title}
                                 </span>
-                                <div className="flex items-center gap-1.5 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full border border-black/5 dark:border-white/5" title={isCritical ? "Critical Status" : "Stable"}>
+                                <div className="flex items-center gap-1.5 bg-black/5 dark:bg-[var(--color-surface)]/50 px-2 py-0.5 rounded-full border border-black/5 dark:border-white/5" title={isCritical ? "Critical Status" : "Stable"}>
                                     <Pulse weight="fill" className={`${healthColor} ${isCritical ? 'animate-pulse' : ''}`} size={12} />
                                     <span className="text-[10px] font-mono opacity-60 uppercase">{isCritical ? 'CRIT' : isUrgent ? 'WARN' : 'GOOD'}</span>
                                 </div>
@@ -210,7 +210,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                 <div className={`flex-1 overflow-hidden p-0 transition-opacity duration-300 relative flex ${isOpen ? 'opacity-100 delay-100' : 'opacity-0 pointer-events-none'}`}>
                     
                     {/* 1. STICKY MAIN CARD (Left) */}
-                    <div className="w-[420px] shrink-0 border-r border-gray-200 dark:border-white/5 flex flex-col bg-white dark:bg-[#111827] shadow-xl z-20">
+                    <div className="w-[420px] shrink-0 border-r border-gray-200 dark:border-white/5 flex flex-col bg-white dark:bg-[var(--color-surface)] shadow-xl z-20">
                         {/* Purple Section (Details) */}
                         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-6 text-white shrink-0 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
@@ -235,7 +235,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                         </div>
 
                         {/* Grey Section (Desc & Notes) */}
-                        <div className="flex-1 bg-gray-50 dark:bg-[#0f172a] flex flex-col overflow-hidden">
+                        <div className="flex-1 bg-gray-50 dark:bg-[var(--color-surface)] flex flex-col overflow-hidden">
                             <div className="p-6 border-b border-gray-200 dark:border-white/5 shrink-0 max-h-[150px] overflow-y-auto custom-scrollbar">
                                 <h4 className="text-[10px] uppercase font-bold opacity-40 mb-2">Description</h4>
                                 <p className="text-sm opacity-80 leading-relaxed whitespace-pre-wrap">{task.desc || "No description provided."}</p>
@@ -248,7 +248,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                 <div className="flex-1 overflow-y-auto px-4 space-y-3 custom-scrollbar">
                                     {(task.notes || []).length === 0 && <div className="text-center text-xs opacity-30 mt-4">No notes yet.</div>}
                                     {task.notes?.map(note => (
-                                        <div key={note.id} className="bg-white dark:bg-white/5 p-3 rounded-lg border border-gray-100 dark:border-white/5">
+                                        <div key={note.id} className="bg-white dark:bg-[var(--color-surface)]/50 p-3 rounded-lg border border-gray-100 dark:border-white/5">
                                             <div className="flex justify-between items-baseline mb-1">
                                                 <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">{note.user}</span>
                                                 <span className="text-[9px] opacity-40">{note.timestamp}</span>
@@ -257,7 +257,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                         </div>
                                     ))}
                                 </div>
-                                <div className="p-4 border-t border-gray-200 dark:border-white/5 bg-white dark:bg-[#111827]">
+                                <div className="p-4 border-t border-gray-200 dark:border-white/5 bg-white dark:bg-[var(--color-surface)]">
                                     <div className="flex gap-2">
                                         <input 
                                             value={noteInput} 
@@ -285,12 +285,12 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                             
                             {/* Start Node */}
                             <div className="flex flex-col items-center justify-center opacity-40">
-                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 dark:border-white/30 flex items-center justify-center mb-2 bg-gray-100 dark:bg-white/5">
+                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-400 dark:border-white/30 flex items-center justify-center mb-2 bg-gray-100 dark:bg-[var(--color-surface)]/50">
                                     <span className="text-[10px] font-bold">START</span>
                                 </div>
                             </div>
 
-                            <ArrowRight className="text-gray-300 dark:text-white/20" weight="bold" size={24} />
+                            <ArrowRight className="text-gray-300 /20" weight="bold" size={24} />
 
                             {task.subtasks?.map((sub: Subtask, idx: number) => {
                                 const isNext = !sub.isCompleted && (idx === 0 || task.subtasks[idx-1].isCompleted);
@@ -308,8 +308,8 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                             ${sub.isCompleted 
                                                 ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500/30 opacity-70 grayscale-[0.5] hover:grayscale-0' 
                                                 : isNext 
-                                                    ? 'bg-white dark:bg-[#1e293b] border-indigo-500 ring-4 ring-indigo-500/10 scale-105 z-10 shadow-2xl' 
-                                                    : 'bg-white dark:bg-[#1e293b] border-gray-200 dark:border-white/10 opacity-90'}
+                                                    ? 'bg-[var(--color-surface)] border-indigo-500 ring-4 ring-indigo-500/10 scale-105 z-10 shadow-2xl' 
+                                                    : 'bg-[var(--color-surface)] border-gray-200 dark:border-white/10 opacity-90'}
                                         `}>
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="flex items-center gap-2">
@@ -349,7 +349,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                                 ) : (
                                                     <button 
                                                         onClick={() => onPickUpSubtask(task.id, sub.id)}
-                                                        className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 hover:text-indigo-500 bg-gray-100 dark:bg-white/5 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg transition"
+                                                        className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 hover:text-indigo-500 bg-gray-100 dark:bg-[var(--color-surface)]/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg transition"
                                                     >
                                                         <UserPlus weight="bold" /> Pick Up
                                                     </button>
@@ -358,7 +358,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                         </div>
 
                                         {idx < (task.subtasks.length || 0) && (
-                                            <ArrowRight className="text-gray-300 dark:text-white/20" weight="bold" size={24} />
+                                            <ArrowRight className="text-gray-300 /20" weight="bold" size={24} />
                                         )}
                                     </div>
                                 );
@@ -377,13 +377,13 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                     </button>
                                     
                                     {showCompleteMenu && (
-                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 bg-white dark:bg-[#1e293b] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-2 z-50 animate-fade-in-up">
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 bg-[var(--color-surface)] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-2 z-50 animate-fade-in-up">
                                             <div className="text-[10px] uppercase font-bold opacity-50 px-2 py-1 mb-1">Move to...</div>
                                             {['Review', 'Done'].map(col => (
                                                 <button 
                                                     key={col} 
                                                     onClick={() => { onMoveTask(task.id, col); setIsOpen(false); }}
-                                                    className="w-full text-left px-3 py-2 hover:bg-indigo-50 dark:hover:bg-white/5 rounded-lg text-xs font-bold transition flex items-center justify-between group/item"
+                                                    className="w-full text-left px-3 py-2 hover:bg-indigo-50 dark:hover:bg-[var(--color-surface)]/50 rounded-lg text-xs font-bold transition flex items-center justify-between group/item"
                                                 >
                                                     {col} <ArrowRight className="opacity-0 group-hover/item:opacity-100 transition-opacity" />
                                                 </button>
@@ -393,7 +393,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center opacity-30">
-                                    <div className="w-14 h-14 rounded-full border-4 border-double border-current flex items-center justify-center mb-2 bg-white dark:bg-[#0f172a] shadow-lg">
+                                    <div className="w-14 h-14 rounded-full border-4 border-double border-current flex items-center justify-center mb-2 bg-white dark:bg-[var(--color-surface)] shadow-lg">
                                         <ShieldCheck size={24} weight="fill" />
                                     </div>
                                     <span className="text-[10px] font-bold uppercase tracking-wider">Complete</span>
@@ -422,7 +422,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                             {upstreamTasks.map(upTask => {
                                                 const isComplete = upTask.status === 'Done';
                                                 return (
-                                                    <div key={upTask.id} className={`p-4 rounded-xl border-2 ${isComplete ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500/30' : 'bg-white dark:bg-[#1e293b] border-orange-200 dark:border-orange-500/20'}`}>
+                                                    <div key={upTask.id} className={`p-4 rounded-xl border-2 ${isComplete ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500/30' : 'bg-[var(--color-surface)] border-orange-200 dark:border-orange-500/20'}`}>
                                                         <div className="flex justify-between items-start mb-2">
                                                             <div className="flex items-center gap-2">
                                                                 {isComplete ? (
@@ -463,7 +463,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                             {downstreamTasks.map((downTask: Task) => {
                                                 const isBlocked = task.status !== 'Done';
                                                 return (
-                                                    <div key={downTask.id} className={`p-4 rounded-xl border-2 ${isBlocked ? 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-500/20' : 'bg-white dark:bg-[#1e293b] border-gray-200 dark:border-white/10'}`}>
+                                                    <div key={downTask.id} className={`p-4 rounded-xl border-2 ${isBlocked ? 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-500/20' : 'bg-[var(--color-surface)] border-gray-200 dark:border-white/10'}`}>
                                                         <div className="flex justify-between items-start mb-2">
                                                             <div className="flex items-center gap-2">
                                                                 {isBlocked ? (
@@ -500,7 +500,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     )}
 
                     {/* --- FOOTER --- */}
-                    <div className="absolute bottom-0 right-0 left-[420px] bg-white/80 dark:bg-[#0f172a]/90 backdrop-blur-md border-t border-gray-200 dark:border-white/10 px-8 py-3 flex justify-between items-center text-xs opacity-70 z-30">
+                    <div className="absolute bottom-0 right-0 left-[420px] bg-white/80 dark:bg-[var(--color-surface)]/90 backdrop-blur-md border-t border-gray-200 dark:border-white/10 px-8 py-3 flex justify-between items-center text-xs opacity-70 z-30">
                         <div className="flex gap-6">
                             <div className="flex items-center gap-2">
                                 <User weight="bold" className="text-indigo-500" />

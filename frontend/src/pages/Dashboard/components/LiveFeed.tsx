@@ -36,10 +36,10 @@ export default function LiveFeed({ feed }: { feed: ActivityItem[] }) {
                 {displayedFeed.map((item, idx) => (
                     <div 
                         key={item.id} 
-                        className="flex gap-4 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition duration-200 border border-transparent hover:border-gray-200 dark:hover:border-white/5 cursor-default group animate-fade-in"
+                        className="flex gap-4 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-[var(--color-surface)]/50 transition duration-200 border border-transparent hover:border-gray-200 dark:hover:border-white/5 cursor-default group animate-fade-in"
                         style={{ animationDelay: `${idx * 50}ms` }}
                     >
-                        <div className="mt-1 p-2 rounded-lg bg-gray-100 dark:bg-white/5 shadow-sm h-fit shrink-0 relative">
+                        <div className="mt-1 p-2 rounded-lg bg-gray-100 dark:bg-[var(--color-surface)]/50 shadow-sm h-fit shrink-0 relative">
                             {item.priority === 'high' && <div className="absolute top-0 right-0 -mt-1 -mr-1 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#1e293b]"></div>}
                             {getIcon(item.category)}
                         </div>
@@ -59,7 +59,7 @@ export default function LiveFeed({ feed }: { feed: ActivityItem[] }) {
             {feed.length > 4 && (
                 <button 
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-4 w-full py-2 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-gray-200 dark:border-white/5"
+                    className="mt-4 w-full py-2 bg-gray-50 dark:bg-[var(--color-surface)]/50 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-gray-200 dark:border-white/5"
                 >
                     {isExpanded ? <>Show Less <CaretUp weight="bold" /></> : <>Expand Feed <CaretDown weight="bold" /></>}
                 </button>

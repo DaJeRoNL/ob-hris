@@ -19,7 +19,7 @@ export default function PolicyModal({ country, onClose }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-4xl rounded-3xl shadow-2xl p-0 border border-white/10 overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-4xl rounded-3xl shadow-2xl p-0 border border-white/10 overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
                 
                 <div className="bg-gradient-to-r from-indigo-900 to-[#0f172a] p-10 text-white relative overflow-hidden shrink-0">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
@@ -37,7 +37,7 @@ export default function PolicyModal({ country, onClose }: Props) {
                                 <h2 className="text-4xl font-bold font-['Montserrat'] tracking-tight mb-2">{country}</h2>
                                 <div className="flex items-center gap-3 opacity-90">
                                     <span className="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30 uppercase tracking-wider">Active Region</span>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-white/50"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-surface)]/500"></span>
                                     <span className="text-sm font-mono opacity-80">Policy Framework v2.4</span>
                                 </div>
                             </div>
@@ -46,12 +46,12 @@ export default function PolicyModal({ country, onClose }: Props) {
                     </div>
                 </div>
                 
-                <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10 bg-gray-50/50 dark:bg-[#0f172a]/30 flex-1 overflow-y-auto">
+                <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-10 bg-gray-50/50 dark:bg-[var(--color-surface)]/30 flex-1 overflow-y-auto">
                     <div className="space-y-8">
                         <div>
                             <h3 className="text-xs font-bold uppercase opacity-50 tracking-widest mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Regulatory Framework</h3>
                             <div className="space-y-4">
-                                <div className="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm hover:border-indigo-500/30 transition group">
+                                <div className="bg-[var(--color-surface)] p-5 rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm hover:border-indigo-500/30 transition group">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl group-hover:bg-blue-500 group-hover:text-white transition"><Bank size={24} weight="duotone" /></div>
                                         <div>
@@ -60,7 +60,7 @@ export default function PolicyModal({ country, onClose }: Props) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-white dark:bg-[#1e293b] p-5 rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm hover:border-indigo-500/30 transition group">
+                                <div className="bg-[var(--color-surface)] p-5 rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm hover:border-indigo-500/30 transition group">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-purple-500/10 text-purple-500 rounded-xl group-hover:bg-purple-500 group-hover:text-white transition"><Briefcase size={24} weight="duotone" /></div>
                                         <div>
@@ -80,12 +80,12 @@ export default function PolicyModal({ country, onClose }: Props) {
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                  <div className="p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-center">
                                      <div className="text-emerald-500 mb-3 flex justify-center"><ShieldCheck size={32} weight="fill" /></div>
-                                     <div className="text-2xl font-bold dark:text-white mb-1">Active</div>
+                                     <div className="text-2xl font-bold  mb-1">Active</div>
                                      <div className="text-[10px] uppercase font-bold opacity-50">Legal Entity</div>
                                  </div>
                                  <div className="p-5 bg-blue-500/5 border border-blue-500/10 rounded-2xl text-center">
                                      <div className="text-blue-500 mb-3 flex justify-center"><Scroll size={32} weight="fill" /></div>
-                                     <div className="text-2xl font-bold dark:text-white mb-1">GDPR</div>
+                                     <div className="text-2xl font-bold  mb-1">GDPR</div>
                                      <div className="text-[10px] uppercase font-bold opacity-50">Data Privacy</div>
                                  </div>
                             </div>
@@ -94,7 +94,7 @@ export default function PolicyModal({ country, onClose }: Props) {
                             <div className="mb-4">
                                 <button 
                                     onClick={() => setShowEntities(!showEntities)}
-                                    className="w-full py-3 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl flex justify-between items-center px-4 hover:bg-gray-50 dark:hover:bg-white/5 transition group"
+                                    className="w-full py-3 bg-[var(--color-surface)] border border-gray-200 dark:border-white/10 rounded-xl flex justify-between items-center px-4 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50 transition group"
                                 >
                                     <div className="flex items-center gap-3">
                                         <Buildings className="text-indigo-500" size={20} />
@@ -107,7 +107,7 @@ export default function PolicyModal({ country, onClose }: Props) {
                                     <div className="mt-2 space-y-2 animate-fade-in-down">
                                         {entities.map(ent => (
                                             <div key={ent.id} className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-lg flex justify-between items-center ml-2 border-l-4 border-l-indigo-500">
-                                                <span className="text-xs font-bold dark:text-white">{ent.name}</span>
+                                                <span className="text-xs font-bold ">{ent.name}</span>
                                                 <span className="text-[10px] font-mono opacity-50">{ent.id}</span>
                                             </div>
                                         ))}

@@ -32,7 +32,7 @@ export default function People() {
             <input 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 backdrop-blur-sm focus:bg-white dark:focus:bg-[#1e293b] focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" 
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--color-surface)]/500 dark:bg-black/20 border border-gray-200 dark:border-white/10 backdrop-blur-sm focus:bg-white dark:focus:bg-[var(--color-surface)] focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" 
               placeholder="Search by name or role..." 
             />
           </div>
@@ -40,7 +40,7 @@ export default function People() {
           {/* Controls */}
           <div className="flex gap-2">
             <select 
-              className="bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="bg-[var(--color-surface)]/500 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               onChange={(e) => setFilterLoc(e.target.value)}
             >
               <option value="">Global (All)</option>
@@ -49,7 +49,7 @@ export default function People() {
               <option value="Philippines">Remote (PH)</option>
             </select>
             
-            <div className="flex bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-1">
+            <div className="flex bg-[var(--color-surface)]/500 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-1">
                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition ${viewMode === 'grid' ? 'bg-indigo-500 text-white shadow-md' : 'opacity-50 hover:opacity-100'}`}><SquaresFour weight="fill" /></button>
                 <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition ${viewMode === 'list' ? 'bg-indigo-500 text-white shadow-md' : 'opacity-50 hover:opacity-100'}`}><List weight="bold" /></button>
             </div>
@@ -64,7 +64,7 @@ export default function People() {
                 <div key={p.id} className="glass-card group relative overflow-hidden hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 border border-white/10">
                     <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-indigo-500/20 to-purple-500/20"></div>
                     <div className="relative p-6 pt-12 flex flex-col items-center text-center">
-                        <div className="w-20 h-20 rounded-full bg-white dark:bg-[#1e293b] p-1 shadow-xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-20 h-20 rounded-full bg-[var(--color-surface)] p-1 shadow-xl mb-4 group-hover:scale-110 transition-transform duration-300">
                             <div className="w-full h-full rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-2xl font-bold text-white">
                                 {p.name.charAt(0)}
                             </div>
@@ -73,8 +73,8 @@ export default function People() {
                         <p className="text-sm opacity-60 mb-4">{p.role}</p>
                         
                         <div className="flex gap-2 mb-6">
-                            <button className="p-2 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-indigo-500 hover:text-white transition"><EnvelopeSimple weight="bold" /></button>
-                            <button className="p-2 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-emerald-500 hover:text-white transition"><Phone weight="bold" /></button>
+                            <button className="p-2 rounded-full bg-gray-100 dark:bg-[var(--color-surface)]/50 hover:bg-indigo-500 hover:text-white transition"><EnvelopeSimple weight="bold" /></button>
+                            <button className="p-2 rounded-full bg-gray-100 dark:bg-[var(--color-surface)]/50 hover:bg-emerald-500 hover:text-white transition"><Phone weight="bold" /></button>
                         </div>
 
                         <div className="w-full border-t border-gray-200 dark:border-white/10 pt-4 flex justify-between items-center text-xs font-bold opacity-70">
@@ -90,7 +90,7 @@ export default function People() {
         <div className="glass-card !p-0 overflow-hidden flex-1">
             <div className="overflow-y-auto h-full custom-scrollbar">
                 <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50/50 dark:bg-white/5 sticky top-0 backdrop-blur-md z-10">
+                    <thead className="bg-gray-50/50 dark:bg-[var(--color-surface)]/50 sticky top-0 backdrop-blur-md z-10">
                         <tr className="text-xs font-bold uppercase opacity-50 border-b border-gray-200 dark:border-white/10">
                             <th className="p-4 pl-6">Employee</th>
                             <th className="p-4">Role & Dept</th>
@@ -101,7 +101,7 @@ export default function People() {
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-sm">
                         {people.map(p => (
-                            <tr key={p.id} className="group hover:bg-indigo-50/30 dark:hover:bg-white/5 transition-colors">
+                            <tr key={p.id} className="group hover:bg-indigo-50/30 dark:hover:bg-[var(--color-surface)]/50 transition-colors">
                                 <td className="p-4 pl-6 flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-xs">{p.name.charAt(0)}</div>
                                     <span className="font-bold">{p.name}</span>

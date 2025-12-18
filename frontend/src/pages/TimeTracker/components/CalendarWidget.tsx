@@ -86,7 +86,7 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
         const isSelectedWeek = week.days.some((d: Date) => getLocalDateStr(d) === selectedDateStr);
         return (
             <div key={wIdx} className={`grid grid-cols-8 gap-1 items-center p-1 rounded-xl transition-colors duration-300 ${isSelectedWeek ? 'bg-indigo-500/10 dark:bg-indigo-500/5' : ''}`}>
-                <div className={`text-center text-[10px] font-mono font-bold transition-all duration-300 ${isSelectedWeek ? 'text-indigo-600 dark:text-white opacity-100 scale-110' : 'opacity-30'}`}>{week.weekNum}</div>
+                <div className={`text-center text-[10px] font-mono font-bold transition-all duration-300 ${isSelectedWeek ? 'text-indigo-600  opacity-100 scale-110' : 'opacity-30'}`}>{week.weekNum}</div>
                 {week.days.map((date: Date, dIdx: number) => {
                     const status = getDayStatus(date);
                     const isSelected = getLocalDateStr(date) === selectedDateStr;
@@ -116,7 +116,7 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
 
                     return (
                         <div key={dIdx} onClick={() => onDateSelect(date)} className={`group relative h-12 flex items-center justify-center text-sm font-semibold cursor-pointer transition overflow-visible ${groupingClasses} ${bgClass} ${!isSelected && !status.leaveDetails && !bgClass ? 'hover:bg-gray-500/5' : ''} ${status.isPast ? 'opacity-50' : 'opacity-100'} ${status.isToday ? 'ring-1 ring-indigo-500/50' : ''}`}>
-                            <span className={`relative z-0 ${isSelected ? 'text-indigo-600 dark:text-white font-bold' : ''}`}>{date.getDate()}</span>
+                            <span className={`relative z-0 ${isSelected ? 'text-indigo-600  font-bold' : ''}`}>{date.getDate()}</span>
                             <div className="absolute top-1 left-1 flex gap-0.5 z-10">
                                 {status.isActive && <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>}
                                 {status.hasEntries && !status.isActive && !status.isCompleteDay && <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>}

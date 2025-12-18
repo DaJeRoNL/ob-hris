@@ -363,7 +363,7 @@ const Hiring: React.FC = () => {
             </div>
             
             <div className="flex gap-3">
-                <button onClick={() => setShowAddCandidateModal(true)} className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-[#1e293b] text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl font-bold transition hover:bg-indigo-50 dark:hover:bg-indigo-500/10 whitespace-nowrap"><UserPlus weight="bold" size={18} /> <span>Add Candidate</span></button>
+                <button onClick={() => setShowAddCandidateModal(true)} className="flex items-center gap-2 px-4 py-3 bg-[var(--color-surface)] text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl font-bold transition hover:bg-indigo-50 dark:hover:bg-indigo-500/10 whitespace-nowrap"><UserPlus weight="bold" size={18} /> <span>Add Candidate</span></button>
                 <button onClick={() => setShowRequisitions(true)} className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 group whitespace-nowrap"><Files weight="bold" size={18} /> <span>Requisitions</span></button>
             </div>
         </div>
@@ -371,12 +371,12 @@ const Hiring: React.FC = () => {
         <div className="flex gap-4">
             <div className="relative flex-1 max-w-md group flex items-center">
                 <MagnifyingGlass size={18} className="absolute left-3 text-gray-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none z-10" weight="bold" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 transition backdrop-blur-sm shadow-sm" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full bg-[var(--color-surface)]/500 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 transition backdrop-blur-sm shadow-sm" />
             </div>
             
             <button 
                 onClick={() => setShowFilters(!showFilters)} 
-                className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${selectedTags.length > 0 ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}
+                className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${selectedTags.length > 0 ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' : 'bg-[var(--color-surface)]/500 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-[var(--color-surface)]/50'}`}
             >
                 <Funnel weight="bold" /> Filter
                 {selectedTags.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-500"></span>}
@@ -385,7 +385,7 @@ const Hiring: React.FC = () => {
             {showFilters && (
                 <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar items-center mask-fade-right animate-fade-in-right">
                     {allTags.map(tag => (
-                        <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition whitespace-nowrap ${selectedTags.includes(tag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-white/5 border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10'}`}>
+                        <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition whitespace-nowrap ${selectedTags.includes(tag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-[var(--color-surface)]/500 dark:bg-[var(--color-surface)]/50 border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10'}`}>
                             {tag}
                         </button>
                     ))}
@@ -393,9 +393,9 @@ const Hiring: React.FC = () => {
             )}
 
             <div className="relative ml-auto" onMouseEnter={handleHistoryEnter} onMouseLeave={handleHistoryLeave}>
-                <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/50 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/5'}`}><ClockCounterClockwise weight="bold" /> History</button>
+                <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-[var(--color-surface)]/500 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-[var(--color-surface)]/50'}`}><ClockCounterClockwise weight="bold" /> History</button>
                 {showHistory && (
-                    <div className="absolute top-full right-0 mt-2 w-96 bg-white dark:bg-[#1e293b] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up">
+                    <div className="absolute top-full right-0 mt-2 w-96 bg-[var(--color-surface)] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up">
                         <h4 className="text-xs font-bold uppercase opacity-50 mb-3">Activity Log</h4>
                         <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
                             {logs.map(log => (
@@ -414,8 +414,8 @@ const Hiring: React.FC = () => {
       {/* Board */}
       <div className="flex-1 relative overflow-hidden group/board">
           {/* UPDATED SCROLL BUTTONS (Consistent with TaskBoard) */}
-          {scrollState.canLeft && <button onClick={() => scrollBoard('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-r-2xl shadow-xl hover:pl-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretLeft weight="bold" size={24} /></button>}
-          {scrollState.canRight && <button onClick={() => scrollBoard('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-l-2xl shadow-xl hover:pr-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretRight weight="bold" size={24} /></button>}
+          {scrollState.canLeft && <button onClick={() => scrollBoard('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-r-2xl shadow-xl hover:pl-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretLeft weight="bold" size={24} /></button>}
+          {scrollState.canRight && <button onClick={() => scrollBoard('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-l-2xl shadow-xl hover:pr-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretRight weight="bold" size={24} /></button>}
 
           <div ref={scrollContainerRef} className="flex gap-6 h-full overflow-x-auto overflow-y-hidden pb-4 px-1 scroll-smooth no-scrollbar">
             {STAGES.map(stage => {
@@ -469,7 +469,7 @@ const Hiring: React.FC = () => {
                                 key={c.id} 
                                 className={`
                                     glass-card !p-0 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-300 group relative overflow-visible 
-                                    !bg-white dark:!bg-[#1e293b] border hover:shadow-xl hover:border-indigo-500/30
+                                    !bg-white dark:!bg-[var(--color-surface)] border hover:shadow-xl hover:border-indigo-500/30
                                     ${isStale ? 'opacity-70 hover:opacity-100 border-gray-200 dark:border-white/5' : 'border-gray-100 dark:border-white/10'}
                                     ${isFresh ? 'ring-2 ring-indigo-500/30 shadow-indigo-500/20' : ''}
                                     ${isHighlighted ? 'ring-4 ring-indigo-400 scale-105 z-50 shadow-2xl shadow-indigo-500/40' : ''}
@@ -505,7 +505,7 @@ const Hiring: React.FC = () => {
                                     <div className="flex justify-between items-center mb-3">
                                         <div className="flex flex-wrap gap-1">
                                             {c.tags.slice(0, 2).map(tag => (
-                                                <span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{tag}</span>
+                                                <span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{tag}</span>
                                             ))}
                                         </div>
                                         
@@ -513,10 +513,10 @@ const Hiring: React.FC = () => {
                                             <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 cursor-help">
                                                 <Sparkle weight="fill" /> {c.aiMatch}% Match
                                             </div>
-                                            <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-slate-900 text-white text-[10px] rounded-lg shadow-xl opacity-0 group-hover/ai:opacity-100 transition pointer-events-none z-50">
+                                            <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-[var(--color-surface)] text-white text-[10px] rounded-lg shadow-xl opacity-0 group-hover/ai:opacity-100 transition pointer-events-none z-50">
                                                 <div className="font-bold mb-1 text-indigo-300">AI Insight:</div>
                                                 {c.aiReason}
-                                                <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-slate-900 rotate-45"></div>
+                                                <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-[var(--color-surface)] rotate-45"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -599,7 +599,7 @@ const Hiring: React.FC = () => {
 
       {showRejections && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowRejections(false)}>
-              <div className="bg-white dark:bg-[#1e293b] w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10 p-6 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10 p-6 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                   <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl font-bold font-['Montserrat']">Rejected Candidates <span className="text-xs opacity-50 font-normal">(Last 30 Days)</span></h2>
                       <button onClick={() => setShowRejections(false)}><XCircle size={24} /></button>
@@ -623,7 +623,7 @@ const Hiring: React.FC = () => {
 
       {showNewReqModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowNewReqModal(false)}>
-              <div className="bg-white dark:bg-[#1e293b] w-full max-w-md rounded-2xl shadow-2xl border border-white/10 p-6" onClick={e => e.stopPropagation()}>
+              <div className="bg-[var(--color-surface)] w-full max-w-md rounded-2xl shadow-2xl border border-white/10 p-6" onClick={e => e.stopPropagation()}>
                   <h2 className="text-xl font-bold mb-4 font-['Montserrat']">Create New Requisition</h2>
                   <div className="space-y-4">
                       <div><label className="text-xs font-bold uppercase opacity-60 block mb-1">Job Title</label><input className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 ring-indigo-500" value={newReqForm.title} onChange={e => setNewReqForm({...newReqForm, title: e.target.value})} placeholder="e.g. Senior Backend Engineer" /></div>

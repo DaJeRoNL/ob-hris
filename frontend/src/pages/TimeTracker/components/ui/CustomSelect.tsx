@@ -22,7 +22,7 @@ export const CustomSelect = ({ value, onChange, options, icon: Icon }: any) => {
         <div className="relative" ref={containerRef}>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition"
+                className="w-full bg-black/5 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition"
             >
                 <div className="flex items-center gap-2">
                     {Icon && <Icon className="opacity-60" />}
@@ -36,7 +36,7 @@ export const CustomSelect = ({ value, onChange, options, icon: Icon }: any) => {
                         <div 
                             key={opt.value}
                             onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                            className={`px-4 py-2 text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-white/5 flex items-center gap-2
+                            className={`px-4 py-2 text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-[var(--color-surface)]/50 flex items-center gap-2
                                 ${value === opt.value ? 'text-indigo-500 font-bold bg-indigo-50/50' : 'opacity-80'}`}
                         >
                             {opt.icon && <opt.icon size={16} />}

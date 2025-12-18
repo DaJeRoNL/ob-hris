@@ -22,7 +22,7 @@ export default function Finance() {
           <p className="text-sm opacity-60 mt-1 font-medium">Real-time cash flow analysis & invoice management.</p>
         </div>
         <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-xs hover:bg-gray-50 dark:hover:bg-white/10 transition">Export CSV</button>
+            <button className="px-4 py-2 bg-white dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-xs hover:bg-gray-50 dark:hover:bg-white/10 transition">Export CSV</button>
             <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/20">New Invoice</button>
         </div>
       </header>
@@ -85,13 +85,13 @@ export default function Finance() {
 
       {/* Invoice Table */}
       <div className="glass-card flex-1 overflow-hidden flex flex-col p-0">
-        <div className="p-5 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
+        <div className="p-5 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-[var(--color-surface)]/50">
             <h3 className="font-bold flex items-center gap-2"><FileText className="text-indigo-500" size={20} weight="duotone" /> Recent Transactions</h3>
             <button className="text-xs font-bold text-indigo-500 hover:underline">View All</button>
         </div>
         <div className="overflow-y-auto custom-scrollbar flex-1">
             <table className="w-full text-left">
-              <thead className="sticky top-0 bg-white dark:bg-[#1e293b] text-xs font-bold uppercase opacity-50 z-10 shadow-sm">
+              <thead className="sticky top-0 bg-[var(--color-surface)] text-xs font-bold uppercase opacity-50 z-10 shadow-sm">
                 <tr>
                   <th className="p-4">Transaction</th>
                   <th className="p-4">Entity</th>
@@ -103,7 +103,7 @@ export default function Finance() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-white/5 text-sm">
                 {records.map((r, i) => (
-                  <tr key={r.id} className="group hover:bg-indigo-50/30 dark:hover:bg-white/5 transition-colors">
+                  <tr key={r.id} className="group hover:bg-indigo-50/30 dark:hover:bg-[var(--color-surface)]/50 transition-colors">
                     <td className="p-4 font-bold font-mono text-xs opacity-70">{r.id}</td>
                     <td className="p-4 font-medium">{r.entity}</td>
                     <td className="p-4 opacity-60 text-xs">{r.date}</td>

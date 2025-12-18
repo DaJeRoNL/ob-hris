@@ -20,7 +20,7 @@ export default function AuditLogWidget({ logs, onViewReport }: Props) {
     return (
         <div className="glass-card flex-1 flex flex-col p-0 overflow-hidden min-h-[300px]">
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 flex justify-between items-center shrink-0">
+            <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-[var(--color-surface)]/50 flex justify-between items-center shrink-0">
                 <h3 className="font-bold flex items-center gap-2 text-sm">
                     <FileText size={18} className="text-blue-500" /> Audit Stream
                 </h3>
@@ -32,7 +32,7 @@ export default function AuditLogWidget({ logs, onViewReport }: Props) {
             {/* Scrollable List */}
             <div className="flex-1 overflow-y-auto p-2 custom-scrollbar space-y-1">
                 {logs.map(log => (
-                    <div key={log.id} className="group p-3 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition flex items-start gap-3 border border-transparent hover:border-gray-200 dark:hover:border-white/5">
+                    <div key={log.id} className="group p-3 rounded-lg hover:bg-black/5 dark:hover:bg-[var(--color-surface)]/50 transition flex items-start gap-3 border border-transparent hover:border-gray-200 dark:hover:border-white/5">
                         <div className="mt-0.5 shrink-0">{getIcon(log.status)}</div>
                         <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start">

@@ -27,7 +27,7 @@ export default function RevenueWidget({ data }: Props) {
     return (
         <div 
             onClick={() => navigate('/finance')}
-            className="glass-card flex flex-col h-full relative overflow-hidden group border border-white/5 hover:border-emerald-500/20 transition-all duration-500 bg-[#020617]/40 cursor-pointer"
+            className="glass-card flex flex-col h-full relative overflow-hidden group border border-white/5 hover:border-emerald-500/20 transition-all duration-500 bg-[var(--color-bg)]/40 cursor-pointer"
         >
             {/* Header */}
             <div className="flex justify-between items-start mb-6 z-20 relative">
@@ -40,7 +40,7 @@ export default function RevenueWidget({ data }: Props) {
                 </div>
                 
                 <div className="flex gap-2">
-                    <button className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition text-[var(--text-main)] border border-white/5">
+                    <button className="p-2 bg-[var(--color-surface)]/50 hover:bg-white/10 rounded-lg transition text-[var(--text-main)] border border-white/5">
                         <DownloadSimple size={16} />
                     </button>
                     <button className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-white transition border border-emerald-500/20">

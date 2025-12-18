@@ -23,7 +23,7 @@ export const CustomTimePicker = ({ value, onChange, disabled }: any) => {
         <div className={`relative ${disabled ? 'opacity-50 pointer-events-none' : ''}`} ref={containerRef}>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-black/10 transition"
+                className="w-full bg-black/5 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-black/10 transition"
             >
                 <div className="flex items-center gap-2">
                     <ClockIcon className="opacity-60" />
@@ -37,7 +37,7 @@ export const CustomTimePicker = ({ value, onChange, disabled }: any) => {
                         <div 
                             key={t}
                             onClick={() => { onChange(t); setIsOpen(false); }}
-                            className={`px-4 py-2 text-xs font-mono cursor-pointer hover:bg-indigo-50 dark:hover:bg-white/5
+                            className={`px-4 py-2 text-xs font-mono cursor-pointer hover:bg-indigo-50 dark:hover:bg-[var(--color-surface)]/50
                                 ${value === t ? 'text-indigo-500 font-bold bg-indigo-50/50' : 'opacity-80'}`}
                         >
                             {t.substring(0,5)}

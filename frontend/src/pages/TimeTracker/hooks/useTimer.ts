@@ -31,20 +31,26 @@ export function useTimer(currentClientId: string, onSaveEntries: (entries: TimeE
 
   // FIX: Accurate Timer using Delta
   useEffect(() => {
-    let interval;
+    let interval: number | null = null;
+
     if (isRunning && startTime) {
       const update = () => {
-          const now = Date.now();
-          const diff = Math.floor((now - startTime.getTime()) / 1000);
-          setSeconds(diff >= 0 ? diff : 0);
+        const now = Date.now();
+        const diff = Math.floor((now - startTime.getTime()) / 1000);
+        setSeconds(diff >= 0 ? diff : 0);
       };
-      
-      update(); // Immediate
-      interval = setInterval(update, 1000);
+
+      update(); // immediate update
+      interval = window.setInterval(update, 1000);
     } else {
-        setSeconds(0);
+      setSeconds(0);
     }
-    return () => clearInterval(interval);
+
+    return () => {
+      if (interval !== null) {
+        clearInterval(interval);
+      }
+    };
   }, [isRunning, startTime]);
 
   const addLiveNote = () => {

@@ -55,7 +55,7 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
                 
                 {/* 1. Enhanced Header with User Context */}
                 <div className="bg-indigo-900 p-6 text-white shrink-0 relative overflow-hidden">
@@ -166,7 +166,7 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
                     <div className="relative">
                         {!isFieldsComplete && (
                             <div className="absolute inset-0 bg-gray-100/50 dark:bg-black/60 backdrop-blur-[1px] z-10 rounded-xl flex items-center justify-center border border-gray-200 dark:border-white/5">
-                                <div className="bg-white dark:bg-[#1e293b] px-4 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs font-bold opacity-80">
+                                <div className="bg-[var(--color-surface)] px-4 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs font-bold opacity-80">
                                     <LockKey weight="fill" /> Fill details above to unlock upload
                                 </div>
                             </div>

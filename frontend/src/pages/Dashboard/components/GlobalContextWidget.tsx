@@ -21,7 +21,7 @@ export default function GlobalContextWidget({ countryStats }: Props) {
     return (
         <div 
             onClick={handleClick}
-            className={`glass-card relative overflow-hidden group cursor-pointer transition-all duration-500 border border-white/5 hover:border-indigo-500/30 ${isExpanded ? 'h-auto p-6 bg-[#020617]/80' : 'h-24 px-8 flex items-center bg-black/20'}`}
+            className={`glass-card relative overflow-hidden group cursor-pointer transition-all duration-500 border border-white/5 hover:border-indigo-500/30 ${isExpanded ? 'h-auto p-6 bg-[var(--color-bg)]/80' : 'h-24 px-8 flex items-center bg-black/20'}`}
         >
             <div className="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg')] bg-cover opacity-[0.03] group-hover:opacity-10 transition-opacity duration-700 bg-center pointer-events-none mix-blend-overlay"></div>
             
@@ -35,9 +35,9 @@ export default function GlobalContextWidget({ countryStats }: Props) {
                 </div>
                 <div className="flex gap-2">
                     {countryStats.slice(0, 5).map(c => (
-                        <span key={c.name} className="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 font-bold opacity-60">{c.name}</span>
+                        <span key={c.name} className="text-[10px] bg-[var(--color-surface)]/50 px-2 py-1 rounded border border-white/10 font-bold opacity-60">{c.name}</span>
                     ))}
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                    <div className="w-8 h-8 rounded-full bg-[var(--color-surface)]/50 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
                         <CaretRight weight="bold" />
                     </div>
                 </div>
@@ -57,7 +57,7 @@ export default function GlobalContextWidget({ countryStats }: Props) {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {countryStats.map((stat, i) => (
-                        <div key={stat.name} className="bg-white/5 border border-white/5 p-3 rounded-xl flex items-center justify-between group/card hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300" style={{ transitionDelay: `${i * 50}ms` }}>
+                        <div key={stat.name} className="bg-[var(--color-surface)]/50 border border-white/5 p-3 rounded-xl flex items-center justify-between group/card hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300" style={{ transitionDelay: `${i * 50}ms` }}>
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-black/30 rounded-lg text-indigo-400"><MapPin weight="fill" /></div>
                                 <span className="font-bold text-sm text-gray-300 group-hover/card:text-white">{stat.name}</span>

@@ -46,7 +46,7 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
     if (showSuccess) {
         return (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-                <div className="bg-white dark:bg-[#1e293b] w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-white/10 flex flex-col items-center text-center">
+                <div className="bg-[var(--color-surface)] w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-white/10 flex flex-col items-center text-center">
                     <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4 text-green-500">
                         <CheckCircle weight="fill" size={32} />
                     </div>
@@ -61,7 +61,7 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-             <div className="bg-white dark:bg-[#1e293b] w-full max-w-xl rounded-2xl shadow-2xl p-8 border border-white/10">
+             <div className="bg-[var(--color-surface)] w-full max-w-xl rounded-2xl shadow-2xl p-8 border border-white/10">
                  <h2 className="text-2xl font-bold font-['Montserrat'] mb-6">Request Time Off</h2>
                  <div className="space-y-6">
                      {/* Leave Type */}
@@ -136,7 +136,7 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                          <textarea 
                              value={form.notes}
                              onChange={e => setForm({...form, notes: e.target.value})}
-                             className="w-full bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 h-24 resize-none"
+                             className="w-full bg-black/5 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 h-24 resize-none"
                              placeholder="Reason (optional)..."
                          />
                      </div>

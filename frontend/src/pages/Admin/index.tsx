@@ -1,165 +1,85 @@
-import { useState, useEffect } from 'react';
-import { Gear, LockKey, LockOpen, Globe, UserSwitch, ShieldCheck, Database, BellRinging, ToggleLeft, ToggleRight, ArrowCounterClockwise, WarningCircle } from '@phosphor-icons/react';
-import { getSystemConfig, saveSystemConfig, resetSystemConfig, SystemConfig, getCurrentRole, setCurrentRole, UserRole } from '../../utils/dashboardConfig';
+import { useState } from 'react';
+import { Globe, ShieldCheck, UserSwitch, Palette, CaretRight, UserCircle } from '@phosphor-icons/react';
+import GeneralTab from './components/GeneralTab';
+import LayoutTab from './components/LayoutTab';
+import SecurityTab from './components/SecurityTab';
+import LookAndFeelTab from './components/LookAndFeelTab';
+import ProfileTab from './components/ProfileTab';
+
+type Tab = 'profile' | 'general' | 'layout' | 'security' | 'theme';
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<'general' | 'security' | 'layout'>('general');
-  const [config, setConfig] = useState<SystemConfig>(getSystemConfig());
-  const [currentSimRole, setCurrentSimRole] = useState<UserRole>(getCurrentRole());
-  const [isUnlocked, setIsUnlocked] = useState(false);
+    const [activeTab, setActiveTab] = useState<Tab>('general');
 
-  const activeUserRole = getCurrentRole(); 
-  const isSystemAdmin = activeUserRole === 'System Admin';
+    const MENU_ITEMS = [
+        { id: 'profile', label: 'My Profile', icon: UserCircle, desc: 'Account Details' },
+        { id: 'general', label: 'General Settings', icon: Globe, desc: 'Environment & Reset' },
+        { id: 'layout', label: 'Roles & Layouts', icon: UserSwitch, desc: 'Widget Configuration' },
+        { id: 'security', label: 'Security & Audit', icon: ShieldCheck, desc: '2FA & Access Logs' },
+        { id: 'theme', label: 'Look & Feel', icon: Palette, desc: 'Themes & Dark Mode' },
+    ];
 
-  useEffect(() => { setConfig(getSystemConfig()); }, []);
-
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newRole = e.target.value as UserRole;
-      setCurrentSimRole(newRole);
-      setCurrentRole(newRole);
-      setTimeout(() => window.location.reload(), 100);
-  };
-
-  const handleSettingChange = (field: keyof SystemConfig['settings'], value: any) => {
-      const newConfig = { ...config };
-      // @ts-ignore
-      newConfig.settings[field] = value;
-      setConfig(newConfig);
-      saveSystemConfig(newConfig);
-  };
-
-  const toggleConfig = (role: UserRole, type: 'widgets' | 'tabs', key: string) => {
-      const newConfig = { ...config };
-      // @ts-ignore
-      newConfig.layout[role][type][key] = !newConfig.layout[role][type][key];
-      setConfig(newConfig);
-      saveSystemConfig(newConfig);
-  };
-
-  const handleFactoryReset = () => {
-      if(confirm('⚠️ FACTORY RESET: This will wipe all demo data, local changes, and timer history. Are you sure?')) {
-          localStorage.clear();
-          window.location.reload();
-      }
-  };
-
-  const LockedScreen = () => (
-      <div className="flex-1 flex flex-col items-center justify-center text-center h-[400px] bg-red-500/5 rounded-2xl border-2 border-dashed border-red-500/20">
-          <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4"><LockKey size={32} weight="duotone" /></div>
-          <h2 className="text-xl font-bold mb-2">Protected Configuration</h2>
-          <p className="text-sm max-w-md mb-6 opacity-70">Sensitive system settings are locked. You must be a System Admin to modify these parameters.</p>
-          {isSystemAdmin && (
-              <button onClick={() => setIsUnlocked(true)} className="px-6 py-2 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 transition flex items-center gap-2"><LockOpen weight="fill" /> Unlock System</button>
-          )}
-      </div>
-  );
-
-  return (
-    <div className="p-8 animate-fade-in text-[var(--text-main)] h-full flex flex-col overflow-hidden">
-      
-      <div className="mb-8 shrink-0 flex items-end justify-between">
-          <div>
-            <h1 className="text-3xl font-black font-['Montserrat'] flex items-center gap-3">
-                <Gear weight="duotone" className="text-slate-400" /> System Administration
-            </h1>
-            <p className="text-sm opacity-70 font-medium mt-1">Global Configuration & Environment Provisioning</p>
-          </div>
-          <div className="flex gap-2">
-             <button onClick={() => setConfig(resetSystemConfig())} className="text-xs font-bold text-indigo-500 hover:bg-indigo-500/10 px-3 py-1.5 rounded-lg transition">Restore Defaults</button>
-          </div>
-      </div>
-
-      <div className="flex gap-6 h-full min-h-0">
-          <div className="w-64 shrink-0 flex flex-col gap-2">
-              <button onClick={() => setActiveTab('general')} className={`p-4 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition ${activeTab === 'general' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-                  <Globe size={18} /> General Settings
-              </button>
-              <button onClick={() => setActiveTab('layout')} className={`p-4 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition ${activeTab === 'layout' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-                  <UserSwitch size={18} /> Role & Layout
-              </button>
-              <button onClick={() => setActiveTab('security')} className={`p-4 rounded-xl text-left font-bold text-sm flex items-center gap-3 transition ${activeTab === 'security' ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}>
-                  <ShieldCheck size={18} /> Security & Audit
-              </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar pb-10">
-              
-              {activeTab === 'general' && (
-                  <div className="space-y-6">
-                      <div className="glass-card">
-                          <h3 className="font-bold mb-6 flex items-center gap-2 text-lg"><UserSwitch size={24} className="text-indigo-500" /> User Simulation</h3>
-                          <div className="bg-indigo-500/10 p-6 rounded-2xl border border-indigo-500/20">
-                              <label className="text-xs font-bold uppercase opacity-70 block mb-2">Current Active Role</label>
-                              <div className="flex gap-4 items-center">
-                                <select value={currentSimRole} onChange={handleRoleChange} className="bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 font-bold focus:ring-2 ring-indigo-500 outline-none min-w-[200px]">
-                                    <option value="System Admin">System Admin (Full Access)</option>
-                                    <option value="Executive">Executive</option>
-                                    <option value="Manager">Manager</option>
-                                    <option value="HR_Admin">HR Admin</option>
-                                    <option value="Employee">Employee (Restricted)</option>
-                                </select>
-                                <div className="text-xs opacity-60">
-                                    Logged in as: <span className="font-bold text-indigo-500">{activeUserRole}</span>
+    return (
+        // FIXED: Uses var(--color-bg) instead of hardcoded colors
+        <div className="flex h-full bg-[var(--color-bg)] text-[var(--color-text)] animate-fade-in overflow-hidden relative transition-colors duration-500">
+            
+            {/* SIDEBAR NAVIGATION */}
+            <div className="w-80 bg-[var(--color-surface)] border-r border-gray-200 dark:border-white/10 flex flex-col shrink-0 z-20 shadow-2xl transition-colors duration-500">
+                <div className="p-8 pb-4">
+                    <h1 className="text-2xl font-black font-['Montserrat'] tracking-tight flex items-center gap-2">
+                        <ShieldCheck className="text-[var(--color-primary)]" weight="duotone" />
+                        Admin
+                    </h1>
+                    <p className="text-xs opacity-50 font-medium mt-1 pl-1">System Control Panel</p>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+                    {MENU_ITEMS.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id as Tab)}
+                                className={`w-full text-left p-3 rounded-xl transition-all duration-300 group relative flex items-center gap-4 ${
+                                    isActive 
+                                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-indigo-500/20 translate-x-1' 
+                                    : 'hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50 text-gray-500 dark:text-gray-400'
+                                }`}
+                            >
+                                <div className={`p-2.5 rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-[var(--color-surface)]/50 group-hover:bg-white/10'}`}>
+                                    <Icon size={20} weight={isActive ? 'fill' : 'duotone'} />
                                 </div>
-                              </div>
-                          </div>
-                      </div>
+                                <div className="flex-1">
+                                    <div className="font-bold text-sm leading-tight">{item.label}</div>
+                                    <div className={`text-[10px] transition-opacity ${isActive ? 'opacity-80' : 'opacity-50'}`}>{item.desc}</div>
+                                </div>
+                                {isActive && <CaretRight weight="bold" className="opacity-50" />}
+                            </button>
+                        );
+                    })}
+                </div>
 
-                      <div className="glass-card !border-red-500/30">
-                          <h3 className="font-bold mb-6 flex items-center gap-2 text-lg text-red-500"><WarningCircle size={24} weight="fill" /> Danger Zone</h3>
-                          <div className="flex items-center justify-between">
-                              <div>
-                                  <div className="font-bold text-sm">Factory Reset Demo</div>
-                                  <div className="text-xs opacity-60">Wipes LocalStorage, Mock Data, and Auth Tokens.</div>
-                              </div>
-                              <button onClick={handleFactoryReset} className="px-4 py-2 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 transition flex items-center gap-2">
-                                  <ArrowCounterClockwise weight="bold" /> Reset All
-                              </button>
-                          </div>
-                      </div>
-                  </div>
-              )}
+                <div className="p-6 border-t border-gray-100 dark:border-white/5">
+                    <div className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest">System Operational</span>
+                    </div>
+                </div>
+            </div>
 
-              {activeTab === 'layout' && (!isUnlocked ? <LockedScreen /> :
-                  <div className="glass-card">
-                      <div className="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-white/10 pb-4">
-                          <h3 className="font-bold text-lg">Dashboard Widgets Configuration</h3>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                          {['System Admin', 'Executive', 'Manager', 'HR_Admin', 'Employee'].map(role => (
-                              <div key={role} className="space-y-3">
-                                  <h4 className="text-xs font-bold uppercase tracking-wider opacity-50 mb-2 text-center border-b border-white/5 pb-2">{role}</h4>
-                                  {Object.keys(config.layout[role as UserRole].widgets).map((key) => (
-                                      <div key={key} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-white/5 rounded-lg border border-transparent hover:border-indigo-500/30 transition">
-                                          <span className="capitalize font-bold text-[10px] truncate mr-2">{key}</span>
-                                          <button onClick={() => toggleConfig(role as UserRole, 'widgets', key)} className="text-indigo-500 hover:text-indigo-400">
-                                              {/* @ts-ignore */}
-                                              {config.layout[role].widgets[key] ? <ToggleRight size={24} weight="fill" /> : <ToggleLeft size={24} className="opacity-30" />}
-                                          </button>
-                                      </div>
-                                  ))}
-                              </div>
-                          ))}
-                      </div>
-                  </div>
-              )}
-              
-              {activeTab === 'security' && (!isUnlocked ? <LockedScreen /> : 
-                  <div className="glass-card">
-                      <h3 className="font-bold mb-6 flex items-center gap-2 text-lg"><ShieldCheck size={24} className="text-indigo-500" /> Security Policies</h3>
-                      <div className="space-y-4">
-                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
-                              <div>
-                                  <div className="font-bold text-sm">Enforce Two-Factor Authentication</div>
-                                  <div className="text-xs opacity-60">Require 2FA for all Admin and Manager roles.</div>
-                              </div>
-                              <button className="text-emerald-500"><ToggleRight size={32} weight="fill" /></button>
-                          </div>
-                      </div>
-                  </div>
-              )}
-          </div>
-      </div>
-    </div>
-  );
+            {/* MAIN CONTENT AREA */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar relative bg-[var(--color-bg)] transition-colors duration-500">
+                {/* REMOVED: The Gradient line that was causing the visual break */}
+                
+                <div className="relative z-10 max-w-5xl mx-auto p-10 min-h-full">
+                    {activeTab === 'profile' && <ProfileTab />}
+                    {activeTab === 'general' && <GeneralTab />}
+                    {activeTab === 'layout' && <LayoutTab />}
+                    {activeTab === 'security' && <SecurityTab />}
+                    {activeTab === 'theme' && <LookAndFeelTab />}
+                </div>
+            </div>
+        </div>
+    );
 }

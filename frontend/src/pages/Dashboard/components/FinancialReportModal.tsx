@@ -9,10 +9,10 @@ export default function FinancialReportModal({ onClose }: Props) {
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#0f172a] w-full max-w-5xl h-[85vh] rounded-xl shadow-2xl border border-white/10 flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-[var(--color-surface)] w-full max-w-5xl h-[85vh] rounded-xl shadow-2xl border border-white/10 flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
                 
                 {/* Toolbar */}
-                <div className="bg-gray-100 dark:bg-[#1e293b] p-4 flex justify-between items-center border-b border-gray-200 dark:border-white/10 shrink-0">
+                <div className="bg-gray-100 dark:bg-[var(--color-surface)] p-4 flex justify-between items-center border-b border-gray-200 dark:border-white/10 shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="bg-emerald-500 text-white p-2 rounded shadow-sm">
                             <Sparkle size={20} weight="fill" />
@@ -31,14 +31,14 @@ export default function FinancialReportModal({ onClose }: Props) {
                 </div>
 
                 {/* PDF Content Mockup */}
-                <div className="flex-1 bg-gray-200 dark:bg-[#020617] overflow-y-auto p-8 flex flex-col items-center gap-8 custom-scrollbar">
+                <div className="flex-1 bg-gray-200  overflow-y-auto p-8 flex flex-col items-center gap-8 custom-scrollbar">
                     
                     {/* PAGE 1 */}
                     <div className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-16 text-black flex flex-col gap-8 relative shrink-0">
                         {/* Report Header */}
                         <div className="border-b-4 border-emerald-900 pb-8 mb-4 flex justify-between items-end">
                             <div>
-                                <h1 className="text-4xl font-bold font-serif mb-2 text-slate-900">Financial Trend Report</h1>
+                                <h1 className="text-4xl font-bold font-serif mb-2 text-[var(--color-text)]">Financial Trend Report</h1>
                                 <p className="text-sm uppercase tracking-widest text-emerald-600 font-bold">Automated Intelligence • OB-HRIS</p>
                             </div>
                             <div className="text-right">

@@ -15,10 +15,10 @@ export default function PendingReviewsModal({ items, onClose }: Props) {
     return (
         <>
             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-                <div className="bg-white dark:bg-[#1e293b] w-full max-w-4xl rounded-2xl shadow-2xl p-0 border border-white/10 overflow-hidden flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
+                <div className="bg-[var(--color-surface)] w-full max-w-4xl rounded-2xl shadow-2xl p-0 border border-white/10 overflow-hidden flex flex-col max-h-[85vh]" onClick={e => e.stopPropagation()}>
                     
                     {/* Header */}
-                    <div className="p-6 border-b border-gray-200 dark:border-white/10 bg-gray-50/90 dark:bg-white/5 flex justify-between items-center shrink-0">
+                    <div className="p-6 border-b border-gray-200 dark:border-white/10 bg-gray-50/90 dark:bg-[var(--color-surface)]/50 flex justify-between items-center shrink-0">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center shadow-inner">
                                 <Clock size={28} weight="duotone" />
@@ -32,7 +32,7 @@ export default function PendingReviewsModal({ items, onClose }: Props) {
                                 </div>
                             </div>
                         </div>
-                        <button onClick={onClose} className="hover:text-red-500 transition p-2 bg-black/5 dark:bg-white/5 rounded-lg"><X size={20} /></button>
+                        <button onClick={onClose} className="hover:text-red-500 transition p-2 bg-black/5 dark:bg-[var(--color-surface)]/50 rounded-lg"><X size={20} /></button>
                     </div>
 
                     {/* List Header */}
@@ -44,7 +44,7 @@ export default function PendingReviewsModal({ items, onClose }: Props) {
                     </div>
 
                     {/* List Content */}
-                    <div className="overflow-y-auto flex-1 custom-scrollbar bg-gray-50 dark:bg-[#0f172a]/50">
+                    <div className="overflow-y-auto flex-1 custom-scrollbar bg-gray-50 dark:bg-[var(--color-surface)]/50">
                         {items.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-64 opacity-50">
                                 <CheckCircle size={48} className="text-emerald-500 mb-4" />
@@ -52,7 +52,7 @@ export default function PendingReviewsModal({ items, onClose }: Props) {
                             </div>
                         ) : (
                             items.map((person) => (
-                                <div key={person.id} className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/5 hover:bg-white dark:hover:bg-white/5 transition items-center group">
+                                <div key={person.id} className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 dark:border-white/5 hover:bg-white dark:hover:bg-[var(--color-surface)]/50 transition items-center group">
                                     
                                     {/* Employee */}
                                     <div className="col-span-4 flex items-center gap-3">
@@ -98,7 +98,7 @@ export default function PendingReviewsModal({ items, onClose }: Props) {
                     </div>
 
                     {/* Footer */}
-                    <div className="p-4 bg-white dark:bg-[#1e293b] border-t border-gray-200 dark:border-white/10 text-center shrink-0">
+                    <div className="p-4 bg-[var(--color-surface)] border-t border-gray-200 dark:border-white/10 text-center shrink-0">
                         <button onClick={onClose} className="text-xs font-bold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition uppercase tracking-wide">
                             Close Action Center
                         </button>

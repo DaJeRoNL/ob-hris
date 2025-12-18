@@ -43,7 +43,7 @@ export default function MapDot({ data, isSelected, onClick }: Props) {
 
             {/* Tooltip */}
             <div className="absolute bottom-full mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-30">
-                <span className="text-[10px] font-bold text-white bg-[#0f172a] px-2 py-1 rounded-md border border-white/10 whitespace-nowrap shadow-xl">
+                <span className="text-[10px] font-bold text-white bg-[var(--color-surface)] px-2 py-1 rounded-md border border-white/10 whitespace-nowrap shadow-xl">
                     {data.name}
                 </span>
             </div>

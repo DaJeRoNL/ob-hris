@@ -55,7 +55,7 @@ export default function Growth() {
                 <h3 className="text-xl font-bold mb-6 font-['Montserrat']">{obj.title}</h3>
                 
                 {/* Progress Bar */}
-                <div className="w-full bg-gray-100 dark:bg-white/5 rounded-full h-2 mb-8 overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-[var(--color-surface)]/50 rounded-full h-2 mb-8 overflow-hidden">
                     <div 
                         className={`h-full rounded-full bg-gradient-to-r from-${obj.color}-400 to-${obj.color}-600 transition-all duration-1000 ease-out relative`} 
                         style={{ width: `${obj.progress}%` }}
@@ -66,7 +66,7 @@ export default function Growth() {
 
                 <div className="space-y-4 flex-1">
                     {obj.keyResults.map((kr, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 hover:border-indigo-500/20 transition-colors">
+                        <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-[var(--color-surface)]/50 border border-gray-100 dark:border-white/5 hover:border-indigo-500/20 transition-colors">
                             <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${kr.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-gray-400 opacity-30'}`}>
                                 {kr.done && <Check size={12} weight="bold" />}
                             </div>

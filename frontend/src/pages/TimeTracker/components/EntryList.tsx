@@ -177,7 +177,7 @@ export default function EntryList({
                             value={line} 
                             onChange={(e) => onNoteUpdate(entry.id, lIdx, e.target.value)} 
                             placeholder="Add note..." 
-                            className="w-full bg-transparent text-xs opacity-80 focus:opacity-100 focus:bg-white/5 rounded px-2 py-0.5 outline-none transition placeholder-gray-500 border-b border-dashed border-gray-500/20 focus:border-indigo-500" 
+                            className="w-full bg-transparent text-xs opacity-80 focus:opacity-100 focus:bg-[var(--color-surface)]/50 rounded px-2 py-0.5 outline-none transition placeholder-gray-500 border-b border-dashed border-gray-500/20 focus:border-indigo-500" 
                         />
                     ))}
                     <button onClick={() => onAddNote(entry.id)} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-500 flex items-center gap-1 opacity-50 hover:opacity-100 transition px-2 py-0.5"><Plus /> Add note</button>

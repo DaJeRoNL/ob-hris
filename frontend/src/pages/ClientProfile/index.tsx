@@ -72,7 +72,7 @@ export default function ClientProfile() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-gray-50 dark:bg-[#020617] text-[var(--text-main)] relative custom-scrollbar">
+    <div className="w-full h-full overflow-y-auto bg-gray-50  text-[var(--text-main)] relative custom-scrollbar">
       
       {/* Background Decor */}
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 pointer-events-none"></div>
@@ -183,7 +183,7 @@ export default function ClientProfile() {
 const ActionBtn = ({ onClick, icon: Icon, color, label }: any) => (
     <button 
         onClick={onClick}
-        className={`glass-card p-6 flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-all group border border-white/5 hover:border-${color}-500/30 hover:-translate-y-1 duration-300`}
+        className={`glass-card p-6 flex flex-col items-center justify-center gap-4 hover:bg-[var(--color-surface)]/50 transition-all group border border-white/5 hover:border-${color}-500/30 hover:-translate-y-1 duration-300`}
     >
         <div className={`p-4 rounded-full bg-${color}-500/10 text-${color}-500 group-hover:bg-${color}-500 group-hover:text-white transition-colors duration-300 shadow-sm`}>
             <Icon weight="fill" size={24} />

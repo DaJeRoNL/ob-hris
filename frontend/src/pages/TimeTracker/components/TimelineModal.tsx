@@ -50,7 +50,7 @@ export default function TimelineModal({ date, entries, leaveRequests, currentCli
                     </div>
                     <div className="px-6 pb-4">
                         <div className="flex justify-between text-[10px] opacity-50 uppercase font-bold mb-1"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
-                        <div className="h-4 bg-gray-100 dark:bg-white/5 rounded-full relative overflow-hidden flex">
+                        <div className="h-4 bg-gray-100 dark:bg-[var(--color-surface)]/50 rounded-full relative overflow-hidden flex">
                             {dayEntries.map((e, idx) => {
                                 if (e.isVirtualLeave) return null; 
                                 const leftPct = (getSecondsFromTime(e.startTime) / 86400) * 100;
@@ -96,7 +96,7 @@ export default function TimelineModal({ date, entries, leaveRequests, currentCli
                              return (
                                 <div key={idx} className="relative pl-6">
                                     <div className={`absolute -left-[9px] top-6 w-4 h-4 rounded-full border-4 border-white dark:border-[#1e1b4b] transition-colors ${isHovered ? 'bg-indigo-400' : 'bg-indigo-600'}`}></div>
-                                    <div onMouseEnter={() => setHoveredEntryId(e.id || null)} onMouseLeave={() => setHoveredEntryId(null)} className={`glass-card !p-4 !bg-gray-50/50 dark:!bg-white/5 transition duration-200 cursor-pointer ${isHovered ? 'ring-2 ring-indigo-500 shadow-lg scale-[1.01]' : ''}`}>
+                                    <div onMouseEnter={() => setHoveredEntryId(e.id || null)} onMouseLeave={() => setHoveredEntryId(null)} className={`glass-card !p-4 !bg-gray-50/50 dark:!bg-[var(--color-surface)]/50 transition duration-200 cursor-pointer ${isHovered ? 'ring-2 ring-indigo-500 shadow-lg scale-[1.01]' : ''}`}>
                                         <div className="flex justify-between items-start mb-2"><div className="flex items-center gap-2"><span className="font-bold text-sm text-indigo-500">{e.startTime} - {e.endTime}</span><span className="text-[10px] font-bold opacity-40">#{idx + 1}</span></div><span className="text-xs font-mono opacity-60 bg-white/10 px-2 py-0.5 rounded">{calculateDuration(e.startTime, e.endTime)}</span></div>
                                         <div className="text-xs opacity-80 whitespace-pre-wrap">{e.notes || "No notes provided."}</div>
                                     </div>

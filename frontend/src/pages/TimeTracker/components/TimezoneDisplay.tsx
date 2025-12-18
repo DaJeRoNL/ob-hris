@@ -39,7 +39,7 @@ export default function TimezoneDisplay() {
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono bg-white/50 dark:bg-black/20 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono bg-[var(--color-surface)]/500 dark:bg-black/20 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
             {/* Local / Selected Time */}
             <div className="flex flex-col">
                 <span className="opacity-50 font-bold uppercase mb-0.5 flex items-center gap-1 text-[10px] tracking-wider">

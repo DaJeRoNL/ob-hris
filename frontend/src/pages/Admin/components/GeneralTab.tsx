@@ -1,21 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
-const ensureDir = (filePath) => {
-    const dirname = path.dirname(filePath);
-    if (fs.existsSync(dirname)) return true;
-    ensureDir(dirname);
-    fs.mkdirSync(dirname, { recursive: true });
-};
-
-const write = (relPath, content) => {
-    const absPath = path.join(__dirname, relPath);
-    ensureDir(absPath);
-    fs.writeFileSync(absPath, content);
-    console.log(`✅ Updated: ${relPath}`);
-};
-
-const GENERAL_TAB_FIXED = `import { useState } from 'react';
+import { useState } from 'react';
 import { UserSwitch, WarningCircle, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { getSystemConfig, getCurrentRole, setCurrentRole } from '../../../utils/dashboardConfig';
 
@@ -99,7 +82,3 @@ export default function GeneralTab() {
         </div>
     );
 }
-`;
-
-write('src/pages/Admin/components/GeneralTab.tsx', GENERAL_TAB_FIXED);
-console.log("✅ FIXED: GeneralTab inputs now respect the active theme.");

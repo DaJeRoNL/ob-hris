@@ -69,7 +69,7 @@ export default function GlobalMapWidget({ data, selectedCountryName, onSelectCou
             onMouseLeave={handleMouseLeave}
             onMouseEnter={handleMouseEnter}
             onClick={handleContainerClick}
-            className="group relative w-full aspect-[2.2/1] bg-[#0f172a] rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-lg cursor-default"
+            className="group relative w-full aspect-[2.2/1] bg-[var(--color-surface)] rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-lg cursor-default"
         >
             <ComposableMap projection="geoMercator" viewBox="0 0 980 420" style={{ width: "100%", height: "100%" }}>
                 
@@ -122,13 +122,13 @@ export default function GlobalMapWidget({ data, selectedCountryName, onSelectCou
             {/* --- OVERLAYS --- */}
             
             <div className="absolute top-4 left-4 z-20 pointer-events-none">
-                 <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-widest bg-[#0f172a]/80 px-3 py-1 rounded-full border border-indigo-500/20 backdrop-blur-sm">
+                 <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-widest bg-[var(--color-surface)]/80 px-3 py-1 rounded-full border border-indigo-500/20 backdrop-blur-sm">
                     <Globe size={14} weight="duotone" className="animate-spin-slow" /> 
                     Live Monitoring
                  </div>
             </div>
 
-            <div className="absolute top-4 right-4 z-20 flex gap-4 bg-[#0f172a]/80 px-4 py-2 rounded-full border border-indigo-500/10 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider">
+            <div className="absolute top-4 right-4 z-20 flex gap-4 bg-[var(--color-surface)]/80 px-4 py-2 rounded-full border border-indigo-500/10 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider">
                 <div className="flex items-center gap-1.5 opacity-80"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-emerald-500/50 shadow-[0_0_8px]"></div><span>Secure</span></div>
                 <div className="flex items-center gap-1.5 opacity-80"><div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-orange-500/50 shadow-[0_0_8px]"></div><span>Alert</span></div>
                 <div className="flex items-center gap-1.5 opacity-80"><div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-red-500/50 shadow-[0_0_8px]"></div><span>Critical</span></div>
@@ -140,7 +140,7 @@ export default function GlobalMapWidget({ data, selectedCountryName, onSelectCou
                     className="absolute bottom-4 left-4 z-30 animate-fade-in-up"
                     onClick={(e) => e.stopPropagation()} 
                 >
-                    <div className="bg-[#0f172a]/95 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl w-64 hover:border-indigo-500/50 transition-colors">
+                    <div className="bg-[var(--color-surface)]/95 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl w-64 hover:border-indigo-500/50 transition-colors">
                         <div className="flex justify-between items-start mb-3">
                             <div>
                                 <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Selected Region</div>
@@ -152,11 +152,11 @@ export default function GlobalMapWidget({ data, selectedCountryName, onSelectCou
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 mb-3">
-                            <div className="bg-white/5 rounded-lg p-2">
+                            <div className="bg-[var(--color-surface)]/50 rounded-lg p-2">
                                 <div className="text-[9px] uppercase text-gray-400 font-bold">Personnel</div>
                                 <div className="text-xl font-mono text-white leading-none mt-1">{selectedCountry.count}</div>
                             </div>
-                            <div className="bg-white/5 rounded-lg p-2">
+                            <div className="bg-[var(--color-surface)]/50 rounded-lg p-2">
                                 <div className="text-[9px] uppercase text-gray-400 font-bold">Status</div>
                                 <div className={`text-sm font-bold leading-none mt-2 ${
                                     selectedCountry.riskLevel === 'High' ? 'text-red-400' : 
