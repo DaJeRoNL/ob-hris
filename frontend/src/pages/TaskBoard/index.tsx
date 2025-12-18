@@ -349,6 +349,22 @@ export default function TaskBoard() {
         }
     };
 
+    const moveColumn = (col: string, direction: 'left' | 'right') => {
+        const currentIndex = columns.indexOf(col);
+        const targetIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+        
+        // Don't allow moving out of bounds
+        if (targetIndex < 0 || targetIndex >= columns.length) return;
+        
+        // Don't allow moving into protected column positions
+        const targetCol = columns[targetIndex];
+        if (PROTECTED_COLUMNS.includes(targetCol)) return;
+        
+        const newColumns = [...columns];
+        [newColumns[currentIndex], newColumns[targetIndex]] = [newColumns[targetIndex], newColumns[currentIndex]];
+        setColumns(newColumns);
+    };
+
     const handlePickUpSubtask = (taskId: string, subtaskId: string) => {
         setTasks(prev => prev.map(t => {
             if (t.id !== taskId) return t;
@@ -480,7 +496,20 @@ export default function TaskBoard() {
 
     // Handle background click to clear flow focus
     const handleBackgroundClick = (e: React.MouseEvent) => {
-        setFlowFocusId(null);
+        // Clear flow focus when clicking anywhere
+        if (flowFocusId) {
+            setFlowFocusId(null);
+        }
+    };
+
+    // Handle card click - opens flow panel and clears any flow focus
+    const handleCardClick = (task: Task, e: React.MouseEvent) => {
+        e.stopPropagation();
+        console.log('Card clicked:', task.id, 'Current flowFocusId:', flowFocusId);
+        setFlowFocusId(null); // Clear any flow visualization
+        setSelectedTask(task);
+        setIsFlowOpen(true);
+        console.log('After click - selectedTask should be:', task.id, 'isFlowOpen should be: true');
     };
 
     return (
@@ -549,9 +578,9 @@ export default function TaskBoard() {
                         const isDragOver = dragOverCol === col;
                         let dragClasses = '';
                         if (isDragOver) {
-                            if (col === 'Review') dragClasses = 'border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)] bg-emerald-500/5';
-                            else if (col === 'Done') dragClasses = 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)] bg-amber-500/5';
-                            else dragClasses = 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] bg-indigo-500/5';
+                            if (col === 'Review') dragClasses = 'border-emerald-500 border-4 bg-emerald-500/5';
+                            else if (col === 'Done') dragClasses = 'border-amber-500 border-4 bg-amber-500/5';
+                            else dragClasses = 'border-indigo-500 border-4 bg-indigo-500/5';
                         }
 
                         return (
@@ -567,15 +596,38 @@ export default function TaskBoard() {
                                         <span className="font-bold text-sm uppercase tracking-wider">{col}</span>
                                         <span className="bg-gray-200 dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">{colTasks.length}</span>
                                     </div>
-                                    <div className="flex gap-1">
+                                    <div className="flex gap-1 items-center">
                                         {!isProtected && (
-                                            <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1">
-                                                <button onClick={() => {
-                                                    const newName = prompt("Rename column:", col);
-                                                    if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
-                                                }} className="p-1 hover:bg-black/5 rounded"><PencilSimple size={12} /></button>
-                                                <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-red-500/10 text-red-500 rounded"><X size={12} /></button>
-                                            </div>
+                                            <>
+                                                {/* Column Move Arrows - appear on hover */}
+                                                <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1 mr-2">
+                                                    <button 
+                                                        onClick={() => moveColumn(col, 'left')} 
+                                                        disabled={idx === 0 || PROTECTED_COLUMNS.includes(columns[idx - 1])}
+                                                        className="p-1 hover:bg-indigo-500/10 text-indigo-500 rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                                        title="Move Left"
+                                                    >
+                                                        <CaretLeft size={14} weight="bold" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => moveColumn(col, 'right')} 
+                                                        disabled={idx === columns.length - 1 || PROTECTED_COLUMNS.includes(columns[idx + 1])}
+                                                        className="p-1 hover:bg-indigo-500/10 text-indigo-500 rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                                        title="Move Right"
+                                                    >
+                                                        <CaretRight size={14} weight="bold" />
+                                                    </button>
+                                                </div>
+                                                
+                                                {/* Edit/Delete buttons */}
+                                                <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1">
+                                                    <button onClick={() => {
+                                                        const newName = prompt("Rename column:", col);
+                                                        if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
+                                                    }} className="p-1 hover:bg-black/5 rounded"><PencilSimple size={12} /></button>
+                                                    <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-red-500/10 text-red-500 rounded"><X size={12} /></button>
+                                                </div>
+                                            </>
                                         )}
                                         {isProtected && <LockKey className="opacity-30" weight="bold" />}
                                     </div>
@@ -586,32 +638,50 @@ export default function TaskBoard() {
                                         const completed = task.subtasks.filter(s => s.isCompleted).length;
                                         const total = task.subtasks.length;
                                         const pct = total > 0 ? (completed / total) * 100 : 0;
-                                        const isActive = selectedTask?.id === task.id && isFlowOpen;
                                         
-                                        // FLOW BLUR LOGIC
+                                        // THE FIX: Check if this task is currently selected AND flow panel is open
+                                        const isActiveInFlow = selectedTask?.id === task.id && isFlowOpen;
+                                        
+                                        // FLOW BLUR LOGIC - BUT EXCLUDE ACTIVE TASK
                                         const isFocused = flowFocusId === task.id;
                                         const isLinkedToFocused = flowFocusId && (
                                             (tasks.find(t => t.id === flowFocusId)?.links?.includes(task.id)) || 
                                             (task.links?.includes(flowFocusId)) 
                                         );
                                         
-                                        // If task is active, it is NEVER dimmed.
-                                        // If flow is active, dim everything else.
-                                        const isDimmed = flowFocusId && !isFocused && !isLinkedToFocused && !isActive;
+                                        // NEW LOGIC: When flow panel is open, blur everything EXCEPT the active card
+                                        // When flow focus is active (Flow Table button), blur everything except focused and linked
+                                        const isDimmed = (isFlowOpen && !isActiveInFlow && !flowFocusId) || 
+                                                        (!isActiveInFlow && flowFocusId && !isFocused && !isLinkedToFocused);
+
+                                        // Debug logging for the first card only
+                                        if (task.id === 't-1') {
+                                            console.log('Card t-1 render:', {
+                                                selectedTaskId: selectedTask?.id,
+                                                isFlowOpen,
+                                                isActiveInFlow,
+                                                flowFocusId,
+                                                isFocused,
+                                                isLinkedToFocused,
+                                                isDimmed
+                                            });
+                                        }
 
                                         let cardStateClass = '';
-                                        // Remove pointer-events-none so we can click dimmed cards to wake them up
                                         if (isDimmed) {
-                                            cardStateClass = 'opacity-20 blur-[2px] grayscale transition-all duration-500';
+                                            // Blur and dim cards that aren't active
+                                            cardStateClass = 'opacity-30 blur-sm grayscale transition-all duration-500';
                                         } else if (isFocused) {
                                             cardStateClass = 'ring-4 ring-purple-500 shadow-2xl scale-105 z-50 !bg-white dark:!bg-[#1e293b]';
+                                        } else if (isActiveInFlow) {
+                                            // Active card in flow panel - stays clear with highlight
+                                            cardStateClass = 'ring-2 ring-indigo-400 shadow-2xl scale-105 z-50 !bg-white dark:!bg-[#1e293b] transition-all duration-500';
                                         }
 
                                         // DRAG & DROP FLASH LOGIC
                                         const isDraggingThis = draggedTaskId === task.id;
                                         const isJustDropped = justDroppedId === task.id;
 
-                                        // Removed rotate-3, added brightness flash
                                         let tiltClass = isDraggingThis ? 'scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
                                         if (isJustDropped) tiltClass += ' brightness-125 ring-2 ring-white/50 shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-500';
 
@@ -631,7 +701,7 @@ export default function TaskBoard() {
                                                 ref={el => cardRefs.current[task.id] = el}
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task.id)}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setIsFlowOpen(true); }}
+                                                onClick={(e) => handleCardClick(task, e)}
                                                 className={`
                                                     glass-card !p-4 group hover:border-indigo-500/30 transition-all duration-300 relative bg-white dark:bg-[#1e293b] cursor-pointer
                                                     ${cardStateClass}
@@ -682,42 +752,46 @@ export default function TaskBoard() {
                                                     </div>
 
                                                     <div className="flex gap-2">
-                                                        {/* FLOW TABLE BUTTON */}
+                                                        {/* UPSTREAM INDICATOR - Tasks that link TO this one (blockers) */}
+                                                        {incomingLinkTask && (
+                                                            <div className="group/link relative flex items-center justify-center">
+                                                                <div className="flex items-center gap-1 text-[10px] font-bold bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400 px-2 py-1 rounded shadow-sm border border-orange-200 dark:border-orange-500/20 cursor-help">
+                                                                    <LinkIcon weight="bold" size={12} />
+                                                                    <span>Blocked</span>
+                                                                </div>
+                                                                <div className="absolute bottom-full right-0 mb-2 hidden group-hover/link:block w-max max-w-[200px] bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-[60] pointer-events-none">
+                                                                    Depends on: {incomingLinkTask.title}
+                                                                    <div className="absolute top-full right-1 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* DOWNSTREAM INDICATOR - Tasks this links TO (blocking others) */}
                                                         {task.links && task.links.length > 0 && (
                                                             <button 
                                                                 onClick={(e) => { 
                                                                     e.stopPropagation(); 
                                                                     setFlowFocusId(flowFocusId === task.id ? null : task.id);
                                                                 }}
-                                                                title="Flow Table"
-                                                                className={`text-[10px] font-bold flex items-center gap-1.5 px-2 py-1 rounded transition shadow-sm 
+                                                                title="Show Flow Dependencies"
+                                                                className={`text-[10px] font-bold flex items-center gap-1.5 px-2 py-1 rounded transition shadow-sm border
                                                                     ${flowFocusId === task.id 
-                                                                        ? 'bg-purple-600 text-white ring-2 ring-purple-300' 
-                                                                        : 'bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-500/10 dark:text-purple-300 dark:hover:bg-purple-500/20'
+                                                                        ? 'bg-purple-600 text-white ring-2 ring-purple-300 border-purple-600' 
+                                                                        : 'bg-purple-50 text-purple-600 hover:bg-purple-100 border-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:hover:bg-purple-500/20 dark:border-purple-500/20'
                                                                     }
                                                                 `}
                                                             >
-                                                                <span className="uppercase tracking-wide">Flow</span>
+                                                                <span className="uppercase tracking-wide">Blocks {task.links.length}</span>
                                                                 <BezierCurve weight="bold" size={14} />
                                                             </button>
                                                         )}
 
-                                                        {/* LINKED FROM ICON + TOOLTIP (New Requirement) */}
-                                                        {incomingLinkTask && (
-                                                            <div className="group/link relative flex items-center justify-center text-fuchsia-500 cursor-help">
-                                                                <LinkIcon weight="bold" size={16} />
-                                                                <div className="absolute bottom-full right-0 mb-2 hidden group-hover/link:block w-max bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-[60] pointer-events-none">
-                                                                    Linked from {incomingLinkTask.title}
-                                                                    <div className="absolute top-full right-1 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {/* MAGIC FLOW BUTTON */}
+                                                        {/* MAGIC FLOW BUTTON - Only if has subtasks */}
                                                         {task.subtasks.length > 0 && (
                                                             <button 
-                                                                onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setIsFlowOpen(true); }}
-                                                                className="text-xs font-bold text-indigo-500 flex items-center gap-1 hover:underline ml-auto"
+                                                                onClick={(e) => { e.stopPropagation(); handleCardClick(task, e); }}
+                                                                className="text-xs font-bold text-indigo-500 flex items-center gap-1 hover:underline"
+                                                                title="Open Workflow"
                                                             >
                                                                 <FlowArrow weight="bold" />
                                                             </button>
@@ -760,6 +834,7 @@ export default function TaskBoard() {
                 onAddSubtask={openAddSubtaskModal}
                 onAddNote={handleAddNote}
                 onMoveTask={moveTaskToColumn}
+                allTasks={tasks}
             />
 
             {isEditModalOpen && (

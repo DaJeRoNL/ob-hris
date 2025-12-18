@@ -3,7 +3,8 @@ import {
     CheckCircle, Circle, CaretUp, CaretDown, 
     ArrowRight, ArrowDown, TreeStructure, CaretLeft, CaretRight, 
     UserPlus, ShieldCheck, CalendarCheck, User, Clock, 
-    UsersThree, Plus, PaperPlaneRight, Chats, Check, Fire, Pulse
+    UsersThree, Plus, PaperPlaneRight, Chats, Check, Fire, Pulse,
+    Link as LinkIcon, ShareNetwork
 } from '@phosphor-icons/react';
 
 
@@ -39,6 +40,7 @@ interface Task {
     collaborators: string[];
     completedAt?: string;
     assignee: string | null;
+    links?: string[]; // Flow Links
 }
 
 
@@ -51,14 +53,16 @@ interface Props {
     onAddSubtask: (taskId: string) => void;
     onAddNote: (taskId: string, text: string) => void;
     onMoveTask: (taskId: string, column: string) => void;
+    allTasks: Task[]; // Need this to show linked task details
 }
 
-export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask, onPickUpSubtask, onAddSubtask, onAddNote, onMoveTask }: Props) {
+export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask, onPickUpSubtask, onAddSubtask, onAddNote, onMoveTask, allTasks }: Props) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const nodesRef = useRef<Map<string, HTMLDivElement>>(new Map());
     const [noteInput, setNoteInput] = useState('');
     const [showCompleteMenu, setShowCompleteMenu] = useState(false);
     const scrollTimeout = useRef<number | null>(null);
+    const [activeTab, setActiveTab] = useState<'workflow' | 'dependencies'>('workflow');
 
     useEffect(() => {
         if (task && isOpen) {
@@ -108,6 +112,11 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
     const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
     const canComplete = requiredCompleted === requiredCount && requiredCount > 0;
     
+    // Dependency counts
+    const upstreamTasks = allTasks.filter(t => t.links?.includes(task.id)); // Tasks that block this one
+    const downstreamTasks = (task.links?.map(id => allTasks.find(t => t.id === id)).filter((t): t is Task => t !== undefined)) || []; // Tasks this blocks
+    const hasDependencies = upstreamTasks.length > 0 || downstreamTasks.length > 0;
+    
     // Header Health Status
     const isCritical = task.priority === 'Critical';
     const isUrgent = task.deadline && (new Date(task.deadline).getTime() - new Date().getTime()) < (2 * 86400000);
@@ -115,8 +124,9 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
 
     return (
         <>
+            {/* Subtle backdrop - no blur, we'll blur cards individually */}
             <div 
-                className={`fixed inset-0 bg-black/20 backdrop-blur-[2px] transition-opacity duration-500 z-30 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                className={`fixed inset-0 bg-black/10 transition-opacity duration-500 z-30 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                 onClick={() => setIsOpen(false)}
             />
 
@@ -141,19 +151,50 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                             </span>
                         </div>
                         <div className="h-4 w-px bg-gray-300 dark:bg-white/10 mx-2"></div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold opacity-60">
-                                {task.title}
-                            </span>
-                            <div className="flex items-center gap-1.5 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full border border-black/5 dark:border-white/5" title={isCritical ? "Critical Status" : "Stable"}>
-                                <Pulse weight="fill" className={`${healthColor} ${isCritical ? 'animate-pulse' : ''}`} size={12} />
-                                <span className="text-[10px] font-mono opacity-60 uppercase">{isCritical ? 'CRIT' : isUrgent ? 'WARN' : 'GOOD'}</span>
+                        
+                        {/* TAB SWITCHER */}
+                        {isOpen && (
+                            <div className="flex gap-1 bg-gray-100 dark:bg-black/20 p-1 rounded-lg">
+                                <button 
+                                    onClick={() => setActiveTab('workflow')}
+                                    className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition ${
+                                        activeTab === 'workflow' 
+                                            ? 'bg-white dark:bg-white/10 text-indigo-600 shadow-sm' 
+                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    Workflow {totalCount > 0 && `(${completedCount}/${totalCount})`}
+                                </button>
+                                {hasDependencies && (
+                                    <button 
+                                        onClick={() => setActiveTab('dependencies')}
+                                        className={`px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition ${
+                                            activeTab === 'dependencies' 
+                                                ? 'bg-white dark:bg-white/10 text-purple-600 shadow-sm' 
+                                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                        }`}
+                                    >
+                                        Dependencies ({upstreamTasks.length + downstreamTasks.length})
+                                    </button>
+                                )}
                             </div>
-                        </div>
+                        )}
+                        
+                        {!isOpen && (
+                            <div className="flex items-center gap-3">
+                                <span className="text-xs font-bold opacity-60">
+                                    {task.title}
+                                </span>
+                                <div className="flex items-center gap-1.5 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full border border-black/5 dark:border-white/5" title={isCritical ? "Critical Status" : "Stable"}>
+                                    <Pulse weight="fill" className={`${healthColor} ${isCritical ? 'animate-pulse' : ''}`} size={12} />
+                                    <span className="text-[10px] font-mono opacity-60 uppercase">{isCritical ? 'CRIT' : isUrgent ? 'WARN' : 'GOOD'}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {isOpen && (
+                        {isOpen && activeTab === 'workflow' && (
                             <div className="flex gap-2 mr-4">
                                 <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition"><CaretLeft weight="bold" /></button>
                                 <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition"><CaretRight weight="bold" /></button>
@@ -233,11 +274,13 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     </div>
 
                     {/* 2. SCROLLABLE FLOW (Right) */}
-                    <div 
-                        ref={scrollRef}
-                        className="flex-1 flex flex-col overflow-x-auto overflow-y-hidden no-scrollbar pb-12 relative bg-gray-50/50 dark:bg-[#0b1121]"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                    >
+                    {activeTab === 'workflow' ? (
+                        // WORKFLOW TAB - Existing subtasks flow
+                        <div 
+                            ref={scrollRef}
+                            className="flex-1 flex flex-col overflow-x-auto overflow-y-hidden no-scrollbar pb-12 relative bg-gray-50/50 dark:bg-[#0b1121]"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
                         <div className="flex items-center gap-8 min-w-max px-12 h-full pt-4">
                             
                             {/* Start Node */}
@@ -255,8 +298,9 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                 return (
                                     <div 
                                         key={sub.id} 
-                                        // @ts-ignore
-                                        ref={el => nodesRef.current.set(sub.id, el)}
+                                        ref={el => {
+                                            if (el) nodesRef.current.set(sub.id, el);
+                                        }}
                                         className="flex items-center gap-8 group/node relative"
                                     >
                                         <div className={`
@@ -358,6 +402,102 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
 
                         </div>
                     </div>
+                    ) : (
+                        // DEPENDENCIES TAB - Show linked tasks
+                        <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50 dark:bg-[#0b1121]">
+                            <div className="max-w-4xl mx-auto space-y-6">
+                                {/* UPSTREAM - Tasks blocking this one */}
+                                {upstreamTasks.length > 0 && (
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center">
+                                                <LinkIcon weight="bold" className="text-orange-600 dark:text-orange-400" size={16} />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-sm">Blocked By ({upstreamTasks.length})</h3>
+                                                <p className="text-[10px] opacity-60">These tasks must complete before this one can finish</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {upstreamTasks.map(upTask => {
+                                                const isComplete = upTask.status === 'Done';
+                                                return (
+                                                    <div key={upTask.id} className={`p-4 rounded-xl border-2 ${isComplete ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500/30' : 'bg-white dark:bg-[#1e293b] border-orange-200 dark:border-orange-500/20'}`}>
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                {isComplete ? (
+                                                                    <CheckCircle size={20} weight="fill" className="text-emerald-500" />
+                                                                ) : (
+                                                                    <Clock size={20} weight="fill" className="text-orange-500" />
+                                                                )}
+                                                                <div>
+                                                                    <div className="font-bold text-sm">{upTask.title}</div>
+                                                                    <div className="text-[10px] opacity-60">{upTask.status}</div>
+                                                                </div>
+                                                            </div>
+                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${upTask.priority === 'Critical' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                                                                {upTask.priority}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-xs opacity-70 leading-relaxed">{upTask.desc || 'No description'}</p>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* DOWNSTREAM - Tasks this blocks */}
+                                {downstreamTasks.length > 0 && (
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                                                <ShareNetwork weight="bold" className="text-purple-600 dark:text-purple-400" size={16} />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-sm">Blocking ({downstreamTasks.length})</h3>
+                                                <p className="text-[10px] opacity-60">These tasks are waiting for this one to complete</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {downstreamTasks.map((downTask: Task) => {
+                                                const isBlocked = task.status !== 'Done';
+                                                return (
+                                                    <div key={downTask.id} className={`p-4 rounded-xl border-2 ${isBlocked ? 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-500/20' : 'bg-white dark:bg-[#1e293b] border-gray-200 dark:border-white/10'}`}>
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                {isBlocked ? (
+                                                                    <Clock size={20} weight="fill" className="text-purple-500" />
+                                                                ) : (
+                                                                    <CheckCircle size={20} weight="fill" className="text-emerald-500" />
+                                                                )}
+                                                                <div>
+                                                                    <div className="font-bold text-sm">{downTask.title}</div>
+                                                                    <div className="text-[10px] opacity-60">{downTask.status}</div>
+                                                                </div>
+                                                            </div>
+                                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${downTask.priority === 'Critical' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                                                                {downTask.priority}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-xs opacity-70 leading-relaxed">{downTask.desc || 'No description'}</p>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {upstreamTasks.length === 0 && downstreamTasks.length === 0 && (
+                                    <div className="text-center py-12 opacity-50">
+                                        <ShareNetwork size={48} weight="duotone" className="mx-auto mb-3 opacity-30" />
+                                        <p className="text-sm font-bold">No Dependencies</p>
+                                        <p className="text-xs mt-1">This task has no upstream or downstream links</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* --- FOOTER --- */}
                     <div className="absolute bottom-0 right-0 left-[420px] bg-white/80 dark:bg-[#0f172a]/90 backdrop-blur-md border-t border-gray-200 dark:border-white/10 px-8 py-3 flex justify-between items-center text-xs opacity-70 z-30">
