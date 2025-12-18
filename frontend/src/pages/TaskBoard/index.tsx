@@ -3,21 +3,10 @@ import {
     Plus, Kanban, List, MagnifyingGlass, 
     DotsThree, UserPlus, Fire, FlowArrow, 
     PencilSimple, CaretLeft, CaretRight, X, LockKey, Pencil, CheckCircle, Archive, SortAscending,
-    CalendarBlank
+    CalendarBlank, Graph, ShareNetwork, BezierCurve, Link as LinkIcon
 } from '@phosphor-icons/react';
 import TaskFlowPanel from './components/TaskFlowPanel';
 import EditTaskModal from './components/EditTaskModal';
-
-
-interface Subtask {
-    id: string;
-    title: string;
-    desc?: string;
-    isCompleted: boolean;
-    assignee?: string;
-    isRequired?: boolean;
-    completedAt?: string;
-}
 
 interface Note {
     id: string;
@@ -26,10 +15,22 @@ interface Note {
     timestamp: string;
 }
 
+interface Subtask {
+    id: string;
+    title: string;
+    desc?: string;
+    isCompleted: boolean;
+    isRequired?: boolean;
+    assignee?: string;
+    completedAt?: string;
+}
+
 interface Task {
     id: string;
     title: string;
     desc: string;
+    assignee: string | null;
+    collaborators: string[];
     priority: 'Low' | 'Medium' | 'High' | 'Critical';
     status: 'New Tickets' | 'Ready' | 'In Progress' | 'Review' | 'Done';
     tags: string[];
@@ -38,17 +39,15 @@ interface Task {
     deadline?: string;
     creator?: string;
     createdAt?: string;
-    collaborators: string[];
     completedAt?: string;
-    assignee: string | null;
+    links?: string[]; // Flow Links
 }
-
 
 const INITIAL_TASKS: Task[] = [
     { 
         id: 't-1', title: 'Migrate Legacy Auth', desc: 'Switch from v1 tokens to JWT.', 
         assignee: null, collaborators: [], priority: 'High', status: 'New Tickets', tags: ['Backend', 'Security'],
-        deadline: '2024-11-30', creator: 'Admin', createdAt: '2024-10-01',
+        deadline: '2024-11-30', creator: 'Admin', createdAt: '2024-10-01', links: ['t-3'],
         subtasks: [
             { id: 's1', title: 'Audit current token usage', desc: 'Check all API endpoints.', isCompleted: true, isRequired: true, completedAt: '2024-10-02T10:00:00' },
             { id: 's2', title: 'Implement JWT Provider', desc: 'Use standard library.', isCompleted: false, isRequired: true },
@@ -78,7 +77,7 @@ const INITIAL_TASKS: Task[] = [
     { 
         id: 't-4', title: 'Update Landing Page', desc: 'Refresh hero image and copy.', 
         assignee: null, collaborators: [], priority: 'Low', status: 'New Tickets', tags: ['Design', 'Marketing'],
-        creator: 'Marketing Lead', createdAt: '2024-10-10',
+        creator: 'Marketing Lead', createdAt: '2024-10-10', links: ['t-5'],
         subtasks: [
             { id: 's1', title: 'Design Mockup', isCompleted: false, isRequired: true },
             { id: 's2', title: 'Copy Review', isCompleted: false, isRequired: false }
@@ -113,11 +112,114 @@ const INITIAL_TASKS: Task[] = [
 
 const PROTECTED_COLUMNS = ['New Tickets', 'Review', 'Done'];
 
+// SVG Layer Component (Dual Color Logic)
+const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { tasks: Task[], cardRefs: React.MutableRefObject<any>, flowFocusId: string | null, isDragging: boolean }) => {
+    // Hide immediately if dragging
+    if (!flowFocusId || isDragging) return null;
+
+    // Explicitly type the paths array
+    const paths: React.ReactNode[] = [];
+    
+    for (const task of tasks) {
+        if (!task.links) continue;
+        
+        const isSourceFocused = task.id === flowFocusId;
+        
+        task.links.forEach(targetId => {
+            const isDestFocused = targetId === flowFocusId;
+            
+            if (isSourceFocused || isDestFocused) {
+                const sourceEl = cardRefs.current[task.id];
+                const destEl = cardRefs.current[targetId];
+
+                if (sourceEl && destEl) {
+                    const sLeft = sourceEl.offsetLeft;
+                    const sTop = sourceEl.offsetTop;
+                    const sWidth = sourceEl.offsetWidth;
+                    const sHeight = sourceEl.offsetHeight;
+
+                    const dLeft = destEl.offsetLeft;
+                    const dTop = destEl.offsetTop;
+                    const dWidth = destEl.offsetWidth;
+                    const dHeight = destEl.offsetHeight;
+
+                    let x1 = sLeft + sWidth / 2;
+                    let y1 = sTop + sHeight;
+                    let x2 = dLeft + dWidth / 2;
+                    let y2 = dTop;
+
+                    const isSameColumn = Math.abs(x1 - x2) < 50; 
+                    let pathData = '';
+
+                    if (isSameColumn) {
+                         // Shift to Right Edge
+                         x1 = sLeft + sWidth;
+                         y1 = sTop + sHeight / 2;
+
+                         x2 = dLeft + dWidth;
+                         y2 = dTop + dHeight / 2;
+
+                         const controlX = Math.max(x1, x2) + 100; 
+                         pathData = `M ${x1} ${y1} C ${controlX} ${y1}, ${controlX} ${y2}, ${x2} ${y2}`;
+                    } else {
+                         // Standard S-Curve
+                         pathData = `M ${x1} ${y1} C ${x1} ${y1 + 150}, ${x2} ${y2 - 150}, ${x2} ${y2}`;
+                    }
+
+                    // COLOR LOGIC
+                    // Source Focused = Green (Forward)
+                    // Dest Focused = Grey (Backward)
+                    const lineColor = isSourceFocused ? '#10b981' : '#64748b'; // Green or Slate-500
+                    const markerId = isSourceFocused ? 'url(#arrowhead-green)' : 'url(#arrowhead-grey)';
+                    const strokeStyle = isSourceFocused ? '6,4' : '4,4'; // Different dash style for variety
+
+                    paths.push(
+                        <g key={`${task.id}-${targetId}`}>
+                            <path 
+                                d={pathData} 
+                                stroke={lineColor} 
+                                strokeWidth="2" 
+                                fill="none" 
+                                strokeDasharray={strokeStyle}
+                                markerEnd={markerId}
+                                className="animate-draw"
+                            />
+                            {/* Halo */}
+                            <path 
+                                d={pathData} 
+                                stroke={isSourceFocused ? "rgba(16,185,129,0.1)" : "rgba(100,116,139,0.1)"} 
+                                strokeWidth="6" 
+                                fill="none" 
+                            />
+                        </g>
+                    );
+                }
+            }
+        });
+    }
+
+    return (
+        <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0" style={{ minWidth: '100%', minHeight: '100%' }}>
+            <defs>
+                {/* Green Arrow (Forward) */}
+                <marker id="arrowhead-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                    <path d="M 0 0 L 10 6 L 0 12" fill="none" stroke="#10b981" strokeWidth="1.5" />
+                </marker>
+                
+                {/* Grey Arrow (Backward) */}
+                <marker id="arrowhead-grey" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                    <path d="M 0 0 L 10 6 L 0 12" fill="none" stroke="#64748b" strokeWidth="1.5" />
+                </marker>
+            </defs>
+            {paths}
+        </svg>
+    );
+};
+
 export default function TaskBoard() {
     const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
     const [columns, setColumns] = useState(['New Tickets', 'Ready', 'In Progress', 'Review', 'Done']);
     const [filter, setFilter] = useState('');
-    const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
     const [sortBy, setSortBy] = useState<'priority' | 'deadline' | 'newest'>('priority');
     const [isAdmin] = useState(true); 
     
@@ -128,6 +230,13 @@ export default function TaskBoard() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
     const [dragOverCol, setDragOverCol] = useState<string | null>(null); 
+    
+    // DROP FLASH STATE
+    const [justDroppedId, setJustDroppedId] = useState<string | null>(null);
+    
+    // FLOW STATE
+    const [flowFocusId, setFlowFocusId] = useState<string | null>(null);
+    const cardRefs = useRef<any>({});
     
     // Sort Menu State
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
@@ -161,7 +270,7 @@ export default function TaskBoard() {
         }
     };
 
-    // Sort Handlers
+    // Sort Menu Handlers
     const handleSortEnter = () => {
         if (sortTimeoutRef.current) clearTimeout(sortTimeoutRef.current);
         setIsSortMenuOpen(true);
@@ -170,11 +279,12 @@ export default function TaskBoard() {
     const handleSortLeave = () => {
         sortTimeoutRef.current = window.setTimeout(() => {
             setIsSortMenuOpen(false);
-        }, 400); // 0.4s delay
+        }, 400); 
     };
 
     // Drag & Drop
     const handleDragStart = (e: React.DragEvent, id: string) => {
+        setFlowFocusId(null);
         setDraggedTaskId(id);
         e.dataTransfer.effectAllowed = "move";
     };
@@ -214,6 +324,11 @@ export default function TaskBoard() {
         };
 
         setTasks(prev => prev.map(t => t.id === draggedTaskId ? updatedTask : t));
+        
+        // TRIGGER FLASH
+        setJustDroppedId(draggedTaskId);
+        setTimeout(() => setJustDroppedId(null), 600); // 600ms Flash duration
+
         setDraggedTaskId(null);
     };
 
@@ -227,29 +342,11 @@ export default function TaskBoard() {
         }
     };
 
-    const moveColumn = (index: number, direction: 'left' | 'right') => {
-        const newCols = [...columns];
-        const targetIndex = direction === 'left' ? index - 1 : index + 1;
-        
-        // Safety range: >0 (New Tickets) and < length-2 (Review/Done)
-        if (targetIndex < 1 || targetIndex > columns.length - 3) return;
-
-        const temp = newCols[index];
-        newCols[index] = newCols[targetIndex];
-        newCols[targetIndex] = temp;
-        setColumns(newCols);
-    };
-
     const handleDeleteColumn = (col: string) => {
         if (confirm(`Delete column "${col}"? Tasks will be moved to New Tickets.`)) {
             setTasks(prev => prev.map(t => t.status === col ? { ...t, status: 'New Tickets' as any } : t));
             setColumns(prev => prev.filter(c => c !== col));
         }
-    };
-
-    const handlePickUp = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        setTasks(prev => prev.map(t => t.id === id ? { ...t, assignee: 'Me', status: 'In Progress', collaborators: [...new Set([...t.collaborators, 'Me'])] } : t));
     };
 
     const handlePickUpSubtask = (taskId: string, subtaskId: string) => {
@@ -327,6 +424,34 @@ export default function TaskBoard() {
         setIsEditModalOpen(true);
     };
 
+    // Creates a new task linked TO by the sourceId
+    const handleCreateLinkedTask = (sourceId: string) => {
+        const sourceTask = tasks.find(t => t.id === sourceId);
+        if (!sourceTask) return;
+
+        const newId = `t-${Date.now()}`;
+        const newTask: Task = {
+            id: newId,
+            title: 'Linked Task',
+            desc: `Follow-up to ${sourceTask.title}`,
+            assignee: null,
+            priority: 'Medium',
+            status: 'New Tickets',
+            tags: ['Linked'],
+            subtasks: [],
+            notes: [],
+            collaborators: [],
+            links: [],
+            creator: 'Me',
+            createdAt: new Date().toISOString()
+        };
+
+        // Update Source to point to New
+        const updatedSource = { ...sourceTask, links: [...(sourceTask.links || []), newId] };
+        
+        setTasks(prev => [...prev.map(t => t.id === sourceId ? updatedSource : t), newTask]);
+    };
+
     const openAddSubtaskModal = (taskId: string) => {
         const t = tasks.find(x => x.id === taskId);
         if (t) {
@@ -353,8 +478,13 @@ export default function TaskBoard() {
         });
     }, [tasks, filter, sortBy]);
 
+    // Handle background click to clear flow focus
+    const handleBackgroundClick = (e: React.MouseEvent) => {
+        setFlowFocusId(null);
+    };
+
     return (
-        <div className="h-full flex flex-col p-6 animate-fade-in bg-[#f3f4f6] dark:bg-[#020617] text-[var(--text-main)] relative overflow-hidden">
+        <div className="h-full flex flex-col p-6 animate-fade-in bg-[#f3f4f6] dark:bg-[#020617] text-[var(--text-main)] relative overflow-hidden" onClick={handleBackgroundClick}>
             
             <header className="flex flex-col md:flex-row justify-between items-end gap-4 mb-6 shrink-0 z-20">
                 <div>
@@ -370,7 +500,6 @@ export default function TaskBoard() {
                         <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search tasks..." className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-64 shadow-sm" />
                     </div>
                     
-                    {/* Sort Button with Delay */}
                     <div 
                         className="relative group"
                         onMouseEnter={handleSortEnter}
@@ -402,14 +531,21 @@ export default function TaskBoard() {
 
             <div 
                 ref={scrollContainerRef}
-                className={`flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar ${isFlowOpen ? 'select-none' : ''}`} // Removed blur from container
+                className="flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar relative"
             >
-                <div className="flex gap-6 h-full min-w-max px-2">
+                {/* SVG Overlay Container */}
+                <div className="flex gap-6 h-full min-w-max px-2 relative z-10">
+                    
+                    <ConnectionsOverlay 
+                        tasks={tasks} 
+                        cardRefs={cardRefs} 
+                        flowFocusId={flowFocusId} 
+                        isDragging={draggedTaskId !== null} 
+                    />
+
                     {columns.map((col, idx) => {
                         const colTasks = filteredTasks.filter(t => t.status === col);
                         const isProtected = PROTECTED_COLUMNS.includes(col);
-                        
-                        // Dynamic Drag Glow
                         const isDragOver = dragOverCol === col;
                         let dragClasses = '';
                         if (isDragOver) {
@@ -418,25 +554,10 @@ export default function TaskBoard() {
                             else dragClasses = 'border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)] bg-indigo-500/5';
                         }
 
-                        // Column Borders
-                        let colBorder = 'border-t-4 border-indigo-500'; 
-                        if (col === 'Review') colBorder = 'border-t-4 border-emerald-500';
-                        if (col === 'Done') colBorder = 'border-t-4 border-amber-500';
-                        if (col !== 'New Tickets' && col !== 'Review' && col !== 'Done') colBorder = 'border-t-4 border-blue-500';
-
-                        let bgClass = 'bg-gray-100/50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5';
-
-                        if (isDragOver) {
-                             bgClass = 'bg-indigo-500/10 dark:bg-indigo-500/20';
-                             if (col === 'Review') colBorder = 'border-t-4 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]';
-                             else if (col === 'Done') colBorder = 'border-t-4 border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]';
-                             else colBorder = 'border-t-4 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.3)]';
-                        }
-
                         return (
                             <div 
                                 key={col} 
-                                className={`w-[350px] flex flex-col rounded-2xl border ${bgClass} ${colBorder} h-full transition-all duration-300 ${dragClasses}`}
+                                className={`w-[350px] flex flex-col bg-gray-100/50 dark:bg-white/[0.02] rounded-2xl border border-gray-200 dark:border-white/5 h-full transition-all duration-300 ${dragClasses}`}
                                 onDragEnter={() => handleDragEnter(col)}
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, col)}
@@ -446,18 +567,15 @@ export default function TaskBoard() {
                                         <span className="font-bold text-sm uppercase tracking-wider">{col}</span>
                                         <span className="bg-gray-200 dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">{colTasks.length}</span>
                                     </div>
-                                    <div className="flex gap-1 opacity-0 group-hover/col:opacity-100 transition-opacity">
+                                    <div className="flex gap-1">
                                         {!isProtected && (
-                                            <>
-                                                <button onClick={() => moveColumn(idx, 'left')} disabled={idx <= 1} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded disabled:opacity-30"><CaretLeft weight="bold" size={12} /></button>
-                                                <button onClick={() => moveColumn(idx, 'right')} disabled={idx >= columns.length - 2} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded disabled:opacity-30"><CaretRight weight="bold" size={12} /></button>
-                                                <div className="w-px h-3 bg-gray-300 dark:bg-white/20 mx-1"></div>
+                                            <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1">
                                                 <button onClick={() => {
                                                     const newName = prompt("Rename column:", col);
                                                     if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
-                                                }} className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded"><PencilSimple size={12} /></button>
+                                                }} className="p-1 hover:bg-black/5 rounded"><PencilSimple size={12} /></button>
                                                 <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-red-500/10 text-red-500 rounded"><X size={12} /></button>
-                                            </>
+                                            </div>
                                         )}
                                         {isProtected && <LockKey className="opacity-30" weight="bold" />}
                                     </div>
@@ -470,36 +588,50 @@ export default function TaskBoard() {
                                         const pct = total > 0 ? (completed / total) * 100 : 0;
                                         const isActive = selectedTask?.id === task.id && isFlowOpen;
                                         
-                                        // Selective Blur: Blurred if panel open AND NOT active
+                                        // FLOW BLUR LOGIC
+                                        const isFocused = flowFocusId === task.id;
+                                        const isLinkedToFocused = flowFocusId && (
+                                            (tasks.find(t => t.id === flowFocusId)?.links?.includes(task.id)) || 
+                                            (task.links?.includes(flowFocusId)) 
+                                        );
+                                        
+                                        // If task is active, it is NEVER dimmed.
+                                        // If flow is active, dim everything else.
+                                        const isDimmed = flowFocusId && !isFocused && !isLinkedToFocused && !isActive;
+
                                         let cardStateClass = '';
-                                        if (isFlowOpen) {
-                                            if (isActive) {
-                                                // Active Card: Pop out, no blur
-                                                cardStateClass = 'ring-4 ring-indigo-500 border-transparent z-50 scale-105 shadow-2xl !blur-0 !brightness-100 !pointer-events-auto';
-                                            } else {
-                                                // Inactive Cards: Blur, dim slightly, disable pointer events
-                                                cardStateClass = 'blur-sm opacity-80 pointer-events-none';
-                                            }
+                                        // Remove pointer-events-none so we can click dimmed cards to wake them up
+                                        if (isDimmed) {
+                                            cardStateClass = 'opacity-20 blur-[2px] grayscale transition-all duration-500';
+                                        } else if (isFocused) {
+                                            cardStateClass = 'ring-4 ring-purple-500 shadow-2xl scale-105 z-50 !bg-white dark:!bg-[#1e293b]';
                                         }
 
-                                        // Dynamic Tilt on Drag
+                                        // DRAG & DROP FLASH LOGIC
                                         const isDraggingThis = draggedTaskId === task.id;
-                                        // FIXED: No rotation, just lift
-                                        const tiltClass = isDraggingThis ? 'scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
+                                        const isJustDropped = justDroppedId === task.id;
 
-                                        // Determine Date Status for Card (Burnout Logic)
+                                        // Removed rotate-3, added brightness flash
+                                        let tiltClass = isDraggingThis ? 'scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
+                                        if (isJustDropped) tiltClass += ' brightness-125 ring-2 ring-white/50 shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-500';
+
                                         const getUrgency = (t: Task) => {
                                             if (!t.deadline) return false;
                                             const days = (new Date(t.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
                                             return days <= 1 || t.subtasks.length > days;
                                         };
 
+                                        // DESTINATION TEXT CHECK
+                                        // Find if any OTHER task links TO this current task
+                                        const incomingLinkTask = tasks.find(t => t.links?.includes(task.id));
+
                                         return (
                                             <div 
                                                 key={task.id} 
+                                                ref={el => cardRefs.current[task.id] = el}
                                                 draggable
                                                 onDragStart={(e) => handleDragStart(e, task.id)}
-                                                onClick={() => { setSelectedTask(task); setIsFlowOpen(true); }}
+                                                onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setIsFlowOpen(true); }}
                                                 className={`
                                                     glass-card !p-4 group hover:border-indigo-500/30 transition-all duration-300 relative bg-white dark:bg-[#1e293b] cursor-pointer
                                                     ${cardStateClass}
@@ -508,7 +640,7 @@ export default function TaskBoard() {
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex flex-wrap gap-1">
-                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 tracking-wider">{tag}</span>))}
+                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500">{tag}</span>))}
                                                     </div>
                                                     <div className="flex gap-1">
                                                         <button onClick={(e) => openEditModal(task, e)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded text-gray-400 hover:text-indigo-500"><PencilSimple /></button>
@@ -520,12 +652,7 @@ export default function TaskBoard() {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-3 mb-2">
-                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold shadow-inner text-white shrink-0">
-                                                        {task.title.charAt(0)}
-                                                    </div>
-                                                    <h3 className="font-bold text-sm leading-tight">{task.title}</h3>
-                                                </div>
+                                                <h3 className="font-bold text-sm mb-2 leading-tight">{task.title}</h3>
                                                 
                                                 {task.deadline && (
                                                     <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2">
@@ -545,7 +672,7 @@ export default function TaskBoard() {
                                                     <div className="flex -space-x-2 overflow-hidden">
                                                         {task.collaborators.length > 0 ? (
                                                             task.collaborators.map((c, i) => (
-                                                                <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
+                                                                <div key={i} className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
                                                                     {c.charAt(0)}
                                                                 </div>
                                                             ))
@@ -554,15 +681,50 @@ export default function TaskBoard() {
                                                         )}
                                                     </div>
 
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setIsFlowOpen(true); }}
-                                                        className="text-xs font-bold text-indigo-500 flex items-center gap-1 hover:underline"
-                                                    >
-                                                        <FlowArrow weight="bold" /> View Flow
-                                                    </button>
+                                                    <div className="flex gap-2">
+                                                        {/* FLOW TABLE BUTTON */}
+                                                        {task.links && task.links.length > 0 && (
+                                                            <button 
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation(); 
+                                                                    setFlowFocusId(flowFocusId === task.id ? null : task.id);
+                                                                }}
+                                                                title="Flow Table"
+                                                                className={`text-[10px] font-bold flex items-center gap-1.5 px-2 py-1 rounded transition shadow-sm 
+                                                                    ${flowFocusId === task.id 
+                                                                        ? 'bg-purple-600 text-white ring-2 ring-purple-300' 
+                                                                        : 'bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-500/10 dark:text-purple-300 dark:hover:bg-purple-500/20'
+                                                                    }
+                                                                `}
+                                                            >
+                                                                <span className="uppercase tracking-wide">Flow</span>
+                                                                <BezierCurve weight="bold" size={14} />
+                                                            </button>
+                                                        )}
+
+                                                        {/* LINKED FROM ICON + TOOLTIP (New Requirement) */}
+                                                        {incomingLinkTask && (
+                                                            <div className="group/link relative flex items-center justify-center text-fuchsia-500 cursor-help">
+                                                                <LinkIcon weight="bold" size={16} />
+                                                                <div className="absolute bottom-full right-0 mb-2 hidden group-hover/link:block w-max bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-[60] pointer-events-none">
+                                                                    Linked from {incomingLinkTask.title}
+                                                                    <div className="absolute top-full right-1 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* MAGIC FLOW BUTTON */}
+                                                        {task.subtasks.length > 0 && (
+                                                            <button 
+                                                                onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setIsFlowOpen(true); }}
+                                                                className="text-xs font-bold text-indigo-500 flex items-center gap-1 hover:underline ml-auto"
+                                                            >
+                                                                <FlowArrow weight="bold" />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
 
-                                                {/* Context Actions */}
                                                 {task.status === 'Review' && (
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); moveTaskToColumn(task.id, 'Done'); }}
@@ -603,8 +765,10 @@ export default function TaskBoard() {
             {isEditModalOpen && (
                 <EditTaskModal 
                     task={editingTask} 
+                    allTasks={tasks} 
                     onClose={() => setIsEditModalOpen(false)} 
                     onSave={saveTask} 
+                    onCreateLinked={handleCreateLinkedTask}
                 />
             )}
         </div>

@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
     X, Plus, Trash, CalendarBlank, CheckSquare, Square, 
-    CaretUp, CaretDown, TextT 
+    CaretUp, CaretDown, TextT, Link as LinkIcon, TreeStructure
 } from '@phosphor-icons/react';
-
 
 interface Subtask {
     id: string;
@@ -37,18 +36,20 @@ interface Task {
     collaborators: string[];
     completedAt?: string;
     assignee: string | null;
+    links?: string[]; // IDs of downstream tasks
 }
-
 
 interface Props {
     task?: Task | null;
+    allTasks: Task[]; // Passed to select existing
     onClose: () => void;
     onSave: (task: Task) => void;
+    onCreateLinked: (sourceId: string) => void; // Quick create handler
 }
 
 const PRESET_TAGS = ['Backend', 'Frontend', 'Design', 'Bug', 'Urgent', 'Feature', 'Ops'];
 
-export default function EditTaskModal({ task, onClose, onSave }: Props) {
+export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreateLinked }: Props) {
     const [form, setForm] = useState<Task>({
         id: `t-${Date.now()}`,
         title: '',
@@ -60,6 +61,7 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
         subtasks: [],
         notes: [],
         collaborators: [],
+        links: [],
         deadline: '',
         creator: 'Me',
         createdAt: new Date().toISOString()
@@ -69,8 +71,14 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
     const [newSubtaskDesc, setNewSubtaskDesc] = useState('');
     const [showSubtaskDescInput, setShowSubtaskDescInput] = useState(false);
     
+    // Tag State
     const [tagInput, setTagInput] = useState('');
     const [showTagMenu, setShowTagMenu] = useState(false);
+
+    // Link Menu State
+    const [showLinkMenu, setShowLinkMenu] = useState(false);
+    const [showExistingSelector, setShowExistingSelector] = useState(false);
+    const linkMenuTimer = useRef<number | null>(null);
 
     useEffect(() => {
         if (task) setForm(task);
@@ -138,9 +146,89 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
         }
     };
 
+    const addLink = (targetId: string) => {
+        if (form.links?.includes(targetId)) return;
+        setForm(prev => ({ ...prev, links: [...(prev.links || []), targetId] }));
+        setShowExistingSelector(false);
+        setShowLinkMenu(false);
+    };
+
+    const removeLink = (targetId: string) => {
+        setForm(prev => ({ ...prev, links: prev.links?.filter(id => id !== targetId) }));
+    };
+
+    // Hover Handlers with Delay
+    const handleLinkEnter = () => {
+        if (linkMenuTimer.current) clearTimeout(linkMenuTimer.current);
+        setShowLinkMenu(true);
+    };
+
+    const handleLinkLeave = () => {
+        if (!showExistingSelector) {
+            linkMenuTimer.current = window.setTimeout(() => {
+                setShowLinkMenu(false);
+            }, 400); // 0.4s delay
+        }
+    };
+
+    // Candidates for linking (exclude self and already linked)
+    const linkableTasks = allTasks.filter(t => t.id !== form.id && !form.links?.includes(t.id));
+
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-[#1e293b] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+                
+                {/* --- PURPLE ACTION BUTTON (The "Idea") --- */}
+                <div 
+                    className="absolute -right-5 top-1/2 -translate-y-1/2 z-50 group"
+                    onMouseEnter={handleLinkEnter}
+                    onMouseLeave={handleLinkLeave}
+                >
+                    <button className="w-10 h-10 bg-purple-600 hover:bg-purple-500 text-white rounded-full shadow-lg shadow-purple-500/30 flex items-center justify-center transition-transform hover:scale-110">
+                        <TreeStructure weight="bold" size={20} />
+                    </button>
+
+                    {showLinkMenu && (
+                        <div 
+                            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-white dark:bg-[#0f172a] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-2 w-48 animate-fade-in-right origin-left"
+                            onMouseEnter={handleLinkEnter} // Keep open if moving to menu
+                            onMouseLeave={handleLinkLeave}
+                        >
+                            <div className="text-[10px] uppercase font-bold opacity-50 mb-2 px-2">Flow Connections</div>
+                            
+                            <button 
+                                onClick={() => { onSave(form); onCreateLinked(form.id); onClose(); }}
+                                className="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-purple-500/20 rounded-lg text-xs font-bold transition flex items-center gap-2 text-purple-600 dark:text-purple-400"
+                            >
+                                <Plus weight="bold" /> Add New Card
+                            </button>
+                            
+                            <button 
+                                onClick={() => setShowExistingSelector(true)}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-xs font-bold transition flex items-center gap-2"
+                            >
+                                <LinkIcon weight="bold" /> Select Existing
+                            </button>
+
+                            {/* Existing Selector Sub-menu */}
+                            {showExistingSelector && (
+                                <div className="mt-2 border-t border-gray-100 dark:border-white/5 pt-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                    {linkableTasks.length === 0 && <div className="px-2 text-[10px] opacity-50">No other tasks available.</div>}
+                                    {linkableTasks.map(t => (
+                                        <button 
+                                            key={t.id}
+                                            onClick={() => addLink(t.id)}
+                                            className="w-full text-left px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-white/5 rounded text-[10px] font-medium truncate transition"
+                                        >
+                                            {t.title}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
                 <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
                     <h2 className="text-lg font-bold font-['Montserrat']">{task ? 'Edit Task' : 'New Ticket'}</h2>
                     <button onClick={onClose}><X size={20} /></button>
@@ -152,6 +240,26 @@ export default function EditTaskModal({ task, onClose, onSave }: Props) {
                         <input className="w-full bg-transparent border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2 font-bold outline-none focus:border-indigo-500" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Task Title" />
                     </div>
                     
+                    {/* Active Links Visualization in Form */}
+                    {form.links && form.links.length > 0 && (
+                        <div>
+                            <label className="text-xs font-bold uppercase opacity-60 mb-1 flex items-center gap-2">
+                                <TreeStructure weight="fill" className="text-purple-500" /> Linked Downstream
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {form.links.map(linkId => {
+                                    const linkedTask = allTasks.find(t => t.id === linkId);
+                                    return (
+                                        <div key={linkId} className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2">
+                                            <span>{linkedTask ? linkedTask.title : 'Unknown Task'}</span>
+                                            <button onClick={() => removeLink(linkId)} className="hover:text-red-500"><X weight="bold" /></button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     <div>
                         <label className="text-xs font-bold uppercase opacity-60 mb-1 block">Tags</label>
                         <div className="flex flex-wrap gap-2 mb-2">
