@@ -78,17 +78,9 @@ const dynamicStyles = useMemo(() => {
       const z = Math.sin(2 * t);
 
       // Hide dots only at ONE center crossing
-      // Start fading earlier by checking when z approaches 0 from positive side
       let opacity = 1;
-      
-      // Target the 25% crossing specifically (i around 20-35 out of 100 steps)
-      // This is where x goes from positive through 0 to negative
       const cyclePercent = (i / steps) * 100;
       
-      // Fade zone: starts at ~18% (earlier fade-out) and ends at ~38% (later fade-in)
-      // Adjust these numbers to control timing:
-      // - Decrease 18 to start fade earlier
-      // - Increase 38 to end fade later
       if (cyclePercent > 16 && cyclePercent < 34) {
           opacity = 0;
       }
@@ -166,7 +158,7 @@ const dynamicStyles = useMemo(() => {
                 }}
               >
                 <div
-                  className={`rounded-full bg-white absolute shadow-[0_0_10px_rgba(255,255,255,0.8)] ${isActive && !isFigure8Mode ? 'animate-pulse' : ''}`}
+                  className={`rounded-full bg-[var(--color-text)] absolute shadow-[0_0_10px_rgba(255,255,255,0.8)] ${isActive && !isFigure8Mode ? 'animate-pulse' : ''}`}
                   style={{
                     width: `${p.size}px`,
                     height: `${p.size}px`,
@@ -202,7 +194,7 @@ const dynamicStyles = useMemo(() => {
             className={`transition-all duration-700 ease-out ${
               isSuccess
                 ? 'drop-shadow-[0_0_25px_rgba(168,85,247,0.8)]'
-                : 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]'
+                : 'text-[var(--color-text)] drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]'
             } ${isActive ? 'animate-pulse' : ''}`}
             style={{ width: '44px', height: '44px', fill: isSuccess ? 'url(#plumbob-gradient)' : undefined }}
           />

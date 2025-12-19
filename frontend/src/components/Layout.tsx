@@ -7,7 +7,7 @@ export default function Layout() {
     // We just need the app-island container here.
     <div className="app-island">
       <Sidebar />
-      <main className="flex-1 h-full overflow-y-auto relative" style={{ background: 'var(--bg-main-gradient)', color: 'var(--text-main)' }}>
+      <main className="flex-1 h-full overflow-y-auto relative" style={{ background: 'var(--bg-main-gradient)', color: 'var(--color-text)' }}>
         <Outlet /> 
       </main>
     </div>
