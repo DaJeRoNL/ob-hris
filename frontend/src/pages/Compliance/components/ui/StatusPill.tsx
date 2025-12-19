@@ -6,10 +6,10 @@ interface Props {
 export default function StatusPill({ status, type = 'info' }: Props) {
     let classes = '';
     switch(type) {
-        case 'success': classes = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'; break;
-        case 'warning': classes = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'; break;
-        case 'danger': classes = 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'; break;
-        default: classes = 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'; break;
+        case 'success': classes = 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20'; break;
+        case 'warning': classes = 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20'; break;
+        case 'danger': classes = 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20'; break;
+        default: classes = 'bg-[var(--color-info)]/10 text-[var(--color-info)] border-[var(--color-info)]/20'; break;
     }
 
     return (

@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/TimezoneDisplay.tsx
 import { useState, useEffect } from 'react';
 import { Globe, CaretDown, MapPin } from '@phosphor-icons/react';
 
@@ -12,7 +11,6 @@ export default function TimezoneDisplay() {
         return () => clearInterval(timer);
     }, []);
 
-    // Common Timezones list for the dropdown
     const timezones = [
         "UTC",
         "America/New_York",
@@ -39,16 +37,15 @@ export default function TimezoneDisplay() {
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono bg-[var(--color-surface)]/500 dark:bg-black/20 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 backdrop-blur-sm shadow-sm">
-            {/* Local / Selected Time */}
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono bg-[var(--color-surface)] px-4 py-2 rounded-xl border border-[var(--color-border)] backdrop-blur-sm shadow-sm text-[var(--color-text)]">
             <div className="flex flex-col">
                 <span className="opacity-50 font-bold uppercase mb-0.5 flex items-center gap-1 text-[10px] tracking-wider">
-                    <MapPin weight="fill" size={10} className={isOverride ? "text-indigo-500" : ""} />
+                    <MapPin weight="fill" size={10} className={isOverride ? "text-[var(--color-primary)]" : ""} />
                     {isOverride ? 'Display Location' : 'Your Location'}
                     {isOverride && (
                         <button 
                             onClick={resetZone} 
-                            className="text-[9px] bg-indigo-500/10 text-indigo-500 px-1.5 rounded hover:bg-indigo-500 hover:text-white transition ml-1"
+                            className="text-[9px] bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-1.5 rounded hover:bg-[var(--color-primary)] hover:text-white transition ml-1"
                         >
                             RESET
                         </button>
@@ -59,20 +56,18 @@ export default function TimezoneDisplay() {
                         {currentTime.toLocaleTimeString('en-US', { timeZone: selectedZone, hour12: false })}
                     </span>
                     
-                    {/* Timezone Selector */}
                     <div className="relative group">
                         <select 
                             value={selectedZone} 
                             onChange={handleZoneChange}
-                            className="appearance-none bg-transparent font-medium opacity-70 hover:opacity-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer pr-4 outline-none text-right"
+                            className="appearance-none bg-transparent font-medium opacity-70 hover:opacity-100 hover:text-[var(--color-primary)] transition cursor-pointer pr-4 outline-none text-right text-[var(--color-text)]"
                             style={{ maxWidth: '140px' }}
                         >
                             {timezones.map(tz => (
-                                <option key={tz} value={tz} className="text-black dark:text-black">{tz}</option>
+                                <option key={tz} value={tz} className="bg-[var(--color-surface)] text-[var(--color-text)]">{tz}</option>
                             ))}
-                            {/* Ensure current detected zone is always an option */}
                             {!timezones.includes(selectedZone) && (
-                                <option value={selectedZone} className="text-black dark:text-black">{selectedZone}</option>
+                                <option value={selectedZone} className="bg-[var(--color-surface)] text-[var(--color-text)]">{selectedZone}</option>
                             )}
                         </select>
                         <CaretDown size={10} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
@@ -80,15 +75,13 @@ export default function TimezoneDisplay() {
                 </div>
             </div>
 
-            {/* Divider */}
-            <div className="w-px h-8 bg-gray-300 dark:bg-white/10 hidden sm:block"></div>
+            <div className="w-px h-8 bg-[var(--color-border)] hidden sm:block"></div>
 
-            {/* UTC Time */}
-            <div className="flex flex-col pl-2 sm:pl-0 border-l border-gray-300 dark:border-white/10 sm:border-none">
+            <div className="flex flex-col pl-2 sm:pl-0 border-l border-[var(--color-border)] sm:border-none">
                 <span className="opacity-40 font-bold uppercase mb-0.5 flex items-center gap-1 text-[10px] tracking-wider">
                     <Globe weight="duotone" size={10} /> UTC / Zulu
                 </span>
-                <span className="font-bold text-lg font-['Montserrat'] tabular-nums text-gray-400 dark:text-gray-500 tracking-tight">
+                <span className="font-bold text-lg font-['Montserrat'] tabular-nums text-[var(--color-text-muted)] tracking-tight">
                     {currentTime.toLocaleTimeString('en-US', { timeZone: 'UTC', hour12: false })}
                 </span>
             </div>

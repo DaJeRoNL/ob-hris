@@ -51,16 +51,16 @@ export default function CommLink() {
     };
 
     return (
-        <div className="h-full flex gap-0 bg-white  text-[var(--text-main)] animate-fade-in overflow-hidden relative">
+        <div className="h-full flex gap-0 bg-[var(--color-bg)] text-[var(--color-text)] animate-fade-in overflow-hidden relative">
             
             {/* SIDEBAR: INBOX LIST */}
-            <div className="w-96 border-r border-gray-200 dark:border-white/10 flex flex-col bg-gray-50/50 dark:bg-[var(--color-surface)]">
-                <div className="p-6 pb-4 border-b border-gray-200 dark:border-white/10">
+            <div className="w-96 border-r border-[var(--color-border)] flex flex-col bg-[var(--color-surface)]/50">
+                <div className="p-6 pb-4 border-b border-[var(--color-border)]">
                     <h2 className="text-xl font-black font-['Montserrat'] flex items-center gap-2">
-                        <ChatCircleDots className="text-indigo-500" weight="duotone" />
+                        <ChatCircleDots className="text-[var(--color-primary)]" weight="duotone" />
                         My Inbox
                     </h2>
-                    <p className="text-xs opacity-60 mt-1">Personalized Stream • {messages.length} Unresolved</p>
+                    <p className="text-xs opacity-60 mt-1 text-[var(--color-text-muted)]">Personalized Stream • {messages.length} Unresolved</p>
                 </div>
                 
                 <div className="flex-1 overflow-y-auto">
@@ -68,21 +68,21 @@ export default function CommLink() {
                         <div 
                             key={msg.id}
                             onClick={() => setSelectedMsg(msg)}
-                            className={`p-4 border-b border-gray-100 dark:border-white/5 cursor-pointer transition-all hover:bg-white dark:hover:bg-[var(--color-surface)]/50 ${selectedMsg?.id === msg.id ? 'bg-white dark:bg-[var(--color-surface)]/50 border-l-4 border-l-indigo-500' : 'border-l-4 border-l-transparent'}`}
+                            className={`p-4 border-b border-[var(--color-border)] cursor-pointer transition-all hover:bg-[var(--color-surface)] ${selectedMsg?.id === msg.id ? 'bg-[var(--color-surface)] border-l-4 border-l-[var(--color-primary)]' : 'border-l-4 border-l-transparent'}`}
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-2">
-                                    {msg.source === 'slack' && <SlackLogo className="text-[#E01E5A]" weight="fill" />}
-                                    {msg.source === 'email' && <Envelope className="text-blue-500" weight="fill" />}
-                                    {msg.source === 'teams' && <MicrosoftTeamsLogo className="text-[#6264A7]" weight="fill" />}
-                                    <span className={`text-xs font-bold ${!msg.isRead ? 'text-indigo-600 dark:text-indigo-400' : 'opacity-70'}`}>{msg.sender}</span>
+                                    {msg.source === 'slack' && <SlackLogo className="text-[var(--color-danger)]" weight="fill" />}
+                                    {msg.source === 'email' && <Envelope className="text-[var(--color-info)]" weight="fill" />}
+                                    {msg.source === 'teams' && <MicrosoftTeamsLogo className="text-[var(--color-primary)]" weight="fill" />}
+                                    <span className={`text-xs font-bold ${!msg.isRead ? 'text-[var(--color-primary)]' : 'opacity-70 text-[var(--color-text-muted)]'}`}>{msg.sender}</span>
                                 </div>
-                                <span className="text-[10px] opacity-40">{msg.timestamp}</span>
+                                <span className="text-[10px] opacity-40 text-[var(--color-text-muted)]">{msg.timestamp}</span>
                             </div>
-                            <h4 className="font-bold text-sm mb-1 truncate">{msg.subject}</h4>
-                            <p className="text-xs opacity-60 line-clamp-2">{msg.body}</p>
+                            <h4 className="font-bold text-sm mb-1 truncate text-[var(--color-text)]">{msg.subject}</h4>
+                            <p className="text-xs opacity-60 line-clamp-2 text-[var(--color-text-muted)]">{msg.body}</p>
                             <div className="mt-2 flex gap-2">
-                                <span className="text-[9px] uppercase font-bold bg-gray-200 dark:bg-white/10 px-1.5 py-0.5 rounded opacity-60">{msg.intentTag}</span>
+                                <span className="text-[9px] uppercase font-bold bg-[var(--color-bg)] border border-[var(--color-border)] px-1.5 py-0.5 rounded opacity-60 text-[var(--color-text-muted)]">{msg.intentTag}</span>
                             </div>
                         </div>
                     ))}
@@ -90,18 +90,18 @@ export default function CommLink() {
             </div>
 
             {/* MAIN CONTENT: MESSAGE DETAIL */}
-            <div className="flex-1 flex flex-col bg-white  relative">
+            <div className="flex-1 flex flex-col bg-[var(--color-bg)] relative">
                 {selectedMsg ? (
                     <>
                         {/* Header */}
-                        <div className="p-8 border-b border-gray-100 dark:border-white/5 flex justify-between items-start">
+                        <div className="p-8 border-b border-[var(--color-border)] flex justify-between items-start">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white font-bold text-lg shadow-lg">
                                     {selectedMsg.avatar}
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl font-bold font-['Montserrat'] mb-1">{selectedMsg.subject}</h1>
-                                    <div className="flex items-center gap-3 text-sm opacity-60">
+                                    <h1 className="text-2xl font-bold font-['Montserrat'] mb-1 text-[var(--color-text)]">{selectedMsg.subject}</h1>
+                                    <div className="flex items-center gap-3 text-sm opacity-60 text-[var(--color-text-muted)]">
                                         <span>From: <strong>{selectedMsg.sender}</strong></span>
                                         <span>•</span>
                                         <span className="capitalize">{selectedMsg.source}</span>
@@ -109,40 +109,40 @@ export default function CommLink() {
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition"><X size={24} /></button>
+                                <button className="p-2 hover:bg-[var(--color-surface)] rounded-full transition text-[var(--color-text-muted)] hover:text-[var(--color-text)]"><X size={24} /></button>
                             </div>
                         </div>
 
                         {/* Body */}
                         <div className="flex-1 p-8 overflow-y-auto">
                             {/* AI Insight Box */}
-                            <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-xl p-4 mb-8 flex items-start gap-4">
-                                <div className="p-2 bg-indigo-500 text-white rounded-lg shrink-0"><Robot weight="fill" size={20} /></div>
+                            <div className="bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-xl p-4 mb-8 flex items-start gap-4">
+                                <div className="p-2 bg-[var(--color-primary)] text-white rounded-lg shrink-0"><Robot weight="fill" size={20} /></div>
                                 <div>
-                                    <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">AI Context Analysis</h4>
-                                    <p className="text-sm opacity-80 leading-relaxed">{selectedMsg.aiAnalysis}</p>
+                                    <h4 className="text-sm font-bold text-[var(--color-primary)] mb-1">AI Context Analysis</h4>
+                                    <p className="text-sm opacity-80 leading-relaxed text-[var(--color-text)]">{selectedMsg.aiAnalysis}</p>
                                 </div>
                             </div>
 
-                            <p className="text-lg leading-relaxed whitespace-pre-wrap font-medium opacity-80 max-w-3xl">
+                            <p className="text-lg leading-relaxed whitespace-pre-wrap font-medium opacity-80 max-w-3xl text-[var(--color-text)]">
                                 {selectedMsg.body}
                             </p>
                         </div>
 
                         {/* Action Bar */}
-                        <div className="p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[var(--color-surface)] flex justify-between items-center">
+                        <div className="p-6 border-t border-[var(--color-border)] bg-[var(--color-surface)] flex justify-between items-center">
                             <div className="flex gap-4">
-                                <button className="px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-white dark:hover:bg-[var(--color-surface)]/50 transition flex items-center gap-2">
+                                <button className="px-6 py-3 border border-[var(--color-border)] rounded-xl font-bold text-sm hover:bg-[var(--color-bg)] transition flex items-center gap-2 text-[var(--color-text)]">
                                     <PaperPlaneRight weight="bold" /> Reply
                                 </button>
-                                <button className="px-6 py-3 border border-gray-200 dark:border-white/10 rounded-xl font-bold text-sm hover:bg-white dark:hover:bg-[var(--color-surface)]/50 transition text-red-500 hover:border-red-200">
+                                <button className="px-6 py-3 border border-[var(--color-border)] rounded-xl font-bold text-sm hover:bg-[var(--color-bg)] transition text-[var(--color-danger)] hover:border-[var(--color-danger)]/30">
                                     Ignore
                                 </button>
                             </div>
                             
                             <button 
                                 onClick={() => handlePushToBoard(selectedMsg.id)}
-                                className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-sm shadow-xl shadow-indigo-500/20 transition transform active:scale-95 flex items-center gap-3"
+                                className="px-8 py-3 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] hover:brightness-110 text-white rounded-xl font-bold text-sm shadow-xl shadow-[var(--color-primary)]/20 transition transform active:scale-95 flex items-center gap-3"
                             >
                                 <ShareNetwork weight="fill" size={18} />
                                 Share to Task Board
@@ -150,7 +150,7 @@ export default function CommLink() {
                         </div>
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center opacity-30">
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-30 text-[var(--color-text-muted)]">
                         <ChatCircleDots size={64} weight="duotone" className="mb-4" />
                         <h3 className="text-xl font-bold">Select a message</h3>
                     </div>

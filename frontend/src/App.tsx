@@ -11,18 +11,27 @@ import TimeTracker from './pages/TimeTracker';
 import Finance from './pages/Finance';
 import Compliance from './pages/Compliance';
 import Chat from './pages/Chat';
-import TaskBoard from './pages/TaskBoard'; // NEW IMPORT
+import TaskBoard from './pages/TaskBoard'; 
 import ClientProfile from './pages/ClientProfile';
 import Admin from './pages/Admin';
 import Growth from './pages/Growth';
-import Documents from './pages/Documents'; 
+import Documents from './pages/Documents';
+import NotFound from './pages/NotFound';
 
 const AppLayout = () => {
   return (
-    <div className="h-screen w-screen bg-[var(--color-bg)] dark:bg-[var(--color-surface)] p-0 font-['Raleway'] overflow-hidden transition-colors duration-300">
-      <div className="app-island w-full h-full bg-white dark:bg-[var(--color-surface)] rounded-none shadow-none overflow-hidden flex relative border-none">
+    // 1. OUTER CONTAINER: Uses dynamic background (e.g., deep blue in Map theme)
+    <div className="h-screen w-screen bg-[var(--color-bg)] p-0 font-['Raleway'] overflow-hidden transition-colors duration-500">
+      
+      {/* 2. APP ISLAND: Uses the specific 'island' variable (prevents white flashes) */}
+      <div className="app-island w-full h-full bg-[var(--color-island)] rounded-none shadow-none overflow-hidden flex relative border-none">
         <Sidebar />
-        <main className="flex-1 h-full overflow-y-auto overflow-x-auto min-w-0 relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1e1b4b] dark:to-[#111827]">
+        
+        {/* 3. MAIN CONTENT: 
+             - REMOVED: bg-gradient-to-br from-gray-50 ... (The Culprit!)
+             - ADDED: bg-[var(--color-bg)] to ensure the main area matches the theme
+        */}
+        <main className="flex-1 h-full overflow-y-auto overflow-x-auto min-w-0 relative bg-[var(--color-bg)] transition-colors duration-500">
             <Outlet />
         </main>
       </div>
@@ -32,7 +41,7 @@ const AppLayout = () => {
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { session, loading } = useAuth();
-  if (loading) return <div className="h-screen w-full bg-[var(--color-surface)] flex items-center justify-center text-white">Loading Environment...</div>;
+  if (loading) return <div className="h-screen w-full bg-[var(--color-bg)] flex items-center justify-center text-[var(--color-text)]">Loading Environment...</div>;
   if (!session) return <Navigate to="/login" replace />;
   return children;
 };
@@ -52,13 +61,13 @@ export default function App() {
             <Route path="time" element={<TimeTracker />} />
             <Route path="finance" element={<Finance />} />
             <Route path="chat" element={<Chat />} />
-            <Route path="tasks" element={<TaskBoard />} /> {/* NEW ROUTE */}
+            <Route path="tasks" element={<TaskBoard />} />
             <Route path="compliance" element={<Compliance />} />
             <Route path="growth" element={<Growth />} />
             <Route path="docs" element={<Documents />} />
             <Route path="admin" element={<Admin />} />
           </Route>
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </Router>

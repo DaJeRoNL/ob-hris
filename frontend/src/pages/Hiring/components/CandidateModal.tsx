@@ -80,8 +80,13 @@ export default function CandidateModal({ candidate, onClose, onUpdate, onReject 
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-[var(--color-surface)] w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                <div className="relative bg-gradient-to-r from-indigo-900 to-[#0f172a] p-8 shrink-0 text-white">
+            <div className="bg-[var(--color-surface)] w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl border border-[var(--color-border)] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                
+                {/* Header with Dynamic Gradient */}
+                <div 
+                    className="relative p-8 shrink-0 text-white backdrop-blur-md"
+                    style={{ background: 'var(--color-header-bg)' }}
+                >
                     <div className="relative z-10 flex justify-between items-start">
                         <div className="flex gap-6">
                             <div className="w-20 h-20 rounded-2xl bg-white/10 border-2 border-white/20 flex items-center justify-center text-3xl font-bold shadow-xl">
@@ -90,8 +95,8 @@ export default function CandidateModal({ candidate, onClose, onUpdate, onReject 
                             <div>
                                 <h2 className="text-3xl font-black font-['Montserrat']">{candidate.name}</h2>
                                 <div className="flex items-center gap-4 mt-2 text-sm opacity-80">
-                                    <span className="flex items-center gap-1.5"><Briefcase weight="fill" className="text-indigo-400" /> {candidate.role}</span>
-                                    <span className="flex items-center gap-1.5"><MapPin weight="fill" className="text-indigo-400" /> {candidate.location}</span>
+                                    <span className="flex items-center gap-1.5"><Briefcase weight="fill" className="text-[var(--color-primary)]" /> {candidate.role}</span>
+                                    <span className="flex items-center gap-1.5"><MapPin weight="fill" className="text-[var(--color-primary)]" /> {candidate.location}</span>
                                 </div>
                                 <div className="mt-3 flex gap-2">
                                     <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20 flex items-center gap-2">
@@ -104,71 +109,71 @@ export default function CandidateModal({ candidate, onClose, onUpdate, onReject 
                     </div>
                 </div>
 
-                <div className="flex border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 px-6 shrink-0">
-                    <button onClick={() => setActiveTab('overview')} className={`py-4 px-4 text-sm font-bold border-b-2 transition flex items-center gap-2 ${activeTab === 'overview' ? 'border-indigo-500 text-indigo-500' : 'border-transparent opacity-60'}`}><User size={18} /> Overview</button>
-                    <button onClick={() => setActiveTab('notes')} className={`py-4 px-4 text-sm font-bold border-b-2 transition flex items-center gap-2 ${activeTab === 'notes' ? 'border-indigo-500 text-indigo-500' : 'border-transparent opacity-60'}`}><Note size={18} /> Notes</button>
-                    <button onClick={() => setActiveTab('files')} className={`py-4 px-4 text-sm font-bold border-b-2 transition flex items-center gap-2 ${activeTab === 'files' ? 'border-indigo-500 text-indigo-500' : 'border-transparent opacity-60'}`}><Paperclip size={18} /> Files</button>
+                <div className="flex border-b border-[var(--color-border)] bg-[var(--color-bg)] px-6 shrink-0">
+                    <button onClick={() => setActiveTab('overview')} className={`py-4 px-4 text-sm font-bold border-b-2 transition flex items-center gap-2 ${activeTab === 'overview' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent opacity-60 text-[var(--color-text)]'}`}><User size={18} /> Overview</button>
+                    <button onClick={() => setActiveTab('notes')} className={`py-4 px-4 text-sm font-bold border-b-2 transition flex items-center gap-2 ${activeTab === 'notes' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent opacity-60 text-[var(--color-text)]'}`}><Note size={18} /> Notes</button>
+                    <button onClick={() => setActiveTab('files')} className={`py-4 px-4 text-sm font-bold border-b-2 transition flex items-center gap-2 ${activeTab === 'files' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent opacity-60 text-[var(--color-text)]'}`}><Paperclip size={18} /> Files</button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 bg-gray-100/50 dark:bg-[var(--color-surface)]/50 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-8 bg-[var(--color-bg)]/50 custom-scrollbar">
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
                             <div className="space-y-6">
                                 <div className="glass-card !p-6">
-                                    <h3 className="text-xs font-bold uppercase opacity-50 mb-4 flex items-center gap-2"><Tag /> Skills & Tags</h3>
+                                    <h3 className="text-xs font-bold uppercase opacity-50 mb-4 flex items-center gap-2 text-[var(--color-text)]"><Tag /> Skills & Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {candidate.tags.map(tag => (
-                                            <span key={tag} className="px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 rounded-full text-xs font-bold flex items-center gap-2 group cursor-default">
+                                            <span key={tag} className="px-3 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 rounded-full text-xs font-bold flex items-center gap-2 group cursor-default">
                                                 {tag}
-                                                <button onClick={() => removeTag(tag)} className="opacity-0 group-hover:opacity-100 hover:text-red-500 transition"><X weight="bold" /></button>
+                                                <button onClick={() => removeTag(tag)} className="opacity-0 group-hover:opacity-100 hover:text-[var(--color-danger)] transition"><X weight="bold" /></button>
                                             </span>
                                         ))}
                                         {isTagInput ? (
                                             <div className="flex items-center gap-2">
-                                                <input autoFocus value={newTag} onChange={e => setNewTag(e.target.value)} onKeyDown={e => e.key === 'Enter' && addTag()} className="w-24 px-2 py-1 text-xs rounded border border-indigo-500 outline-none bg-transparent" placeholder="New tag..." />
-                                                <button onClick={addTag} className="text-emerald-500"><Check weight="bold" /></button>
-                                                <button onClick={() => setIsTagInput(false)} className="text-red-500"><X weight="bold" /></button>
+                                                <input autoFocus value={newTag} onChange={e => setNewTag(e.target.value)} onKeyDown={e => e.key === 'Enter' && addTag()} className="w-24 px-2 py-1 text-xs rounded border border-[var(--color-primary)] outline-none bg-transparent text-[var(--color-text)]" placeholder="New tag..." />
+                                                <button onClick={addTag} className="text-[var(--color-success)]"><Check weight="bold" /></button>
+                                                <button onClick={() => setIsTagInput(false)} className="text-[var(--color-danger)]"><X weight="bold" /></button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setIsTagInput(true)} className="px-3 py-1 border border-dashed border-gray-400 opacity-50 rounded-full text-xs font-bold hover:opacity-100 hover:border-indigo-500 transition">+ Add</button>
+                                            <button onClick={() => setIsTagInput(true)} className="px-3 py-1 border border-dashed border-[var(--color-text-muted)] opacity-50 rounded-full text-xs font-bold hover:opacity-100 hover:border-[var(--color-primary)] transition text-[var(--color-text)]">+ Add</button>
                                         )}
                                     </div>
                                 </div>
                                 <div className="glass-card !p-6">
-                                    <h3 className="text-xs font-bold uppercase opacity-50 mb-4 flex items-center gap-2"><User /> Contact</h3>
+                                    <h3 className="text-xs font-bold uppercase opacity-50 mb-4 flex items-center gap-2 text-[var(--color-text)]"><User /> Contact</h3>
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center"><EnvelopeSimple weight="fill" size={20} /></div><div><div className="text-sm font-bold">{candidate.email}</div><div className="text-xs opacity-60">Personal</div></div></div>
-                                        <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><Phone weight="fill" size={20} /></div><div><div className="text-sm font-bold">{candidate.phone}</div><div className="text-xs opacity-60">Mobile</div></div></div>
+                                        <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-[var(--color-info)]/10 text-[var(--color-info)] flex items-center justify-center"><EnvelopeSimple weight="fill" size={20} /></div><div><div className="text-sm font-bold text-[var(--color-text)]">{candidate.email}</div><div className="text-xs opacity-60 text-[var(--color-text)]">Personal</div></div></div>
+                                        <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-[var(--color-success)]/10 text-[var(--color-success)] flex items-center justify-center"><Phone weight="fill" size={20} /></div><div><div className="text-sm font-bold text-[var(--color-text)]">{candidate.phone}</div><div className="text-xs opacity-60 text-[var(--color-text)]">Mobile</div></div></div>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-col h-full">
-                                <div className="glass-card !p-6 h-full border-l-4 border-l-indigo-500 flex flex-col min-h-[400px]">
+                                <div className="glass-card !p-6 h-full border-l-4 border-l-[var(--color-primary)] flex flex-col min-h-[400px]">
                                     <div className="flex justify-between items-center mb-4 shrink-0">
-                                        <h3 className="text-xs font-bold uppercase opacity-50 flex items-center gap-2"><Briefcase /> Application Summary</h3>
-                                        {!isEditingSummary ? <button onClick={() => setIsEditingSummary(true)} className="text-xs text-indigo-500 hover:underline font-bold">Edit</button> : <button onClick={saveSummary} className="text-xs text-emerald-500 hover:underline font-bold flex items-center gap-1"><FloppyDisk /> Save</button>}
+                                        <h3 className="text-xs font-bold uppercase opacity-50 flex items-center gap-2 text-[var(--color-text)]"><Briefcase /> Application Summary</h3>
+                                        {!isEditingSummary ? <button onClick={() => setIsEditingSummary(true)} className="text-xs text-[var(--color-primary)] hover:underline font-bold">Edit</button> : <button onClick={saveSummary} className="text-xs text-[var(--color-success)] hover:underline font-bold flex items-center gap-1"><FloppyDisk /> Save</button>}
                                     </div>
-                                    {isEditingSummary ? <textarea value={summaryText} onChange={(e) => setSummaryText(e.target.value)} className="w-full flex-1 bg-[var(--color-surface)]/500 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg p-3 text-sm focus:ring-2 ring-indigo-500 outline-none resize-none custom-scrollbar" /> : <div className="text-sm leading-relaxed opacity-80 text-justify whitespace-pre-wrap flex-1 overflow-y-auto custom-scrollbar pr-2">{summaryText || "No summary."}</div>}
+                                    {isEditingSummary ? <textarea value={summaryText} onChange={(e) => setSummaryText(e.target.value)} className="w-full flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg p-3 text-sm focus:ring-2 ring-[var(--color-primary)] outline-none resize-none custom-scrollbar text-[var(--color-text)]" /> : <div className="text-sm leading-relaxed opacity-80 text-justify whitespace-pre-wrap flex-1 overflow-y-auto custom-scrollbar pr-2 text-[var(--color-text)]">{summaryText || "No summary."}</div>}
                                 </div>
                             </div>
                         </div>
                     )}
                     {activeTab === 'notes' && (
                         <div className="flex flex-col h-full">
-                            <div className="flex gap-2 mb-6"><input value={noteInput} onChange={e => setNoteInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addNote()} placeholder="Add note..." className="flex-1 bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500" /><button onClick={addNote} className="px-6 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">Post</button></div>
-                            <div className="space-y-6 relative pl-4 border-l-2 border-gray-200 dark:border-white/10 ml-2">{candidate.notes.map(note => (<div key={note.id} className="relative pl-6"><div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-indigo-500 border-4 border-white dark:border-white/10"></div><div className="glass-card !p-4"><div className="flex justify-between items-start mb-2"><span className="font-bold text-sm text-indigo-600 dark:text-indigo-400">{note.author}</span><span className="text-[10px] opacity-50 font-mono">{note.date}</span></div><p className="text-sm opacity-80">{note.text}</p></div></div>))}</div>
+                            <div className="flex gap-2 mb-6"><input value={noteInput} onChange={e => setNoteInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addNote()} placeholder="Add note..." className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-[var(--color-text)]" /><button onClick={addNote} className="px-6 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)]">Post</button></div>
+                            <div className="space-y-6 relative pl-4 border-l-2 border-[var(--color-border)] ml-2">{candidate.notes.map(note => (<div key={note.id} className="relative pl-6"><div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[var(--color-primary)] border-4 border-[var(--color-bg)]"></div><div className="glass-card !p-4"><div className="flex justify-between items-start mb-2"><span className="font-bold text-sm text-[var(--color-primary)]">{note.author}</span><span className="text-[10px] opacity-50 font-mono text-[var(--color-text)]">{note.date}</span></div><p className="text-sm opacity-80 text-[var(--color-text)]">{note.text}</p></div></div>))}</div>
                         </div>
                     )}
                     {activeTab === 'files' && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-indigo-500/5 hover:border-indigo-500 transition"><div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-[var(--color-surface)]/50 flex items-center justify-center mb-3"><Plus weight="bold" size={24} /></div><div className="font-bold text-sm">Upload</div></div>
-                            {candidate.files.map((file, i) => (<div key={i} className="glass-card !p-4 flex items-center justify-between"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center"><FileText weight="duotone" size={24} /></div><div><div className="font-bold text-sm">{file.name}</div><div className="text-[10px] opacity-50 uppercase font-bold">{file.type} • {file.size}</div></div></div><button className="p-2 hover:bg-black/5 rounded-lg text-indigo-500"><DownloadSimple weight="bold" size={18} /></button></div>))}
+                            <div className="border-2 border-dashed border-[var(--color-border)] rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-[var(--color-primary)]/5 hover:border-[var(--color-primary)] transition text-[var(--color-text)]"><div className="w-12 h-12 rounded-full bg-[var(--color-bg)] flex items-center justify-center mb-3"><Plus weight="bold" size={24} /></div><div className="font-bold text-sm">Upload</div></div>
+                            {candidate.files.map((file, i) => (<div key={i} className="glass-card !p-4 flex items-center justify-between"><div className="flex items-center gap-4"><div className="w-12 h-12 rounded-xl bg-[var(--color-danger)]/10 text-[var(--color-danger)] flex items-center justify-center"><FileText weight="duotone" size={24} /></div><div><div className="font-bold text-sm text-[var(--color-text)]">{file.name}</div><div className="text-[10px] opacity-50 uppercase font-bold text-[var(--color-text)]">{file.type} • {file.size}</div></div></div><button className="p-2 hover:bg-[var(--color-bg)] rounded-lg text-[var(--color-primary)]"><DownloadSimple weight="bold" size={18} /></button></div>))}
                         </div>
                     )}
                 </div>
-                <div className="p-4 border-t border-gray-200 dark:border-white/10 flex justify-between bg-gray-50 dark:bg-black/20">
-                    <button onClick={() => { if(window.confirm('Reject candidate?')) { onReject(candidate.id); onClose(); } }} className="px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg flex items-center gap-2"><Trash weight="bold" /> Reject Candidate</button>
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 shadow-lg">Done</button>
+                <div className="p-4 border-t border-[var(--color-border)] flex justify-between bg-[var(--color-bg)]">
+                    <button onClick={() => { if(window.confirm('Reject candidate?')) { onReject(candidate.id); onClose(); } }} className="px-4 py-2 text-xs font-bold text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 rounded-lg flex items-center gap-2"><Trash weight="bold" /> Reject Candidate</button>
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-bold hover:bg-[var(--color-primary-hover)] shadow-lg">Done</button>
                 </div>
             </div>
         </div>

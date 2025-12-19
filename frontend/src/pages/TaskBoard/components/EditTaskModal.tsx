@@ -36,15 +36,15 @@ interface Task {
     collaborators: string[];
     completedAt?: string;
     assignee: string | null;
-    links?: string[]; // IDs of downstream tasks
+    links?: string[]; 
 }
 
 interface Props {
     task?: Task | null;
-    allTasks: Task[]; // Passed to select existing
+    allTasks: Task[];
     onClose: () => void;
     onSave: (task: Task) => void;
-    onCreateLinked: (sourceId: string) => void; // Quick create handler
+    onCreateLinked: (sourceId: string) => void;
 }
 
 const PRESET_TAGS = ['Backend', 'Frontend', 'Design', 'Bug', 'Urgent', 'Feature', 'Ops'];
@@ -70,12 +70,8 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
     const [newSubtaskDesc, setNewSubtaskDesc] = useState('');
     const [showSubtaskDescInput, setShowSubtaskDescInput] = useState(false);
-    
-    // Tag State
     const [tagInput, setTagInput] = useState('');
     const [showTagMenu, setShowTagMenu] = useState(false);
-
-    // Link Menu State
     const [showLinkMenu, setShowLinkMenu] = useState(false);
     const [showExistingSelector, setShowExistingSelector] = useState(false);
     const linkMenuTimer = useRef<number | null>(null);
@@ -157,7 +153,6 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
         setForm(prev => ({ ...prev, links: prev.links?.filter(id => id !== targetId) }));
     };
 
-    // Hover Handlers with Delay
     const handleLinkEnter = () => {
         if (linkMenuTimer.current) clearTimeout(linkMenuTimer.current);
         setShowLinkMenu(true);
@@ -167,18 +162,18 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
         if (!showExistingSelector) {
             linkMenuTimer.current = window.setTimeout(() => {
                 setShowLinkMenu(false);
-            }, 400); // 0.4s delay
+            }, 400); 
         }
     };
 
-    // Candidates for linking (exclude self and already linked)
     const linkableTasks = allTasks.filter(t => t.id !== form.id && !form.links?.includes(t.id));
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+            {/* REMOVED overflow-hidden from parent to allow button to pop out */}
+            <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-[var(--color-border)] flex flex-col max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
                 
-                {/* --- PURPLE ACTION BUTTON (The "Idea") --- */}
+                {/* --- PURPLE ACTION BUTTON (Now visible due to removed overflow-hidden) --- */}
                 <div 
                     className="absolute -right-5 top-1/2 -translate-y-1/2 z-50 group"
                     onMouseEnter={handleLinkEnter}
@@ -190,11 +185,11 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
                     {showLinkMenu && (
                         <div 
-                            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-white dark:bg-[var(--color-surface)] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-2 w-48 animate-fade-in-right origin-left"
-                            onMouseEnter={handleLinkEnter} // Keep open if moving to menu
+                            className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-[var(--color-surface)] rounded-xl shadow-xl border border-[var(--color-border)] p-2 w-48 animate-fade-in-right origin-left"
+                            onMouseEnter={handleLinkEnter}
                             onMouseLeave={handleLinkLeave}
                         >
-                            <div className="text-[10px] uppercase font-bold opacity-50 mb-2 px-2">Flow Connections</div>
+                            <div className="text-[10px] uppercase font-bold opacity-50 mb-2 px-2 text-[var(--color-text)]">Flow Connections</div>
                             
                             <button 
                                 onClick={() => { onSave(form); onCreateLinked(form.id); onClose(); }}
@@ -205,20 +200,20 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                             
                             <button 
                                 onClick={() => setShowExistingSelector(true)}
-                                className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50 rounded-lg text-xs font-bold transition flex items-center gap-2"
+                                className="w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] rounded-lg text-xs font-bold transition flex items-center gap-2 text-[var(--color-text)]"
                             >
                                 <LinkIcon weight="bold" /> Select Existing
                             </button>
 
                             {/* Existing Selector Sub-menu */}
                             {showExistingSelector && (
-                                <div className="mt-2 border-t border-gray-100 dark:border-white/5 pt-2 max-h-40 overflow-y-auto custom-scrollbar">
-                                    {linkableTasks.length === 0 && <div className="px-2 text-[10px] opacity-50">No other tasks available.</div>}
+                                <div className="mt-2 border-t border-[var(--color-border)] pt-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                    {linkableTasks.length === 0 && <div className="px-2 text-[10px] opacity-50 text-[var(--color-text)]">No other tasks available.</div>}
                                     {linkableTasks.map(t => (
                                         <button 
                                             key={t.id}
                                             onClick={() => addLink(t.id)}
-                                            className="w-full text-left px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-[var(--color-surface)]/50 rounded text-[10px] font-medium truncate transition"
+                                            className="w-full text-left px-2 py-1.5 hover:bg-[var(--color-bg)] rounded text-[10px] font-medium truncate transition text-[var(--color-text)]"
                                         >
                                             {t.title}
                                         </button>
@@ -229,21 +224,24 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     )}
                 </div>
 
-                <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50/50 dark:bg-[var(--color-surface)]/50">
-                    <h2 className="text-lg font-bold font-['Montserrat']">{task ? 'Edit Task' : 'New Ticket'}</h2>
-                    <button onClick={onClose}><X size={20} /></button>
+                {/* --- HEADER (Rounded corners added explicitly) --- */}
+                <div 
+                    className="p-6 border-b border-[var(--color-border)] flex justify-between items-center backdrop-blur-md relative z-10 rounded-t-2xl"
+                    style={{ background: 'var(--color-header-bg)' }}
+                >
+                    <h2 className="text-lg font-bold font-['Montserrat'] text-white">{task ? 'Edit Task' : 'New Ticket'}</h2>
+                    <button onClick={onClose} className="text-white/70 hover:text-white transition"><X size={20} /></button>
                 </div>
                 
                 <div className="p-6 overflow-y-auto space-y-4 flex-1">
                     <div>
-                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block">Title</label>
-                        <input className="w-full bg-transparent border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2 font-bold outline-none focus:border-indigo-500" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Task Title" />
+                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Title</label>
+                        <input className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 font-bold outline-none focus:border-[var(--color-primary)] text-[var(--color-text)]" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Task Title" />
                     </div>
                     
-                    {/* Active Links Visualization in Form */}
                     {form.links && form.links.length > 0 && (
                         <div>
-                            <label className="text-xs font-bold uppercase opacity-60 mb-1 flex items-center gap-2">
+                            <label className="text-xs font-bold uppercase opacity-60 mb-1 flex items-center gap-2 text-[var(--color-text)]">
                                 <TreeStructure weight="fill" className="text-purple-500" /> Linked Downstream
                             </label>
                             <div className="flex flex-wrap gap-2">
@@ -261,37 +259,37 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     )}
 
                     <div>
-                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block">Tags</label>
+                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Tags</label>
                         <div className="flex flex-wrap gap-2 mb-2">
                             {form.tags.map(tag => (
-                                <span key={tag} className="bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
+                                <span key={tag} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 border border-[var(--color-primary)]/20">
                                     {tag}
                                     <button onClick={() => toggleTag(tag)} className="hover:text-red-500"><X weight="bold" /></button>
                                 </span>
                             ))}
-                            <button onClick={() => setShowTagMenu(!showTagMenu)} className="bg-gray-100 dark:bg-[var(--color-surface)]/50 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition">
+                            <button onClick={() => setShowTagMenu(!showTagMenu)} className="bg-[var(--color-bg)] hover:bg-[var(--color-border)] text-[var(--color-text-muted)] text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition border border-[var(--color-border)]">
                                 <Plus weight="bold" /> Add Tag
                             </button>
                         </div>
                         
                         {showTagMenu && (
-                            <div className="bg-white dark:bg-[var(--color-surface)] border border-gray-200 dark:border-white/10 rounded-xl p-3 shadow-lg mb-4 animate-fade-in-down">
+                            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 shadow-lg mb-4 animate-fade-in-down">
                                 <div className="flex gap-2 mb-2">
                                     <input 
-                                        className="flex-1 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1 text-xs outline-none" 
+                                        className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1 text-xs outline-none text-[var(--color-text)]" 
                                         placeholder="Custom tag..." 
                                         value={tagInput}
                                         onChange={e => setTagInput(e.target.value)}
                                         onKeyDown={e => e.key === 'Enter' && addCustomTag()}
                                     />
-                                    <button onClick={addCustomTag} className="p-1 bg-indigo-500 text-white rounded-lg"><Plus /></button>
+                                    <button onClick={addCustomTag} className="p-1 bg-[var(--color-primary)] text-white rounded-lg"><Plus /></button>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {PRESET_TAGS.map(t => (
                                         <button 
                                             key={t} 
                                             onClick={() => toggleTag(t)}
-                                            className={`text-[10px] font-bold px-2 py-1 rounded border transition ${form.tags.includes(t) ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-transparent border-gray-200 dark:border-white/10 hover:border-indigo-500 text-gray-500'}`}
+                                            className={`text-[10px] font-bold px-2 py-1 rounded border transition ${form.tags.includes(t) ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent border-[var(--color-border)] hover:border-[var(--color-primary)] text-[var(--color-text-muted)]'}`}
                                         >
                                             {t}
                                         </button>
@@ -303,46 +301,46 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-bold uppercase opacity-60 mb-1 block">Priority</label>
-                            <select className="w-full bg-transparent border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:border-indigo-500" value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})}>
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                                <option value="Critical">Critical</option>
+                            <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Priority</label>
+                            <select className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] text-[var(--color-text)]" value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})}>
+                                <option className="bg-[var(--color-surface)]" value="Low">Low</option>
+                                <option className="bg-[var(--color-surface)]" value="Medium">Medium</option>
+                                <option className="bg-[var(--color-surface)]" value="High">High</option>
+                                <option className="bg-[var(--color-surface)]" value="Critical">Critical</option>
                             </select>
                         </div>
                         <div>
-                            <label className="text-xs font-bold uppercase opacity-60 mb-1 block">Deadline</label>
+                            <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Deadline</label>
                             <div className="relative">
-                                <input type="date" className="w-full bg-transparent border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:border-indigo-500" value={form.deadline} onChange={e => setForm({...form, deadline: e.target.value})} />
-                                <CalendarBlank className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
+                                <input type="date" className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] text-[var(--color-text)]" value={form.deadline} onChange={e => setForm({...form, deadline: e.target.value})} />
+                                <CalendarBlank className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none text-[var(--color-text)]" />
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block">Description</label>
-                        <textarea className="w-full bg-transparent border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:border-indigo-500 h-20 resize-none" value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} placeholder="Main task details..." />
+                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Description</label>
+                        <textarea className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] h-20 resize-none text-[var(--color-text)]" value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} placeholder="Main task details..." />
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold uppercase opacity-60 mb-2 block">Subtasks (Workflow)</label>
+                        <label className="text-xs font-bold uppercase opacity-60 mb-2 block text-[var(--color-text)]">Subtasks (Workflow)</label>
                         
-                        <div className="bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-dashed border-gray-300 dark:border-white/10 mb-3">
+                        <div className="bg-[var(--color-bg)]/50 p-3 rounded-xl border border-dashed border-[var(--color-border)] mb-3">
                             <div className="flex gap-2 mb-2">
                                 <input 
-                                    className="flex-1 bg-white dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm outline-none" 
+                                    className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm outline-none text-[var(--color-text)]" 
                                     placeholder="New subtask title..." 
                                     value={newSubtaskTitle}
                                     onChange={e => setNewSubtaskTitle(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && addSubtask()}
                                 />
-                                <button onClick={() => setShowSubtaskDescInput(!showSubtaskDescInput)} className={`p-2 rounded-lg transition ${showSubtaskDescInput ? 'bg-indigo-500 text-white' : 'bg-gray-200 dark:bg-white/10'}`} title="Add Description"><TextT weight="bold" /></button>
-                                <button onClick={addSubtask} className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"><Plus weight="bold" /></button>
+                                <button onClick={() => setShowSubtaskDescInput(!showSubtaskDescInput)} className={`p-2 rounded-lg transition ${showSubtaskDescInput ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-border)] text-[var(--color-text-muted)]'}`} title="Add Description"><TextT weight="bold" /></button>
+                                <button onClick={addSubtask} className="p-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition"><Plus weight="bold" /></button>
                             </div>
                             {showSubtaskDescInput && (
                                 <input 
-                                    className="w-full bg-white dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs outline-none animate-fade-in" 
+                                    className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs outline-none animate-fade-in text-[var(--color-text)]" 
                                     placeholder="Optional short description..." 
                                     value={newSubtaskDesc}
                                     onChange={e => setNewSubtaskDesc(e.target.value)}
@@ -353,23 +351,23 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
                         <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
                             {form.subtasks.map((s, idx) => (
-                                <div key={s.id} className="flex flex-col gap-1 p-2 border border-gray-100 dark:border-white/5 rounded-lg group bg-[var(--color-surface)]">
+                                <div key={s.id} className="flex flex-col gap-1 p-2 border border-[var(--color-border)] rounded-lg group bg-[var(--color-surface)]">
                                     <div className="flex items-center gap-2">
-                                        <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => moveSubtask(idx, 'up')} disabled={idx === 0} className="hover:text-indigo-500 disabled:opacity-30"><CaretUp size={12} weight="bold" /></button>
-                                            <button onClick={() => moveSubtask(idx, 'down')} disabled={idx === form.subtasks.length - 1} className="hover:text-indigo-500 disabled:opacity-30"><CaretDown size={12} weight="bold" /></button>
+                                        <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity text-[var(--color-text-muted)]">
+                                            <button onClick={() => moveSubtask(idx, 'up')} disabled={idx === 0} className="hover:text-[var(--color-primary)] disabled:opacity-30"><CaretUp size={12} weight="bold" /></button>
+                                            <button onClick={() => moveSubtask(idx, 'down')} disabled={idx === form.subtasks.length - 1} className="hover:text-[var(--color-primary)] disabled:opacity-30"><CaretDown size={12} weight="bold" /></button>
                                         </div>
                                         
-                                        <button onClick={() => updateSubtask(s.id, 'isRequired', !s.isRequired)} className={s.isRequired ? "text-red-500" : "text-gray-400"} title="Toggle Required">
+                                        <button onClick={() => updateSubtask(s.id, 'isRequired', !s.isRequired)} className={s.isRequired ? "text-[var(--color-danger)]" : "text-[var(--color-text-muted)]"} title="Toggle Required">
                                             {s.isRequired ? <CheckSquare weight="fill" /> : <Square />}
                                         </button>
                                         
-                                        <div className="flex-1">
+                                        <div className="flex-1 text-[var(--color-text)]">
                                             <div className={`text-sm ${s.isRequired ? 'font-bold' : ''}`}>{s.title}</div>
                                             {s.desc && <div className="text-[10px] opacity-60">{s.desc}</div>}
                                         </div>
                                         
-                                        <button onClick={() => removeSubtask(s.id)} className="opacity-0 group-hover:opacity-100 text-red-400 transition hover:bg-red-500/10 p-1 rounded"><Trash /></button>
+                                        <button onClick={() => removeSubtask(s.id)} className="opacity-0 group-hover:opacity-100 text-[var(--color-danger)] transition hover:bg-[var(--color-danger)]/10 p-1 rounded"><Trash /></button>
                                     </div>
                                 </div>
                             ))}
@@ -377,9 +375,10 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     </div>
                 </div>
 
-                <div className="p-4 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3 bg-gray-50/50 dark:bg-black/20">
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl font-bold text-sm hover:bg-black/5 dark:hover:bg-[var(--color-surface)]/50 transition">Cancel</button>
-                    <button onClick={handleSave} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg">Save Task</button>
+                {/* --- FOOTER (Rounded corners added explicitly) --- */}
+                <div className="p-4 border-t border-[var(--color-border)] flex justify-end gap-3 bg-[var(--color-bg)]/50 rounded-b-2xl">
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl font-bold text-sm hover:bg-[var(--color-border)] transition text-[var(--color-text)]">Cancel</button>
+                    <button onClick={handleSave} className="px-6 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-xl font-bold text-sm shadow-lg">Save Task</button>
                 </div>
             </div>
         </div>

@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/ui/CustomTimePicker.tsx
 import { useState, useRef, useEffect } from 'react';
 import { Clock as ClockIcon, CaretDown } from '@phosphor-icons/react';
 import { TIME_OPTIONS } from '../../utils';
@@ -23,7 +22,7 @@ export const CustomTimePicker = ({ value, onChange, disabled }: any) => {
         <div className={`relative ${disabled ? 'opacity-50 pointer-events-none' : ''}`} ref={containerRef}>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-black/5 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-black/10 transition"
+                className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[var(--color-bg)] transition text-[var(--color-text)]"
             >
                 <div className="flex items-center gap-2">
                     <ClockIcon className="opacity-60" />
@@ -32,13 +31,13 @@ export const CustomTimePicker = ({ value, onChange, disabled }: any) => {
                 <CaretDown className="opacity-50" size={12} />
             </div>
             {isOpen && (
-                <div className="absolute top-full left-0 w-full mt-2 h-48 overflow-y-auto bg-white dark:bg-[#1f2937] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl z-50 custom-scrollbar">
+                <div className="absolute top-full left-0 w-full mt-2 h-48 overflow-y-auto bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-xl z-50 custom-scrollbar text-[var(--color-text)]">
                     {TIME_OPTIONS.map(t => (
                         <div 
                             key={t}
                             onClick={() => { onChange(t); setIsOpen(false); }}
-                            className={`px-4 py-2 text-xs font-mono cursor-pointer hover:bg-indigo-50 dark:hover:bg-[var(--color-surface)]/50
-                                ${value === t ? 'text-indigo-500 font-bold bg-indigo-50/50' : 'opacity-80'}`}
+                            className={`px-4 py-2 text-xs font-mono cursor-pointer hover:bg-[var(--color-bg)]
+                                ${value === t ? 'text-[var(--color-primary)] font-bold bg-[var(--color-primary)]/10' : 'opacity-80'}`}
                         >
                             {t.substring(0,5)}
                         </div>

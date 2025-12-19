@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/CalendarWidget.tsx
 import { useMemo } from 'react';
 import { Check, Flag } from '@phosphor-icons/react';
 import { TimeEntry } from '../../../types';
@@ -12,7 +11,6 @@ interface Props {
     leaveRequests: LeaveRequest[];
     currentClientId: string;
     isRunning: boolean;
-    // New prop for collision logic
     isCondensed?: boolean;
 }
 
@@ -23,7 +21,7 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
     const calendarData = useMemo(() => {
         const weeks = [];
         const TOTAL_ROWS = 6; 
-        const TARGET_ROW_INDEX = 4; // Today is always in the 5th row (index 4)
+        const TARGET_ROW_INDEX = 4;
 
         const anchorDate = new Date(); 
         const startOfAnchorWeek = new Date(anchorDate);
@@ -85,8 +83,8 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
     const renderWeek = (week: any, wIdx: number) => {
         const isSelectedWeek = week.days.some((d: Date) => getLocalDateStr(d) === selectedDateStr);
         return (
-            <div key={wIdx} className={`grid grid-cols-8 gap-1 items-center p-1 rounded-xl transition-colors duration-300 ${isSelectedWeek ? 'bg-indigo-500/10 dark:bg-indigo-500/5' : ''}`}>
-                <div className={`text-center text-[10px] font-mono font-bold transition-all duration-300 ${isSelectedWeek ? 'text-indigo-600  opacity-100 scale-110' : 'opacity-30'}`}>{week.weekNum}</div>
+            <div key={wIdx} className={`grid grid-cols-8 gap-1 items-center p-1 rounded-xl transition-colors duration-300 ${isSelectedWeek ? 'bg-[var(--color-primary)]/10' : ''}`}>
+                <div className={`text-center text-[10px] font-mono font-bold transition-all duration-300 ${isSelectedWeek ? 'text-[var(--color-primary)] opacity-100 scale-110' : 'opacity-30'}`}>{week.weekNum}</div>
                 {week.days.map((date: Date, dIdx: number) => {
                     const status = getDayStatus(date);
                     const isSelected = getLocalDateStr(date) === selectedDateStr;
@@ -96,10 +94,10 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
 
                     if (status.leaveDetails) {
                         const isSick = status.leaveDetails.type === 'Sick';
-                        let borderColor = 'border-orange-400';
+                        let borderColor = 'border-[var(--color-warning)]';
                         let borderStyle = 'border-dashed';
-                        if (isSick) { borderColor = 'border-red-500'; borderStyle = 'border-solid'; bgClass = 'bg-red-500/20'; } 
-                        else if (status.leaveStatus === 'Confirmed') { borderColor = 'border-green-500'; borderStyle = 'border-solid'; }
+                        if (isSick) { borderColor = 'border-[var(--color-danger)]'; borderStyle = 'border-solid'; bgClass = 'bg-[var(--color-danger)]/20'; } 
+                        else if (status.leaveStatus === 'Confirmed') { borderColor = 'border-[var(--color-success)]'; borderStyle = 'border-solid'; }
 
                         const { startDate, endDate } = status.leaveDetails;
                         const dStr = getLocalDateStr(date);
@@ -112,21 +110,21 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
                         else { groupingClasses = `rounded-xl border-2 ${borderStyle} ${borderColor}`; }
                     }
 
-                    if (isSelected) groupingClasses = `${groupingClasses} ring-2 ring-indigo-500 shadow-lg z-20`;
+                    if (isSelected) groupingClasses = `${groupingClasses} ring-2 ring-[var(--color-primary)] shadow-lg z-20`;
 
                     return (
-                        <div key={dIdx} onClick={() => onDateSelect(date)} className={`group relative h-12 flex items-center justify-center text-sm font-semibold cursor-pointer transition overflow-visible ${groupingClasses} ${bgClass} ${!isSelected && !status.leaveDetails && !bgClass ? 'hover:bg-gray-500/5' : ''} ${status.isPast ? 'opacity-50' : 'opacity-100'} ${status.isToday ? 'ring-1 ring-indigo-500/50' : ''}`}>
-                            <span className={`relative z-0 ${isSelected ? 'text-indigo-600  font-bold' : ''}`}>{date.getDate()}</span>
+                        <div key={dIdx} onClick={() => onDateSelect(date)} className={`group relative h-12 flex items-center justify-center text-sm font-semibold cursor-pointer transition overflow-visible ${groupingClasses} ${bgClass} ${!isSelected && !status.leaveDetails && !bgClass ? 'hover:bg-[var(--color-bg)]/50' : ''} ${status.isPast ? 'opacity-50' : 'opacity-100'} ${status.isToday ? 'ring-1 ring-[var(--color-primary)]/50' : ''}`}>
+                            <span className={`relative z-0 ${isSelected ? 'text-[var(--color-primary)] font-bold' : 'text-[var(--color-text)]'}`}>{date.getDate()}</span>
                             <div className="absolute top-1 left-1 flex gap-0.5 z-10">
-                                {status.isActive && <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>}
-                                {status.hasEntries && !status.isActive && !status.isCompleteDay && <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>}
+                                {status.isActive && <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-warning)] animate-pulse"></div>}
+                                {status.hasEntries && !status.isActive && !status.isCompleteDay && <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-info)]"></div>}
                             </div>
                             <div className="absolute top-1 right-1 flex flex-col gap-0.5 z-10">
-                                {status.hasDescription && <Flag size={8} weight="fill" className="text-green-500" />}
-                                {status.hasManual && <Flag size={8} weight="fill" className="text-gray-400" />}
+                                {status.hasDescription && <Flag size={8} weight="fill" className="text-[var(--color-success)]" />}
+                                {status.hasManual && <Flag size={8} weight="fill" className="text-[var(--color-text-muted)]" />}
                             </div>
-                            {status.isCompleteDay && <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"><Check weight="bold" size={24} className={`${status.isLiveComplete ? 'text-green-500' : 'text-gray-400'} opacity-20`} /></div>}
-                            {status.leaveDetails && <div className="absolute bottom-full mb-2 bg-slate-800 text-white text-[10px] p-2 rounded shadow-xl opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 w-max whitespace-nowrap"><div className="font-bold">{status.leaveDetails.type}</div><div className="opacity-80">{status.leaveDetails.status}</div></div>}
+                            {status.isCompleteDay && <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"><Check weight="bold" size={24} className={`${status.isLiveComplete ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'} opacity-20`} /></div>}
+                            {status.leaveDetails && <div className="absolute bottom-full mb-2 bg-[var(--color-surface)] text-[var(--color-text)] text-[10px] p-2 rounded shadow-xl opacity-0 group-hover:opacity-100 transition pointer-events-none z-50 w-max whitespace-nowrap border border-[var(--color-border)]"><div className="font-bold">{status.leaveDetails.type}</div><div className="opacity-80">{status.leaveDetails.status}</div></div>}
                         </div>
                     );
                 })}
@@ -139,29 +137,29 @@ export default function CalendarWidget({ selectedDate, onDateSelect, entries, le
             <div className="flex flex-wrap justify-between items-end mb-4 gap-2">
                 <div className="flex gap-2 items-center">
                     <div>
-                        <h3 className="font-bold">Rolling Schedule</h3>
-                        <p className="text-xs opacity-50 capitalize">{selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                        <h3 className="font-bold text-[var(--color-text)]">Rolling Schedule</h3>
+                        <p className="text-xs opacity-50 capitalize text-[var(--color-text-muted)]">{selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase font-bold opacity-60 justify-end">
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 border-2 border-dashed border-orange-500"></div> Requested</span>
-                    <span className="flex items-center gap-1"><div className="w-2 h-2 border-2 border-green-500"></div> Confirmed</span>
-                    <span className="flex items-center gap-1"><Check weight="bold" className="text-green-500" /> Confirmed</span>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase font-bold opacity-60 justify-end text-[var(--color-text)]">
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 border-2 border-dashed border-[var(--color-warning)]"></div> Requested</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 border-2 border-[var(--color-success)]"></div> Confirmed</span>
+                    <span className="flex items-center gap-1"><Check weight="bold" className="text-[var(--color-success)]" /> Confirmed</span>
                 </div>
             </div>
             
             <div className="mb-2">
-                <div className="grid grid-cols-8 gap-1 mb-2 border-b border-gray-500/10 pb-2">
-                    <div className="text-center text-[10px] font-bold opacity-30">#</div>
-                    {calendarData.headers.map((d,i) => <div key={i} className="text-center text-xs font-bold opacity-40">{d}</div>)}
+                <div className="grid grid-cols-8 gap-1 mb-2 border-b border-[var(--color-border)] pb-2">
+                    <div className="text-center text-[10px] font-bold opacity-30 text-[var(--color-text)]">#</div>
+                    {calendarData.headers.map((d,i) => <div key={i} className="text-center text-xs font-bold opacity-40 text-[var(--color-text)]">{d}</div>)}
                 </div>
                 
-                {/* Collapsible Section (Top 4 Weeks) */}
+                {/* Collapsible Section */}
                 <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isCondensed ? 'max-h-0 opacity-0 -translate-y-4' : 'max-h-[300px] opacity-100 translate-y-0'}`}>
                     {calendarData.weeks.slice(0, 4).map((week, idx) => renderWeek(week, idx))}
                 </div>
 
-                {/* Persistent Section (Bottom 2 Weeks) */}
+                {/* Persistent Section */}
                 <div className="transition-transform duration-500">
                     {calendarData.weeks.slice(4).map((week, idx) => renderWeek(week, idx + 4))}
                 </div>

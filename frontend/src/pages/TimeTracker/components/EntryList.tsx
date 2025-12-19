@@ -88,7 +88,7 @@ export default function EntryList({
     const recentEntries = displayEntries.slice(0, threshold);
     const olderEntries = displayEntries.slice(threshold);
 
-    // Only needed on desktop where overflow might happen
+    // Check Scroll
     const checkScroll = () => {
         if (scrollContainerRef.current) {
             const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
@@ -130,20 +130,20 @@ export default function EntryList({
 
         if (entry.isVirtualLeave) {
             const lType = entry.leaveType;
-            let theme = { color: 'text-gray-500', bg: 'bg-gray-500/10', border: 'border-gray-500/50', icon: Info };
-            if (lType === 'Sick') theme = { color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/50', icon: FirstAid };
-            if (lType === 'Vacation') theme = { color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', icon: Smiley };
-            if (lType === 'Personal') theme = { color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/50', icon: User };
+            let theme = { color: 'text-[var(--color-text-muted)]', bg: 'bg-[var(--color-text-muted)]/10', border: 'border-[var(--color-text-muted)]/50', icon: Info };
+            if (lType === 'Sick') theme = { color: 'text-[var(--color-danger)]', bg: 'bg-[var(--color-danger)]/10', border: 'border-[var(--color-danger)]/50', icon: FirstAid };
+            if (lType === 'Vacation') theme = { color: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success)]/10', border: 'border-[var(--color-success)]/50', icon: Smiley };
+            if (lType === 'Personal') theme = { color: 'text-[var(--color-primary)]', bg: 'bg-[var(--color-primary)]/10', border: 'border-[var(--color-primary)]/50', icon: User };
 
             return (
                 <div key={entry.id} onMouseEnter={() => entry.id && setHoveredEntryId(entry.id)} onMouseLeave={() => setHoveredEntryId(null)} className={`mb-3 p-4 rounded-xl border ${theme.border} ${theme.bg} transition ${isHovered ? 'scale-[1.01] shadow-lg' : ''}`}>
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-full ${theme.color.replace('text','bg').replace('500','500')} flex items-center justify-center text-white`}><theme.icon weight="fill" /></div>
-                            <div><div className={`font-bold ${theme.color}`}>{lType} Leave</div><div className="text-xs opacity-70 font-mono">{entry.startTime} - {entry.endTime}</div></div>
+                            <div><div className={`font-bold ${theme.color}`}>{lType} Leave</div><div className="text-xs opacity-70 font-mono text-[var(--color-text)]">{entry.startTime} - {entry.endTime}</div></div>
                         </div>
                     </div>
-                    <div className="pl-11 text-xs opacity-60 italic">Locked Entry • Contact HR for adjustments.</div>
+                    <div className="pl-11 text-xs opacity-60 italic text-[var(--color-text)]">Locked Entry • Contact HR for adjustments.</div>
                 </div>
             );
         }
@@ -151,23 +151,23 @@ export default function EntryList({
         const displayIndex = displayEntries.length - idx;
 
         return (
-            <div key={entry.id} onMouseEnter={() => entry.id && setHoveredEntryId(entry.id)} onMouseLeave={() => setHoveredEntryId(null)} className={`mb-3 p-4 rounded-xl border group transition ${isHovered ? 'bg-indigo-500/10 border-indigo-500/50 scale-[1.01]' : 'bg-gray-500/5 border-gray-500/10 hover:border-indigo-500/30'}`}>
+            <div key={entry.id} onMouseEnter={() => entry.id && setHoveredEntryId(entry.id)} onMouseLeave={() => setHoveredEntryId(null)} className={`mb-3 p-4 rounded-xl border group transition ${isHovered ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)]/50 scale-[1.01]' : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-primary)]/30'}`}>
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
                         <div className="flex flex-col items-end w-8 shrink-0">
-                            <span className="text-xs font-bold text-green-500 font-mono">{getHourMarker(entry.startTime)}</span>
-                            <span className="text-xl font-bold opacity-20 leading-none">{displayIndex}</span>
+                            <span className="text-xs font-bold text-[var(--color-success)] font-mono">{getHourMarker(entry.startTime)}</span>
+                            <span className="text-xl font-bold opacity-20 leading-none text-[var(--color-text)]">{displayIndex}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <input type="time" step="1" value={entry.startTime} onChange={(e) => onUpdate(entry.id, 'startTime', e.target.value)} className="bg-transparent font-bold text-sm w-20 focus:bg-white/10 rounded px-1 outline-none" />
-                            <span className="opacity-50">-</span>
-                            <input type="time" step="1" value={entry.endTime} onChange={(e) => onUpdate(entry.id, 'endTime', e.target.value)} className="bg-transparent font-bold text-sm w-20 focus:bg-white/10 rounded px-1 outline-none" />
+                            <input type="time" step="1" value={entry.startTime} onChange={(e) => onUpdate(entry.id, 'startTime', e.target.value)} className="bg-transparent font-bold text-sm w-20 focus:bg-[var(--color-bg)]/20 rounded px-1 outline-none text-[var(--color-text)]" />
+                            <span className="opacity-50 text-[var(--color-text)]">-</span>
+                            <input type="time" step="1" value={entry.endTime} onChange={(e) => onUpdate(entry.id, 'endTime', e.target.value)} className="bg-transparent font-bold text-sm w-20 focus:bg-[var(--color-bg)]/20 rounded px-1 outline-none text-[var(--color-text)]" />
                         </div>
-                        {entry.isManual && <div title="Retroactive Entry"><Flag size={12} weight="fill" className="text-gray-400" /></div>}
+                        {entry.isManual && <div title="Retroactive Entry"><Flag size={12} weight="fill" className="text-[var(--color-text-muted)]" /></div>}
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="font-mono text-xs font-bold bg-gray-500/10 px-2 py-1 rounded">{entry.duration}</div>
-                        <button onClick={() => onDelete(entry.id)} className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500 transition"><Trash size={14} /></button>
+                        <div className="font-mono text-xs font-bold bg-[var(--color-bg)]/50 px-2 py-1 rounded text-[var(--color-text)]">{entry.duration}</div>
+                        <button onClick={() => onDelete(entry.id)} className="opacity-0 group-hover:opacity-100 text-[var(--color-danger)] hover:text-[var(--color-danger)] transition"><Trash size={14} /></button>
                     </div>
                 </div>
                 <div className="pl-11 space-y-1">
@@ -177,65 +177,62 @@ export default function EntryList({
                             value={line} 
                             onChange={(e) => onNoteUpdate(entry.id, lIdx, e.target.value)} 
                             placeholder="Add note..." 
-                            className="w-full bg-transparent text-xs opacity-80 focus:opacity-100 focus:bg-[var(--color-surface)]/50 rounded px-2 py-0.5 outline-none transition placeholder-gray-500 border-b border-dashed border-gray-500/20 focus:border-indigo-500" 
+                            className="w-full bg-transparent text-xs opacity-80 focus:opacity-100 focus:bg-[var(--color-bg)]/20 rounded px-2 py-0.5 outline-none transition placeholder-[var(--color-text-muted)] border-b border-dashed border-[var(--color-border)] focus:border-[var(--color-primary)] text-[var(--color-text)]" 
                         />
                     ))}
-                    <button onClick={() => onAddNote(entry.id)} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-500 flex items-center gap-1 opacity-50 hover:opacity-100 transition px-2 py-0.5"><Plus /> Add note</button>
+                    <button onClick={() => onAddNote(entry.id)} className="text-[10px] font-bold text-[var(--color-primary)] hover:text-[var(--color-primary)] flex items-center gap-1 opacity-50 hover:opacity-100 transition px-2 py-0.5"><Plus /> Add note</button>
                 </div>
             </div>
         );
     };
 
     return (
-        // CHANGED: 'h-auto' on mobile forces component to respect content height. 'lg:h-full' locks it on desktop.
         <div className="glass-card p-0 overflow-hidden flex flex-col h-auto lg:h-full !shadow-none relative">
             <div className="p-6 pb-2 shrink-0 z-10">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold flex items-center gap-2">Entries for {selectedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</h3>
+                    <h3 className="font-bold flex items-center gap-2 text-[var(--color-text)]">Entries for {selectedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</h3>
                     <div className="flex gap-2">
-                        <button onClick={onShowTimeline} className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition flex items-center gap-1 font-bold"><ChartBar weight="bold" /> Timeline</button>
-                        <button onClick={onManualAdd} disabled={isSelectedDateFuture} className={`text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 font-bold text-white ${isSelectedDateFuture ? 'bg-gray-400 cursor-not-allowed opacity-50' : 'bg-indigo-500 hover:bg-indigo-600'}`}><Plus weight="bold" /> Retroactive</button>
+                        <button onClick={onShowTimeline} className="text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1.5 rounded-lg hover:bg-[var(--color-primary)]/20 transition flex items-center gap-1 font-bold"><ChartBar weight="bold" /> Timeline</button>
+                        <button onClick={onManualAdd} disabled={isSelectedDateFuture} className={`text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 font-bold text-white ${isSelectedDateFuture ? 'bg-[var(--color-text-muted)] cursor-not-allowed opacity-50' : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]'}`}><Plus weight="bold" /> Retroactive</button>
                     </div>
                 </div>
             </div>
             
-            {/* CHANGED: 'overflow-visible' on mobile removes internal scrollbar. 'lg:overflow-y-auto' enables it on desktop. */}
-            {/* CHANGED: 'lg:flex-1' allows it to fill space on desktop, but auto-height on mobile. */}
             <div 
                 ref={scrollContainerRef}
                 onScroll={checkScroll}
                 className="px-6 pb-6 relative custom-scrollbar space-y-2 overflow-visible lg:overflow-y-auto lg:flex-1"
             >
                 {activeSick && (
-                    <div className="text-center font-bold text-red-500 bg-red-500/10 p-2 rounded-lg mb-4 border border-red-500/20">
+                    <div className="text-center font-bold text-[var(--color-danger)] bg-[var(--color-danger)]/10 p-2 rounded-lg mb-4 border border-[var(--color-danger)]/20">
                         Sick Leave Active
                         {activeSick.reportedAt && selectedDateStr === activeSick.startDate && <span className="block text-xs font-normal opacity-70 mt-1">Since {activeSick.reportedAt}</span>}
                     </div>
                 )}
 
                 {isToday && isRunning && startTime && (
-                    <div className="p-4 rounded-xl border border-orange-500/50 bg-orange-500/10 mb-4 animate-pulse relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-orange-500"></div>
+                    <div className="p-4 rounded-xl border border-[var(--color-warning)]/50 bg-[var(--color-warning)]/10 mb-4 animate-pulse relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[var(--color-warning)]"></div>
                         <div className="flex justify-between items-start mb-2 pl-2">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-[var(--color-warning)] flex items-center justify-center text-white shrink-0">
                                     <Clock size={16} weight="fill" />
                                 </div>
                                 <div>
-                                    <div className="font-bold text-orange-500 flex items-center gap-2">
+                                    <div className="font-bold text-[var(--color-warning)] flex items-center gap-2">
                                         Live Session
-                                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                                        <div className="w-1.5 h-1.5 bg-[var(--color-warning)] rounded-full"></div>
                                     </div>
-                                    <div className="text-xs opacity-70 font-mono">
+                                    <div className="text-xs opacity-70 font-mono text-[var(--color-text)]">
                                         {startTime.toLocaleTimeString('en-US', {hour12: false})} - ...
                                     </div>
                                 </div>
                             </div>
-                            <div className="font-mono text-sm font-bold bg-orange-500 text-white px-2 py-1 rounded shadow-lg">
+                            <div className="font-mono text-sm font-bold bg-[var(--color-warning)] text-white px-2 py-1 rounded shadow-lg">
                                 {formatTime(seconds)}
                             </div>
                         </div>
-                        <div className="pl-14 text-xs opacity-60 italic text-orange-400">
+                        <div className="pl-14 text-xs opacity-60 italic text-[var(--color-warning)]">
                             Recording in progress...
                         </div>
                     </div>
@@ -245,7 +242,7 @@ export default function EntryList({
 
                 {shouldGroup && (
                     <div 
-                        className="mt-4 border-t border-gray-200 dark:border-white/10 pt-2"
+                        className="mt-4 border-t border-[var(--color-border)] pt-2"
                         onMouseEnter={handleMouseEnterGroup}
                         onMouseLeave={handleMouseLeaveGroup}
                     >
@@ -253,28 +250,27 @@ export default function EntryList({
                             onClick={handleClickGroup}
                             className={`
                                 cursor-pointer rounded-xl p-3 flex items-center justify-between transition-all duration-300
-                                ${showOlder ? 'bg-indigo-500/5 mb-2' : 'bg-gray-500/5 hover:bg-gray-500/10'}
+                                ${showOlder ? 'bg-[var(--color-primary)]/5 mb-2' : 'bg-[var(--color-bg)]/50 hover:bg-[var(--color-bg)]/80'}
                             `}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-gray-400/20 flex items-center justify-center text-gray-500">
+                                <div className="w-8 h-8 rounded-full bg-[var(--color-text-muted)]/20 flex items-center justify-center text-[var(--color-text-muted)]">
                                     <Stack weight="fill" />
                                 </div>
                                 <div>
-                                    <div className="text-xs font-bold opacity-70">{olderEntries.length} Previous Entries</div>
-                                    <div className="text-[10px] opacity-50">
+                                    <div className="text-xs font-bold opacity-70 text-[var(--color-text)]">{olderEntries.length} Previous Entries</div>
+                                    <div className="text-[10px] opacity-50 text-[var(--color-text)]">
                                         {olderEntries[0].startTime.substring(0,5)} - {olderEntries[olderEntries.length-1].endTime.substring(0,5)}
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-xs opacity-50">
+                            <div className="text-xs opacity-50 text-[var(--color-text)]">
                                 {showOlder ? <CaretUp weight="bold" /> : <CaretDown weight="bold" />}
                             </div>
                         </div>
 
-                        {/* CHANGED: Increased max-height to 5000px to ensure full expansion on mobile for long lists */}
                         <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showOlder ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="pl-4 border-l-2 border-dashed border-gray-200 dark:border-white/10 pt-2">
+                            <div className="pl-4 border-l-2 border-dashed border-[var(--color-border)] pt-2">
                                 {olderEntries.map((e, i) => renderEntry(e, i + threshold))}
                             </div>
                         </div>
@@ -282,8 +278,8 @@ export default function EntryList({
                 )}
 
                 {displayEntries.length === 0 && !isRunning && (
-                    <div className="text-center py-12 opacity-30 text-sm font-medium flex flex-col items-center gap-2">
-                        <div className="w-12 h-12 rounded-full bg-gray-500/10 flex items-center justify-center">
+                    <div className="text-center py-12 opacity-30 text-sm font-medium flex flex-col items-center gap-2 text-[var(--color-text)]">
+                        <div className="w-12 h-12 rounded-full bg-[var(--color-bg)] flex items-center justify-center">
                             <Clock size={24} weight="duotone" />
                         </div>
                         No entries recorded.
@@ -291,10 +287,10 @@ export default function EntryList({
                 )}
             </div>
 
-            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white dark:from-[#1e1b4b] to-transparent pointer-events-none opacity-80" />
+            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[var(--color-surface)] to-transparent pointer-events-none opacity-80" />
             
             {hasScrollBelow && (
-                <div className="absolute bottom-2 left-6 z-20 animate-bounce text-indigo-500 dark:text-indigo-400 opacity-70 pointer-events-none">
+                <div className="absolute bottom-2 left-6 z-20 animate-bounce text-[var(--color-primary)] opacity-70 pointer-events-none">
                     <CaretDown weight="bold" size={20} />
                 </div>
             )}

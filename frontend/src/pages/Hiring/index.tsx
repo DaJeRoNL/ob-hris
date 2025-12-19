@@ -83,7 +83,7 @@ const ConfettiRain = () => {
                     className="absolute top-[-20px]"
                     style={{
                         left: `${Math.random() * 100}%`,
-                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'][Math.floor(Math.random() * 5)],
+                        backgroundColor: ['var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', 'var(--color-info)'][Math.floor(Math.random() * 5)],
                         width: `${Math.random() * 8 + 4}px`,
                         height: `${Math.random() * 8 + 4}px`,
                         animation: `fall ${Math.random() * 2 + 1.5}s linear forwards`,
@@ -330,18 +330,18 @@ const Hiring: React.FC = () => {
   };
 
   return (
-    <div className="p-8 h-full flex flex-col text-[var(--text-main)] animate-fade-in overflow-hidden relative">
+    <div className="p-8 h-full flex flex-col text-[var(--color-text)] animate-fade-in overflow-hidden relative">
       {showConfetti && <ConfettiRain />}
 
       {showConfetti && hiredCandidate && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[70] animate-pop-in">
-              <div className="bg-indigo-900 text-white pl-6 pr-2 py-2 rounded-full shadow-2xl flex items-center gap-4 border border-indigo-500/50 backdrop-blur-md">
+              <div className="bg-[var(--color-surface)] text-[var(--color-text)] pl-6 pr-2 py-2 rounded-full shadow-2xl flex items-center gap-4 border border-[var(--color-success)] backdrop-blur-md">
                   <div className="flex items-center gap-2">
-                      <span className="bg-green-500 rounded-full p-1"><CheckCircle weight="fill" /></span>
+                      <span className="bg-[var(--color-success)] rounded-full p-1 text-white"><CheckCircle weight="fill" /></span>
                       <span className="font-bold text-sm">{hiredCandidate.name} Hired!</span>
                   </div>
-                  <button onClick={() => { setShowConfetti(false); setVerificationModal({ show: true, type: 'verify', candidateId: hiredCandidate.id, targetStage: 'Onboarding' }); }} className="bg-white text-indigo-900 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-gray-100 transition flex items-center gap-1">Verify & Onboard <ArrowRight weight="bold" /></button>
-                  <button onClick={() => setShowConfetti(false)} className="p-1 hover:bg-white/10 rounded-full"><XCircle size={18} /></button>
+                  <button onClick={() => { setShowConfetti(false); setVerificationModal({ show: true, type: 'verify', candidateId: hiredCandidate.id, targetStage: 'Onboarding' }); }} className="bg-[var(--color-primary)] text-white px-4 py-1.5 rounded-full text-xs font-bold hover:bg-[var(--color-primary)]/90 transition flex items-center gap-1">Verify & Onboard <ArrowRight weight="bold" /></button>
+                  <button onClick={() => setShowConfetti(false)} className="p-1 hover:bg-[var(--color-bg)] rounded-full"><XCircle size={18} /></button>
               </div>
           </div>
       )}
@@ -349,43 +349,43 @@ const Hiring: React.FC = () => {
       <header className="mb-6 shrink-0 space-y-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3">
+              <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-3 text-[var(--color-text)]">
                   Talent Pipeline 
-                  <span className="text-xs bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 px-2 py-1 rounded-full font-bold shadow-sm flex items-center gap-1">
+                  <span className="text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 px-2 py-1 rounded-full font-bold shadow-sm flex items-center gap-1">
                       <Sparkle weight="fill" /> AI Enhanced
                   </span>
               </h1>
-              <div className="flex gap-6 mt-4 text-sm font-medium opacity-70 items-center">
-                  <span className="flex items-center gap-2"><User weight="fill" className="text-blue-500" /> {candidates.filter(c => c.stage !== 'Rejected').length} Active</span>
-                  <span className="flex items-center gap-2"><CheckCircle weight="fill" className="text-emerald-500" /> {candidates.filter(c => c.stage === 'Hired').length} Hired</span>
-                  <button onClick={() => setShowRejections(true)} className="flex items-center gap-2 hover:text-indigo-500 transition"><Archive weight="bold" /> {rejectedCandidates.length} Rejected (30d)</button>
+              <div className="flex gap-6 mt-4 text-sm font-medium opacity-70 items-center text-[var(--color-text-muted)]">
+                  <span className="flex items-center gap-2"><User weight="fill" className="text-[var(--color-info)]" /> {candidates.filter(c => c.stage !== 'Rejected').length} Active</span>
+                  <span className="flex items-center gap-2"><CheckCircle weight="fill" className="text-[var(--color-success)]" /> {candidates.filter(c => c.stage === 'Hired').length} Hired</span>
+                  <button onClick={() => setShowRejections(true)} className="flex items-center gap-2 hover:text-[var(--color-primary)] transition"><Archive weight="bold" /> {rejectedCandidates.length} Rejected (30d)</button>
               </div>
             </div>
             
             <div className="flex gap-3">
-                <button onClick={() => setShowAddCandidateModal(true)} className="flex items-center gap-2 px-4 py-3 bg-[var(--color-surface)] text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 rounded-xl font-bold transition hover:bg-indigo-50 dark:hover:bg-indigo-500/10 whitespace-nowrap"><UserPlus weight="bold" size={18} /> <span>Add Candidate</span></button>
-                <button onClick={() => setShowRequisitions(true)} className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95 group whitespace-nowrap"><Files weight="bold" size={18} /> <span>Requisitions</span></button>
+                <button onClick={() => setShowAddCandidateModal(true)} className="flex items-center gap-2 px-4 py-3 bg-[var(--color-surface)] text-[var(--color-primary)] border border-[var(--color-border)] rounded-xl font-bold transition hover:bg-[var(--color-primary)]/10 whitespace-nowrap"><UserPlus weight="bold" size={18} /> <span>Add Candidate</span></button>
+                <button onClick={() => setShowRequisitions(true)} className="flex items-center gap-2 px-5 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-xl font-bold transition shadow-xl shadow-[var(--color-primary)]/20 hover:scale-105 active:scale-95 group whitespace-nowrap"><Files weight="bold" size={18} /> <span>Requisitions</span></button>
             </div>
         </div>
 
         <div className="flex gap-4">
             <div className="relative flex-1 max-w-md group flex items-center">
-                <MagnifyingGlass size={18} className="absolute left-3 text-gray-400 group-focus-within:text-indigo-500 transition-colors pointer-events-none z-10" weight="bold" />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full bg-[var(--color-surface)]/500 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500 transition backdrop-blur-sm shadow-sm" />
+                <MagnifyingGlass size={18} className="absolute left-3 text-[var(--color-text-muted)] group-focus-within:text-[var(--color-primary)] transition-colors pointer-events-none z-10" weight="bold" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition backdrop-blur-sm shadow-sm text-[var(--color-text)]" />
             </div>
             
             <button 
                 onClick={() => setShowFilters(!showFilters)} 
-                className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${selectedTags.length > 0 ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' : 'bg-[var(--color-surface)]/500 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-[var(--color-surface)]/50'}`}
+                className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${selectedTags.length > 0 ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-[var(--color-primary)]/30' : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:bg-[var(--color-bg)] text-[var(--color-text)]'}`}
             >
                 <Funnel weight="bold" /> Filter
-                {selectedTags.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-500"></span>}
+                {selectedTags.length > 0 && <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></span>}
             </button>
 
             {showFilters && (
                 <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar items-center mask-fade-right animate-fade-in-right">
                     {allTags.map(tag => (
-                        <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition whitespace-nowrap ${selectedTags.includes(tag) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-[var(--color-surface)]/500 dark:bg-[var(--color-surface)]/50 border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10'}`}>
+                        <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition whitespace-nowrap ${selectedTags.includes(tag) ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'}`}>
                             {tag}
                         </button>
                     ))}
@@ -393,15 +393,15 @@ const Hiring: React.FC = () => {
             )}
 
             <div className="relative ml-auto" onMouseEnter={handleHistoryEnter} onMouseLeave={handleHistoryLeave}>
-                <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-[var(--color-surface)]/500 dark:bg-black/20 border-gray-200 dark:border-white/10 hover:bg-white dark:hover:bg-[var(--color-surface)]/50'}`}><ClockCounterClockwise weight="bold" /> History</button>
+                <button className={`px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border ${showHistory ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:bg-[var(--color-bg)] text-[var(--color-text)]'}`}><ClockCounterClockwise weight="bold" /> History</button>
                 {showHistory && (
-                    <div className="absolute top-full right-0 mt-2 w-96 bg-[var(--color-surface)] rounded-xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 z-50 animate-fade-in-up">
-                        <h4 className="text-xs font-bold uppercase opacity-50 mb-3">Activity Log</h4>
+                    <div className="absolute top-full right-0 mt-2 w-96 bg-[var(--color-surface)] rounded-xl shadow-2xl border border-[var(--color-border)] p-4 z-50 animate-fade-in-up">
+                        <h4 className="text-xs font-bold uppercase opacity-50 mb-3 text-[var(--color-text)]">Activity Log</h4>
                         <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
                             {logs.map(log => (
-                                <div key={log.id} className="text-xs border-l-2 border-indigo-500 pl-2">
-                                    <div className="font-medium opacity-80">{log.text}</div>
-                                    <div className="opacity-40 text-[10px]">{log.timestamp}</div>
+                                <div key={log.id} className="text-xs border-l-2 border-[var(--color-primary)] pl-2">
+                                    <div className="font-medium opacity-80 text-[var(--color-text)]">{log.text}</div>
+                                    <div className="opacity-40 text-[10px] text-[var(--color-text)]">{log.timestamp}</div>
                                 </div>
                             ))}
                         </div>
@@ -413,9 +413,9 @@ const Hiring: React.FC = () => {
 
       {/* Board */}
       <div className="flex-1 relative overflow-hidden group/board">
-          {/* UPDATED SCROLL BUTTONS (Consistent with TaskBoard) */}
-          {scrollState.canLeft && <button onClick={() => scrollBoard('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-r-2xl shadow-xl hover:pl-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretLeft weight="bold" size={24} /></button>}
-          {scrollState.canRight && <button onClick={() => scrollBoard('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/80 dark:bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-l-2xl shadow-xl hover:pr-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-gray-200 dark:border-white/10 text-indigo-500"><CaretRight weight="bold" size={24} /></button>}
+          {/* UPDATED SCROLL BUTTONS */}
+          {scrollState.canLeft && <button onClick={() => scrollBoard('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-r-2xl shadow-xl hover:pl-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-[var(--color-border)] text-[var(--color-primary)]"><CaretLeft weight="bold" size={24} /></button>}
+          {scrollState.canRight && <button onClick={() => scrollBoard('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-3 bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-l-2xl shadow-xl hover:pr-4 transition-all opacity-0 group-hover/board:opacity-100 hover:scale-110 border border-[var(--color-border)] text-[var(--color-primary)]"><CaretRight weight="bold" size={24} /></button>}
 
           <div ref={scrollContainerRef} className="flex gap-6 h-full overflow-x-auto overflow-y-hidden pb-4 px-1 scroll-smooth no-scrollbar">
             {STAGES.map(stage => {
@@ -425,34 +425,35 @@ const Hiring: React.FC = () => {
                 const isOffer = stage === 'Offer';
                 const isDragOver = dragOverStage === stage;
                 
-                let colBorder = 'border-t-4 border-t-indigo-500';
-                let colBg = 'bg-gray-50/50 dark:bg-white/[0.02]';
+                // Dynamic border colors based on stage meaning
+                let colBorder = 'border-t-4 border-t-[var(--color-primary)]';
+                let colBg = 'bg-[var(--color-surface)]/30';
                 
-                if (isOffer) { colBorder = 'border-t-4 border-t-amber-500'; colBg = 'bg-amber-500/5 dark:bg-amber-500/5'; }
-                if (isHired) { colBorder = 'border-t-4 border-t-emerald-500'; colBg = 'bg-emerald-500/5 dark:bg-emerald-500/5'; }
-                if (isOnboarding) { colBorder = 'border-t-4 border-t-blue-500'; colBg = 'bg-blue-500/5 dark:bg-blue-500/5'; }
+                if (isOffer) { colBorder = 'border-t-4 border-t-[var(--color-warning)]'; colBg = 'bg-[var(--color-warning)]/5'; }
+                if (isHired) { colBorder = 'border-t-4 border-t-[var(--color-success)]'; colBg = 'bg-[var(--color-success)]/5'; }
+                if (isOnboarding) { colBorder = 'border-t-4 border-t-[var(--color-info)]'; colBg = 'bg-[var(--color-info)]/5'; }
 
                 if (isDragOver) {
-                    colBg = 'bg-indigo-500/10 dark:bg-indigo-500/20';
-                    colBorder = 'border-t-4 border-t-white shadow-[0_0_30px_rgba(99,102,241,0.3)]';
+                    colBg = 'bg-[var(--color-primary)]/10';
+                    colBorder = 'border-t-4 border-t-[var(--color-text)] shadow-lg';
                 }
 
                 return (
                 <div 
                     key={stage} 
-                    className={`flex-1 flex flex-col min-w-[320px] max-w-[380px] ${colBg} rounded-2xl p-3 border border-gray-200 dark:border-white/5 ${colBorder} transition-all duration-300`} 
+                    className={`flex-1 flex flex-col min-w-[320px] max-w-[380px] ${colBg} rounded-2xl p-3 border border-[var(--color-border)] ${colBorder} transition-all duration-300`} 
                     onDragOver={(e) => handleDragOver(e, stage)} 
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, stage)}
                 >
                     <div className="flex justify-between items-center mb-4 px-2 pt-2">
-                        <h3 className="font-bold text-xs uppercase opacity-80 tracking-widest">{stage}</h3>
-                        <span className="bg-white dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-md opacity-60 shadow-sm">{stageCandidates.length}</span>
+                        <h3 className="font-bold text-xs uppercase opacity-80 tracking-widest text-[var(--color-text)]">{stage}</h3>
+                        <span className="bg-[var(--color-surface)] text-[var(--color-text)] text-[10px] font-bold px-2 py-0.5 rounded-md opacity-60 shadow-sm">{stageCandidates.length}</span>
                     </div>
                     
                     <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 px-1 pb-2">
                         {stageCandidates.length === 0 && (
-                            <div className={`h-32 flex flex-col items-center justify-center opacity-30 text-center border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl m-1 transition-colors ${isDragOver ? 'border-indigo-400 text-indigo-400 opacity-80 bg-indigo-500/10' : ''}`}>
+                            <div className={`h-32 flex flex-col items-center justify-center opacity-30 text-center border-2 border-dashed border-[var(--color-border)] rounded-xl m-1 transition-colors ${isDragOver ? 'border-[var(--color-primary)] text-[var(--color-primary)] opacity-80 bg-[var(--color-primary)]/5' : 'text-[var(--color-text-muted)]'}`}>
                                 <UserPlus size={32} weight="duotone" className="mb-2" />
                                 <span className="text-xs font-bold">{isDragOver ? 'Drop to Move' : 'Empty Stage'}</span>
                             </div>
@@ -469,35 +470,35 @@ const Hiring: React.FC = () => {
                                 key={c.id} 
                                 className={`
                                     glass-card !p-0 cursor-grab active:cursor-grabbing hover:-translate-y-1 transition-all duration-300 group relative overflow-visible 
-                                    !bg-white dark:!bg-[var(--color-surface)] border hover:shadow-xl hover:border-indigo-500/30
-                                    ${isStale ? 'opacity-70 hover:opacity-100 border-gray-200 dark:border-white/5' : 'border-gray-100 dark:border-white/10'}
-                                    ${isFresh ? 'ring-2 ring-indigo-500/30 shadow-indigo-500/20' : ''}
-                                    ${isHighlighted ? 'ring-4 ring-indigo-400 scale-105 z-50 shadow-2xl shadow-indigo-500/40' : ''}
+                                    !bg-[var(--color-surface)] border hover:shadow-xl hover:border-[var(--color-primary)]/30
+                                    ${isStale ? 'opacity-70 hover:opacity-100 border-[var(--color-border)]' : 'border-[var(--color-border)]'}
+                                    ${isFresh ? 'ring-2 ring-[var(--color-primary)]/30 shadow-[var(--color-primary)]/20' : ''}
+                                    ${isHighlighted ? 'ring-4 ring-[var(--color-primary)] scale-105 z-50 shadow-2xl' : ''}
                                 `}
                                 draggable 
                                 onDragStart={(e) => handleDragStart(e, c.id)} 
                                 onClick={() => setSelectedCandidate(c)}
                             >
-                                <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity ${isHired ? 'bg-emerald-500' : isOnboarding ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
+                                <div className={`absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity ${isHired ? 'bg-[var(--color-success)]' : isOnboarding ? 'bg-[var(--color-info)]' : 'bg-[var(--color-primary)]'}`}></div>
                                 
                                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                    <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-indigo-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Email"><EnvelopeSimple size={14} weight="bold" /></button>
-                                    <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-emerald-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Call"><Phone size={14} weight="bold" /></button>
-                                    <button className="p-1.5 bg-gray-100 dark:bg-white/10 hover:bg-indigo-500 hover:text-white rounded-lg text-gray-500 transition shadow-sm" title="Schedule"><CalendarPlus size={14} weight="bold" /></button>
+                                    <button className="p-1.5 bg-[var(--color-bg)] hover:bg-[var(--color-primary)] hover:text-white rounded-lg text-[var(--color-text-muted)] transition shadow-sm" title="Email"><EnvelopeSimple size={14} weight="bold" /></button>
+                                    <button className="p-1.5 bg-[var(--color-bg)] hover:bg-[var(--color-success)] hover:text-white rounded-lg text-[var(--color-text-muted)] transition shadow-sm" title="Call"><Phone size={14} weight="bold" /></button>
+                                    <button className="p-1.5 bg-[var(--color-bg)] hover:bg-[var(--color-primary)] hover:text-white rounded-lg text-[var(--color-text-muted)] transition shadow-sm" title="Schedule"><CalendarPlus size={14} weight="bold" /></button>
                                 </div>
 
                                 <div className="p-4">
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold shadow-inner text-white shrink-0">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-sm font-bold shadow-inner text-white shrink-0">
                                                 {c.name.charAt(0)}
                                             </div>
                                             <div>
-                                                <div className="font-bold text-sm leading-tight text-gray-900 dark:text-gray-100 group-hover:text-indigo-500 transition-colors flex items-center gap-1">
+                                                <div className="font-bold text-sm leading-tight text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors flex items-center gap-1">
                                                     {c.name}
-                                                    {isHot && <Lightning weight="fill" className="text-amber-400" size={12} />}
+                                                    {isHot && <Lightning weight="fill" className="text-[var(--color-warning)]" size={12} />}
                                                 </div>
-                                                <div className="text-[10px] opacity-60 flex items-center gap-1 mt-0.5 font-medium">{c.role}</div>
+                                                <div className="text-[10px] opacity-60 flex items-center gap-1 mt-0.5 font-medium text-[var(--color-text)]">{c.role}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -505,24 +506,24 @@ const Hiring: React.FC = () => {
                                     <div className="flex justify-between items-center mb-3">
                                         <div className="flex flex-wrap gap-1">
                                             {c.tags.slice(0, 2).map(tag => (
-                                                <span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{tag}</span>
+                                                <span key={tag} className="text-[9px] font-bold uppercase bg-[var(--color-bg)] border border-[var(--color-border)] px-1.5 py-0.5 rounded text-[var(--color-text-muted)]">{tag}</span>
                                             ))}
                                         </div>
                                         
                                         <div className="relative group/ai">
-                                            <div className="flex items-center gap-1 text-[10px] font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20 cursor-help">
+                                            <div className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 rounded-full border border-[var(--color-primary)]/20 cursor-help">
                                                 <Sparkle weight="fill" /> {c.aiMatch}% Match
                                             </div>
-                                            <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-[var(--color-surface)] text-white text-[10px] rounded-lg shadow-xl opacity-0 group-hover/ai:opacity-100 transition pointer-events-none z-50">
-                                                <div className="font-bold mb-1 text-indigo-300">AI Insight:</div>
+                                            <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-[var(--color-surface)] text-[var(--color-text)] text-[10px] rounded-lg shadow-xl opacity-0 group-hover/ai:opacity-100 transition pointer-events-none z-50 border border-[var(--color-border)]">
+                                                <div className="font-bold mb-1 text-[var(--color-primary)]">AI Insight:</div>
                                                 {c.aiReason}
-                                                <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-[var(--color-surface)] rotate-45"></div>
+                                                <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-[var(--color-surface)] rotate-45 border-r border-b border-[var(--color-border)]"></div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="pt-3 border-t border-gray-100 dark:border-white/5 flex justify-between items-center text-[10px] opacity-50 font-medium">
-                                        <div className={`flex items-center gap-1 transition-colors ${isStale ? 'text-red-400 opacity-100' : 'group-hover:text-indigo-500'}`}>
+                                    <div className="pt-3 border-t border-[var(--color-border)] flex justify-between items-center text-[10px] opacity-50 font-medium text-[var(--color-text)]">
+                                        <div className={`flex items-center gap-1 transition-colors ${isStale ? 'text-[var(--color-danger)] opacity-100' : 'group-hover:text-[var(--color-primary)]'}`}>
                                             {isStale ? <Warning weight="fill" /> : <Clock weight="bold" />} 
                                             {c.daysInStage === 0 ? 'Today' : `${c.daysInStage}d in stage`}
                                         </div>
@@ -532,13 +533,13 @@ const Hiring: React.FC = () => {
                                     </div>
                                     
                                     {isHired && (
-                                        <button onClick={(e) => { e.stopPropagation(); setVerificationModal({ show: true, type: 'verify', candidateId: c.id, targetStage: 'Onboarding' }); }} className="mt-3 w-full py-2 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 rounded-lg text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 border border-emerald-500/20">
+                                        <button onClick={(e) => { e.stopPropagation(); setVerificationModal({ show: true, type: 'verify', candidateId: c.id, targetStage: 'Onboarding' }); }} className="mt-3 w-full py-2 bg-[var(--color-success)]/10 hover:bg-[var(--color-success)] hover:text-white text-[var(--color-success)] rounded-lg text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 border border-[var(--color-success)]/20">
                                             <ShieldCheck weight="fill" size={14} /> Verify & Onboard
                                         </button>
                                     )}
 
                                     {isOnboarding && (
-                                        <button onClick={(e) => { e.stopPropagation(); handleFinalizeSetup(c); }} className="mt-3 w-full py-2 bg-indigo-500/10 hover:bg-indigo-500 hover:text-white text-indigo-600 rounded-lg text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 border border-indigo-500/20">
+                                        <button onClick={(e) => { e.stopPropagation(); handleFinalizeSetup(c); }} className="mt-3 w-full py-2 bg-[var(--color-info)]/10 hover:bg-[var(--color-info)] hover:text-white text-[var(--color-info)] rounded-lg text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 border border-[var(--color-info)]/20">
                                             <UserGear weight="fill" size={14} /> Finalize Setup
                                         </button>
                                     )}
@@ -599,20 +600,20 @@ const Hiring: React.FC = () => {
 
       {showRejections && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowRejections(false)}>
-              <div className="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10 p-6 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+              <div className="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-2xl border border-[var(--color-border)] p-6 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                   <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl font-bold font-['Montserrat']">Rejected Candidates <span className="text-xs opacity-50 font-normal">(Last 30 Days)</span></h2>
-                      <button onClick={() => setShowRejections(false)}><XCircle size={24} /></button>
+                      <h2 className="text-xl font-bold font-['Montserrat'] text-[var(--color-text)]">Rejected Candidates <span className="text-xs opacity-50 font-normal">(Last 30 Days)</span></h2>
+                      <button onClick={() => setShowRejections(false)} className="text-[var(--color-text)]"><XCircle size={24} /></button>
                   </div>
                   <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar">
-                      {rejectedCandidates.length === 0 ? <div className="text-center opacity-50 py-10">No rejections in the last 30 days.</div> : 
+                      {rejectedCandidates.length === 0 ? <div className="text-center opacity-50 py-10 text-[var(--color-text)]">No rejections in the last 30 days.</div> : 
                         rejectedCandidates.map(c => (
-                            <div key={c.id} className="p-4 rounded-xl border border-red-500/10 bg-red-500/5 flex justify-between items-center">
+                            <div key={c.id} className="p-4 rounded-xl border border-[var(--color-danger)]/20 bg-[var(--color-danger)]/5 flex justify-between items-center">
                                 <div>
-                                    <div className="font-bold">{c.name}</div>
-                                    <div className="text-xs opacity-60">{c.role} • Rejected on {new Date(c.lastUpdated).toLocaleDateString()}</div>
+                                    <div className="font-bold text-[var(--color-text)]">{c.name}</div>
+                                    <div className="text-xs opacity-60 text-[var(--color-text)]">{c.role} • Rejected on {new Date(c.lastUpdated).toLocaleDateString()}</div>
                                 </div>
-                                <span className="text-xs font-bold text-red-500 uppercase">Archived</span>
+                                <span className="text-xs font-bold text-[var(--color-danger)] uppercase">Archived</span>
                             </div>
                         ))
                       }
@@ -623,13 +624,13 @@ const Hiring: React.FC = () => {
 
       {showNewReqModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowNewReqModal(false)}>
-              <div className="bg-[var(--color-surface)] w-full max-w-md rounded-2xl shadow-2xl border border-white/10 p-6" onClick={e => e.stopPropagation()}>
-                  <h2 className="text-xl font-bold mb-4 font-['Montserrat']">Create New Requisition</h2>
+              <div className="bg-[var(--color-surface)] w-full max-w-md rounded-2xl shadow-2xl border border-[var(--color-border)] p-6" onClick={e => e.stopPropagation()}>
+                  <h2 className="text-xl font-bold mb-4 font-['Montserrat'] text-[var(--color-text)]">Create New Requisition</h2>
                   <div className="space-y-4">
-                      <div><label className="text-xs font-bold uppercase opacity-60 block mb-1">Job Title</label><input className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 ring-indigo-500" value={newReqForm.title} onChange={e => setNewReqForm({...newReqForm, title: e.target.value})} placeholder="e.g. Senior Backend Engineer" /></div>
-                      <div><label className="text-xs font-bold uppercase opacity-60 block mb-1">Department</label><select className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 ring-indigo-500" value={newReqForm.dept} onChange={e => setNewReqForm({...newReqForm, dept: e.target.value})}><option value="">Select Department</option><option value="Engineering">Engineering</option><option value="Sales">Sales</option><option value="Marketing">Marketing</option></select></div>
-                      <div><label className="text-xs font-bold uppercase opacity-60 block mb-1">Budget (Annual)</label><input className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 ring-indigo-500" value={newReqForm.budget} onChange={e => setNewReqForm({...newReqForm, budget: e.target.value})} placeholder="$120,000" /></div>
-                      <button onClick={createRequisition} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg mt-2">Create Requisition</button>
+                      <div><label className="text-xs font-bold uppercase opacity-60 block mb-1 text-[var(--color-text)]">Job Title</label><input className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:ring-2 ring-[var(--color-primary)] text-[var(--color-text)]" value={newReqForm.title} onChange={e => setNewReqForm({...newReqForm, title: e.target.value})} placeholder="e.g. Senior Backend Engineer" /></div>
+                      <div><label className="text-xs font-bold uppercase opacity-60 block mb-1 text-[var(--color-text)]">Department</label><select className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:ring-2 ring-[var(--color-primary)] text-[var(--color-text)]" value={newReqForm.dept} onChange={e => setNewReqForm({...newReqForm, dept: e.target.value})}><option value="">Select Department</option><option value="Engineering">Engineering</option><option value="Sales">Sales</option><option value="Marketing">Marketing</option></select></div>
+                      <div><label className="text-xs font-bold uppercase opacity-60 block mb-1 text-[var(--color-text)]">Budget (Annual)</label><input className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:ring-2 ring-[var(--color-primary)] text-[var(--color-text)]" value={newReqForm.budget} onChange={e => setNewReqForm({...newReqForm, budget: e.target.value})} placeholder="$120,000" /></div>
+                      <button onClick={createRequisition} className="w-full py-3 bg-[var(--color-primary)] text-white rounded-xl font-bold hover:bg-[var(--color-primary-hover)] transition shadow-lg mt-2">Create Requisition</button>
                   </div>
               </div>
           </div>

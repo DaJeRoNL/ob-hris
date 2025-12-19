@@ -13,8 +13,8 @@ export default function VerificationModal({ candidate, type, onConfirm, onClose 
     
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-[var(--color-surface)] w-full max-w-md rounded-2xl shadow-2xl border border-white/10 overflow-hidden" onClick={e => e.stopPropagation()}>
-                <div className={`p-6 flex items-center gap-4 text-white ${isVerify ? 'bg-indigo-600' : 'bg-orange-500'}`}>
+            <div className="bg-[var(--color-surface)] w-full max-w-md rounded-2xl shadow-2xl border border-[var(--color-border)] overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className={`p-6 flex items-center gap-4 text-white ${isVerify ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-warning)]'}`}>
                     <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-inner">
                         {isVerify ? <ShieldCheck size={32} weight="fill" /> : <Warning size={32} weight="fill" />}
                     </div>
@@ -25,32 +25,32 @@ export default function VerificationModal({ candidate, type, onConfirm, onClose 
                     <button onClick={onClose} className="ml-auto p-2 hover:bg-white/20 rounded-full transition"><X size={20} /></button>
                 </div>
                 
-                <div className="p-6 bg-gray-50 dark:bg-[var(--color-surface)]/50">
-                    <p className="text-sm opacity-70 mb-6 leading-relaxed">
+                <div className="p-6 bg-[var(--color-bg)]">
+                    <p className="text-sm opacity-70 mb-6 leading-relaxed text-[var(--color-text)]">
                         {isVerify 
                             ? `You are validating the provisional record for ${candidate.name}. This will move them to Onboarding and create a verified entry in the system.` 
                             : `Are you sure you want to move ${candidate.name} back to the recruitment pipeline? This will void their provisional record.`
                         }
                     </p>
                     
-                    <div className="bg-[var(--color-surface)] p-4 rounded-xl border border-gray-200 dark:border-white/5 shadow-sm mb-6">
-                        <div className="flex items-center gap-3 mb-3 border-b border-gray-100 dark:border-white/5 pb-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center font-bold text-sm">{candidate.name.charAt(0)}</div>
+                    <div className="bg-[var(--color-surface)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm mb-6">
+                        <div className="flex items-center gap-3 mb-3 border-b border-[var(--color-border)] pb-3">
+                            <div className="w-10 h-10 rounded-full bg-[var(--color-bg)] flex items-center justify-center font-bold text-sm text-[var(--color-text)]">{candidate.name.charAt(0)}</div>
                             <div>
-                                <div className="font-bold text-sm">{candidate.name}</div>
-                                <div className="text-[10px] opacity-50 flex items-center gap-1"><Briefcase size={10} weight="fill" /> {candidate.role}</div>
+                                <div className="font-bold text-sm text-[var(--color-text)]">{candidate.name}</div>
+                                <div className="text-[10px] opacity-50 flex items-center gap-1 text-[var(--color-text)]"><Briefcase size={10} weight="fill" /> {candidate.role}</div>
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <div className="flex items-center gap-3 text-xs opacity-70">
-                                <EnvelopeSimple weight="bold" className="text-indigo-500" />{candidate.email}
+                            <div className="flex items-center gap-3 text-xs opacity-70 text-[var(--color-text)]">
+                                <EnvelopeSimple weight="bold" className="text-[var(--color-primary)]" />{candidate.email}
                             </div>
                         </div>
                     </div>
 
                     <div className="flex gap-3">
-                        <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-white/10 font-bold text-sm hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50 transition">Cancel</button>
-                        <button onClick={onConfirm} className={`flex-1 py-3 rounded-xl font-bold text-sm text-white shadow-lg transition hover:scale-105 active:scale-95 ${isVerify ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-orange-500 hover:bg-orange-600'}`}>
+                        <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-[var(--color-border)] font-bold text-sm hover:bg-[var(--color-bg)] transition text-[var(--color-text)]">Cancel</button>
+                        <button onClick={onConfirm} className={`flex-1 py-3 rounded-xl font-bold text-sm text-white shadow-lg transition hover:scale-105 active:scale-95 ${isVerify ? 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]' : 'bg-[var(--color-warning)] hover:bg-[var(--color-warning)]/80'}`}>
                             {isVerify ? 'Verify & Onboard' : 'Confirm Revoke'}
                         </button>
                     </div>

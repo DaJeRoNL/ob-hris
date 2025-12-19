@@ -6,18 +6,21 @@ interface ThemeColors {
     primary: string;
     secondary: string;
     primaryHover: string;
-    bg: string;       // --bg-body
-    island: string;   // --bg-island (Main app container)
-    sidebar: string;  // --bg-sidebar
-    surface: string;  // --bg-panel (Cards/Panels)
-    glass: string;    // --bg-glass-card
-    border: string;   // --border-color
+    bg: string;       
+    island: string;   
+    sidebar: string;  
+    surface: string;  
+    glass: string;    
+    border: string;   
     
-    // Typography
-    text: string;      // --text-main
-    textMuted: string; // --text-muted
+    // NEW: Specifically for large headers/panels
+    headerBg: string; 
 
-    // Semantic Status Colors (Pills & Alerts)
+    // Typography
+    text: string;      
+    textMuted: string; 
+
+    // Semantic Status Colors
     success: string;
     successBg: string;
     info: string;
@@ -27,7 +30,7 @@ interface ThemeColors {
     danger: string;
     dangerBg: string;
 
-    // Component Specific (Map, etc.)
+    // Component Specific
     mapBg: string;
     mapDot: string;
     shadow: string;
@@ -42,14 +45,14 @@ interface ThemeDefinition {
     };
 }
 
-// 2. Define Themes with Extracted Values
+// 2. Define Themes
 export const THEMES: Record<string, ThemeDefinition> = {
     nexus: {
         name: 'Nexus (Default)',
         type: 'Modern SaaS',
         colors: {
             light: { 
-                primary: '#4f46e5', // Indigo 600
+                primary: '#4f46e5', 
                 secondary: '#818cf8', 
                 primaryHover: '#4338ca',
                 bg: '#f3f4f6',      
@@ -58,6 +61,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff',
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(0,0,0,0.1)',
+                headerBg: '#4f46e5', // Standard solid primary
                 text: '#111827',
                 textMuted: '#6b7280',
                 success: '#10b981',
@@ -73,7 +77,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
             },
             dark: { 
-                primary: '#6366f1', // Indigo 500
+                primary: '#6366f1', 
                 secondary: '#4f46e5', 
                 primaryHover: '#818cf8',
                 bg: '#0f172a',      
@@ -82,9 +86,10 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#1f2937',
                 glass: 'rgba(30, 41, 59, 0.7)',
                 border: 'rgba(255, 255, 255, 0.08)',
+                headerBg: '#6366f1', // Standard solid primary
                 text: '#f3f4f6',
                 textMuted: '#9ca3af',
-                success: '#34d399', // Lighter for dark mode
+                success: '#34d399', 
                 successBg: 'rgba(16, 185, 129, 0.25)',
                 info: '#60a5fa',
                 infoBg: 'rgba(59, 130, 246, 0.25)',
@@ -103,7 +108,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
         type: 'Corporate',
         colors: {
             light: { 
-                primary: '#334155', // Slate 700
+                primary: '#334155', 
                 secondary: '#475569', 
                 primaryHover: '#1e293b',
                 bg: '#f1f5f9',      
@@ -112,6 +117,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.98)',
                 border: 'rgba(0,0,0,0.15)',
+                headerBg: '#334155',
                 text: '#020617', 
                 textMuted: '#64748b',
                 success: '#059669',
@@ -127,7 +133,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 shadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             },
             dark: { 
-                primary: '#38bdf8', // Sky 400
+                primary: '#38bdf8', 
                 secondary: '#0ea5e9', 
                 primaryHover: '#7dd3fc',
                 bg: '#020617',      
@@ -136,6 +142,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#0f172a', 
                 glass: 'rgba(15, 23, 42, 0.8)',
                 border: 'rgba(255, 255, 255, 0.1)',
+                headerBg: '#0284c7', // Slight variation for header
                 text: '#f8fafc',
                 textMuted: '#94a3b8',
                 success: '#4ade80',
@@ -157,15 +164,16 @@ export const THEMES: Record<string, ThemeDefinition> = {
         type: 'Focus & Calm',
         colors: {
             light: { 
-                primary: '#059669', // Emerald 600
+                primary: '#059669', 
                 secondary: '#10b981', 
                 primaryHover: '#047857',
-                bg: '#f5f5f4',      // Stone 100
+                bg: '#f5f5f4',
                 island: '#fafaf9',
                 sidebar: '#e7e5e4',
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.9)',
                 border: 'rgba(87, 83, 78, 0.1)',
+                headerBg: '#059669',
                 text: '#1c1917', 
                 textMuted: '#78716c',
                 success: '#059669',
@@ -181,15 +189,16 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 shadow: 'none'
             },
             dark: { 
-                primary: '#34d399', // Emerald 400
+                primary: '#34d399', 
                 secondary: '#10b981', 
                 primaryHover: '#6ee7b7',
-                bg: '#1c1917',      // Stone 900
+                bg: '#1c1917',
                 island: '#292524',
                 sidebar: '#1c1917',
                 surface: '#292524', 
                 glass: 'rgba(41, 37, 36, 0.8)',
                 border: 'rgba(255, 255, 255, 0.05)',
+                headerBg: '#34d399',
                 text: '#f5f5f4', 
                 textMuted: '#a8a29e',
                 success: '#6ee7b7',
@@ -214,12 +223,14 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 primary: '#ea580c', // Orange 600
                 secondary: '#f97316', 
                 primaryHover: '#c2410c',
-                bg: '#fff7ed',      // Orange 50
+                bg: '#fff7ed',      
                 island: '#ffffff',
                 sidebar: '#ffedd5',
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(234, 88, 12, 0.15)',
+                // FROSTED CHARCOAL GRADIENT FOR HEADERS
+                headerBg: 'linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(67, 20, 7, 0.9) 100%)', 
                 text: '#431407', 
                 textMuted: '#9a3412',
                 success: '#16a34a',
@@ -238,12 +249,14 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 primary: '#f97316', // Orange 500
                 secondary: '#ea580c', 
                 primaryHover: '#fb923c',
-                bg: '#18181b',      // Zinc 900
+                bg: '#18181b',      
                 island: '#27272a',
                 sidebar: '#18181b',
                 surface: '#27272a', 
                 glass: 'rgba(39, 39, 42, 0.8)',
                 border: 'rgba(249, 115, 22, 0.2)',
+                // DEEP STEALTH GRADIENT FOR HEADERS
+                headerBg: 'linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(124, 45, 18, 0.2) 100%)',
                 text: '#fafafa', 
                 textMuted: '#a1a1aa',
                 success: '#4ade80',
@@ -288,18 +301,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         const colors = THEMES[currentTheme].colors[mode];
         const root = document.documentElement;
 
-        // AUTOMATIC INJECTION of CSS Variables
-        // Converts "primaryHover" -> "--color-primary-hover"
         Object.entries(colors).forEach(([key, value]) => {
             const cssVarName = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
             root.style.setProperty(cssVarName, value);
         });
 
-        // Force body background to match theme immediately
         document.body.style.backgroundColor = colors.bg;
         document.body.style.color = colors.text;
 
-        // Toggle Tailwind 'dark' class
         if (isDarkMode) {
             root.classList.add('dark');
         } else {

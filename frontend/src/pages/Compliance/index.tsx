@@ -37,7 +37,7 @@ export default function Compliance() {
   };
 
   return (
-    <div className="p-8 text-[var(--text-main)] animate-fade-in relative h-full flex flex-col overflow-hidden">
+    <div className="p-8 text-[var(--color-text)] animate-fade-in relative h-full flex flex-col overflow-hidden">
       {/* Header */}
       <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 shrink-0">
         <div>
@@ -45,22 +45,22 @@ export default function Compliance() {
             Global Compliance 
             <button 
                 onClick={() => setShowHealthModal(true)}
-                className="text-xs bg-indigo-500/10 text-indigo-500 px-2 py-1 rounded-full border border-indigo-500/20 font-mono flex items-center gap-1 hover:bg-indigo-500/20 transition cursor-pointer"
+                className="text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-2 py-1 rounded-full border border-[var(--color-primary)]/20 font-mono flex items-center gap-1 hover:bg-[var(--color-primary)]/20 transition cursor-pointer"
             >
                 <ShieldCheck weight="fill" /> SYSTEM SECURE
             </button>
           </h1>
-          <p className="text-sm opacity-70">Workforce Distribution & Regulatory Monitoring</p>
+          <p className="text-sm opacity-70 text-[var(--color-text-muted)]">Workforce Distribution & Regulatory Monitoring</p>
         </div>
         <div className="flex gap-3">
              <div className="text-right hidden md:block">
-                <div className="text-[10px] uppercase font-bold opacity-50">Next Audit</div>
-                <div className="text-sm font-mono font-bold text-emerald-500">In 14 Days</div>
+                <div className="text-[10px] uppercase font-bold opacity-50 text-[var(--color-text-muted)]">Next Audit</div>
+                <div className="text-sm font-mono font-bold text-[var(--color-success)]">In 14 Days</div>
              </div>
-             <div className="w-px h-8 bg-gray-200 dark:bg-white/10 hidden md:block"></div>
+             <div className="w-px h-8 bg-[var(--color-border)] hidden md:block"></div>
              <div className="text-right hidden md:block">
-                <div className="text-[10px] uppercase font-bold opacity-50">Active Alerts</div>
-                <div className="text-sm font-mono font-bold text-orange-500">0 Critical</div>
+                <div className="text-[10px] uppercase font-bold opacity-50 text-[var(--color-text-muted)]">Active Alerts</div>
+                <div className="text-sm font-mono font-bold text-[var(--color-warning)]">0 Critical</div>
              </div>
         </div>
       </header>
@@ -116,7 +116,6 @@ export default function Compliance() {
       {distributionModalType && <UserDistributionModal type={distributionModalType} people={distributionModalType === 'Remote' ? remotePeople : hybridPeople} onClose={() => setDistributionModalType(null)} onSelectCountry={(country) => { setDistributionModalType(null); handleOpenPolicy(country); }} />}
       {showPendingReviews && <PendingReviewsModal items={pendingReviews} onClose={() => setShowPendingReviews(false)} />}
       
-      {/* Passed 'pendingReviews' to ReportModal */}
       {showReportModal && <ReportModal onClose={() => setShowReportModal(false)} stats={stats} locationStats={locationStats} pendingReviews={pendingReviews} />}
       
       {showAddUserModal && <AddUserModal onClose={() => setShowAddUserModal(false)} onAdd={addUser} />}

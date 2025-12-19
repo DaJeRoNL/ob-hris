@@ -53,26 +53,19 @@ export default function TimeTracker() {
   const isSelectedDateFuture = getLocalDateStr(selectedDate) > getLocalDateStr(new Date());
 
   return (
-    // CONTAINER: 'min-h-screen' ensures it fills the view but can grow. 
-    // 'flex-col' stacks header and grid.
-    <div className="p-4 md:p-8 animate-fade-in text-[var(--text-main)] relative min-h-screen flex flex-col">
+    // CONTAINER: Uses dynamic background and text colors
+    <div className="p-4 md:p-8 animate-fade-in text-[var(--color-text)] relative min-h-screen flex flex-col">
       <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 shrink-0">
         <div>
             <h1 className="text-2xl font-bold font-['Montserrat']">Time & Monitoring</h1>
-            <p className="text-sm opacity-70">Track your work hours and leave</p>
+            <p className="text-sm opacity-70 text-[var(--color-text-muted)]">Track your work hours and leave</p>
         </div>
         <TimezoneDisplay />
       </header>
       
-      {/* GRID: 
-          - 'items-start' is CRITICAL. It prevents the columns from forcing each other to be the same height.
-            This allows the Sticky behavior to work because the container is taller than the sticky element.
-      */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start flex-1">
         
-        {/* LEFT COLUMN: 
-            - No height restrictions. It grows as EntryList grows.
-        */}
+        {/* LEFT COLUMN */}
         <div className="lg:col-span-2 flex flex-col gap-6 w-full transition-all duration-500">
             <div className="shrink-0">
                 <CalendarWidget 
@@ -106,12 +99,7 @@ export default function TimeTracker() {
             </div>
         </div>
 
-        {/* RIGHT COLUMN: 
-            - 'h-fit': Ensures the div is only as tall as its content (doesn't stretch).
-            - 'lg:sticky': Only applies on Desktop.
-            - 'lg:bottom-6': This is the magic. It sticks to the BOTTOM of the viewport (with 1.5rem padding).
-              This means if the column is tall, you scroll down until the bottom is visible, and THEN it sticks.
-        */}
+        {/* RIGHT COLUMN */}
         <div className="space-y-4 lg:col-span-1 w-full h-fit lg:sticky lg:bottom-6">
             <StatsSidebar 
                 entries={timeEntries.entries} 

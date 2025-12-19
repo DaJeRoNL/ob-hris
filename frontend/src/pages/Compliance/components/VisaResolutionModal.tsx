@@ -39,7 +39,7 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
 
     // Derived State
     const activeRule = VISA_RULES[visaType];
-    const isFieldsComplete = visaType !== '' && expiryDate !== ''; // Lock condition
+    const isFieldsComplete = visaType !== '' && expiryDate !== ''; 
     
     const reminderDateDisplay = useMemo(() => {
         if (!expiryDate) return '---';
@@ -49,16 +49,18 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
     }, [expiryDate, reminderThreshold]);
 
     const handleChat = () => {
-        // In a real app, pass user ID to chat context
         navigate('/chat');
     };
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/10" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-[var(--color-border)]" onClick={e => e.stopPropagation()}>
                 
-                {/* 1. Enhanced Header with User Context */}
-                <div className="bg-indigo-900 p-6 text-white shrink-0 relative overflow-hidden">
+                {/* 1. Enhanced Header with Dynamic Gradient Variable */}
+                <div 
+                    className="p-6 text-white shrink-0 relative overflow-hidden backdrop-blur-md"
+                    style={{ background: 'var(--color-header-bg)' }}
+                >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
                     
                     <div className="flex justify-between items-start relative z-10">
@@ -69,7 +71,7 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
                             <div>
                                 <h2 className="text-xl font-bold font-['Montserrat'] flex items-center gap-2">
                                     {person.name}
-                                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded uppercase tracking-wider">
+                                    <span className="text-[10px] bg-[var(--color-success)]/20 text-[var(--color-success)] border border-[var(--color-success)]/30 px-2 py-0.5 rounded uppercase tracking-wider text-white mix-blend-overlay">
                                         {person.status}
                                     </span>
                                 </h2>
@@ -90,18 +92,18 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
                     </div>
                 </div>
 
-                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar bg-[var(--color-bg)]/20">
                     
                     {/* 2. Data Entry Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         
                         {/* Visa Type */}
                         <div className="col-span-2">
-                            <label className="text-xs font-bold uppercase opacity-50 mb-2 block">1. Visa Classification</label>
+                            <label className="text-xs font-bold uppercase opacity-50 mb-2 block text-[var(--color-text)]">1. Visa Classification</label>
                             <select 
                                 value={visaType} 
                                 onChange={(e) => setVisaType(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition appearance-none cursor-pointer"
+                                className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--color-primary)] transition appearance-none cursor-pointer text-[var(--color-text)]"
                             >
                                 <option value="">Select Visa Type...</option>
                                 <option value="H1B">USA - H-1B Specialty Occupation</option>
@@ -111,12 +113,12 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
 
                             {/* Context Rule Card */}
                             {activeRule && (
-                                <div className="mt-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 flex gap-3 animate-fade-in">
-                                    <div className="mt-1"><ShieldCheck size={20} className="text-indigo-500" /></div>
+                                <div className="mt-3 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-xl p-3 flex gap-3 animate-fade-in">
+                                    <div className="mt-1"><ShieldCheck size={20} className="text-[var(--color-primary)]" /></div>
                                     <div>
-                                        <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400">{activeRule.label}</div>
-                                        <div className="text-[11px] opacity-70 mt-1 mb-2 leading-relaxed">{activeRule.description}</div>
-                                        <span className="text-[10px] bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 font-bold">
+                                        <div className="text-xs font-bold text-[var(--color-primary)]">{activeRule.label}</div>
+                                        <div className="text-[11px] opacity-70 mt-1 mb-2 leading-relaxed text-[var(--color-text)]">{activeRule.description}</div>
+                                        <span className="text-[10px] bg-[var(--color-primary)]/10 px-2 py-0.5 rounded border border-[var(--color-primary)]/20 font-bold text-[var(--color-text)]">
                                             Max Duration: {activeRule.maxDuration}
                                         </span>
                                     </div>
@@ -124,27 +126,27 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
                             )}
                         </div>
 
-                        {/* Expiration Date (With Icon) */}
+                        {/* Expiration Date */}
                         <div>
-                            <label className="text-xs font-bold uppercase opacity-50 mb-2 block">2. Expiration Date</label>
+                            <label className="text-xs font-bold uppercase opacity-50 mb-2 block text-[var(--color-text)]">2. Expiration Date</label>
                             <div className="relative">
                                 <input 
                                     type="date" 
                                     value={expiryDate}
                                     onChange={(e) => setExpiryDate(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:border-indigo-500 transition"
+                                    className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:border-[var(--color-primary)] transition text-[var(--color-text)]"
                                 />
-                                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" size={18} />
+                                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none text-[var(--color-text)]" size={18} />
                             </div>
                         </div>
 
                         {/* Reminder Threshold */}
                         <div>
-                            <label className="text-xs font-bold uppercase opacity-50 mb-2 block">3. Warning Threshold</label>
+                            <label className="text-xs font-bold uppercase opacity-50 mb-2 block text-[var(--color-text)]">3. Warning Threshold</label>
                             <select 
                                 value={reminderThreshold}
                                 onChange={(e) => setReminderThreshold(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition"
+                                className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--color-primary)] transition text-[var(--color-text)]"
                             >
                                 <option value="30">30 Days Before</option>
                                 <option value="60">60 Days Before</option>
@@ -156,43 +158,43 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
 
                     {/* Timeline Preview */}
                     {expiryDate && (
-                        <div className="mb-8 p-3 bg-orange-500/5 border border-orange-500/20 rounded-xl flex items-center justify-between text-xs animate-fade-in">
-                            <span className="flex items-center gap-2 opacity-70"><Warning className="text-orange-500" /> System will alert Admin on:</span>
-                            <span className="font-mono font-bold text-orange-500">{reminderDateDisplay}</span>
+                        <div className="mb-8 p-3 bg-[var(--color-warning)]/5 border border-[var(--color-warning)]/20 rounded-xl flex items-center justify-between text-xs animate-fade-in">
+                            <span className="flex items-center gap-2 opacity-70 text-[var(--color-text)]"><Warning className="text-[var(--color-warning)]" /> System will alert Admin on:</span>
+                            <span className="font-mono font-bold text-[var(--color-warning)]">{reminderDateDisplay}</span>
                         </div>
                     )}
 
-                    {/* 3. Document Proof (Locked State) */}
+                    {/* 3. Document Proof */}
                     <div className="relative">
                         {!isFieldsComplete && (
-                            <div className="absolute inset-0 bg-gray-100/50 dark:bg-black/60 backdrop-blur-[1px] z-10 rounded-xl flex items-center justify-center border border-gray-200 dark:border-white/5">
-                                <div className="bg-[var(--color-surface)] px-4 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-white/10 flex items-center gap-2 text-xs font-bold opacity-80">
+                            <div className="absolute inset-0 bg-[var(--color-bg)]/60 backdrop-blur-[1px] z-10 rounded-xl flex items-center justify-center border border-[var(--color-border)]">
+                                <div className="bg-[var(--color-surface)] px-4 py-2 rounded-lg shadow-lg border border-[var(--color-border)] flex items-center gap-2 text-xs font-bold opacity-80 text-[var(--color-text)]">
                                     <LockKey weight="fill" /> Fill details above to unlock upload
                                 </div>
                             </div>
                         )}
                         
-                        <label className="text-xs font-bold uppercase opacity-50 mb-2 block">4. Proof of Visa</label>
+                        <label className="text-xs font-bold uppercase opacity-50 mb-2 block text-[var(--color-text)]">4. Proof of Visa</label>
                         <div 
                             onClick={() => isFieldsComplete && setDocUploaded(!docUploaded)}
                             className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition mb-2 ${
-                                !isFieldsComplete ? 'opacity-50 cursor-not-allowed border-gray-200 dark:border-white/10' :
+                                !isFieldsComplete ? 'opacity-50 cursor-not-allowed border-[var(--color-border)]' :
                                 docUploaded 
-                                    ? 'border-emerald-500 bg-emerald-500/5 cursor-pointer' 
-                                    : 'border-gray-300 dark:border-white/20 hover:border-indigo-500 hover:bg-indigo-500/5 cursor-pointer'
+                                    ? 'border-[var(--color-success)] bg-[var(--color-success)]/5 cursor-pointer' 
+                                    : 'border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 cursor-pointer'
                             }`}
                         >
                             {docUploaded ? (
                                 <>
-                                    <CheckCircle size={32} className="text-emerald-500 mb-2" weight="fill" />
-                                    <div className="text-sm font-bold text-emerald-600">Document Verified & Attached</div>
-                                    <div className="text-[10px] opacity-50">scan_visa_2024.pdf (1.2 MB)</div>
+                                    <CheckCircle size={32} className="text-[var(--color-success)] mb-2" weight="fill" />
+                                    <div className="text-sm font-bold text-[var(--color-success)]">Document Verified & Attached</div>
+                                    <div className="text-[10px] opacity-50 text-[var(--color-text)]">scan_visa_2024.pdf (1.2 MB)</div>
                                 </>
                             ) : (
                                 <>
-                                    <FileArrowUp size={32} className="opacity-30 mb-2" />
-                                    <div className="text-sm font-bold">Upload Document</div>
-                                    <div className="text-[10px] opacity-50">Drag & drop or click to browse</div>
+                                    <FileArrowUp size={32} className="opacity-30 mb-2 text-[var(--color-text)]" />
+                                    <div className="text-sm font-bold text-[var(--color-text)]">Upload Document</div>
+                                    <div className="text-[10px] opacity-50 text-[var(--color-text)]">Drag & drop or click to browse</div>
                                 </>
                             )}
                         </div>
@@ -208,19 +210,19 @@ export default function VisaResolutionModal({ person, onClose, onSave }: Props) 
                             readOnly 
                             disabled={!isFieldsComplete}
                         />
-                        <label htmlFor="verify" className="text-[10px] opacity-60 leading-tight">
+                        <label htmlFor="verify" className="text-[10px] opacity-60 leading-tight text-[var(--color-text)]">
                             I confirm that I have physically or digitally verified the original document against the details entered above.
                         </label>
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3 bg-gray-50 dark:bg-black/20">
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition">Cancel</button>
+                <div className="p-4 border-t border-[var(--color-border)] flex justify-end gap-3 bg-[var(--color-bg)]">
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-bold hover:bg-[var(--color-surface)] transition text-[var(--color-text)]">Cancel</button>
                     <button 
                         onClick={onSave}
                         disabled={!docUploaded || !isFieldsComplete}
-                        className="px-6 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                        className="px-6 py-2 rounded-xl bg-[var(--color-primary)] text-white text-sm font-bold hover:bg-[var(--color-primary-hover)] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                     >
                         Confirm & Update
                     </button>

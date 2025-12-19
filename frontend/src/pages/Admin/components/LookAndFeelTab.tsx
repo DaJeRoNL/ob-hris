@@ -5,21 +5,21 @@ export default function LookAndFeelTab() {
     const { currentTheme, setTheme, isDarkMode, setMode } = useTheme();
 
     return (
-        <div className="animate-fade-in space-y-10 max-w-5xl">
+        <div className="animate-fade-in space-y-10 max-w-5xl text-[var(--color-text)]">
             
             {/* 1. MODE SELECTOR */}
             <section>
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <h3 className="font-bold text-lg">Interface Mode</h3>
-                        <p className="text-sm opacity-60">Select your preferred brightness level.</p>
+                        <p className="text-sm opacity-60 text-[var(--color-text-muted)]">Select your preferred brightness level.</p>
                     </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                     <button 
                         onClick={() => setMode('light')} 
-                        className={`p-4 rounded-2xl border-2 flex items-center justify-center gap-3 transition-all duration-300 ${!isDarkMode ? 'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-lg' : 'border-transparent bg-gray-100 dark:bg-[var(--color-surface)]/50 opacity-60 hover:opacity-100'}`}
+                        className={`p-4 rounded-2xl border-2 flex items-center justify-center gap-3 transition-all duration-300 ${!isDarkMode ? 'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-lg' : 'border-transparent bg-[var(--color-surface)]/50 opacity-60 hover:opacity-100 hover:bg-[var(--color-surface)]'}`}
                     >
                         <Sun weight={!isDarkMode ? "fill" : "duotone"} size={24} className={!isDarkMode ? "text-[var(--color-primary)]" : ""} />
                         <span className="font-bold">Light Mode</span>
@@ -27,7 +27,7 @@ export default function LookAndFeelTab() {
 
                     <button 
                         onClick={() => setMode('dark')} 
-                        className={`p-4 rounded-2xl border-2 flex items-center justify-center gap-3 transition-all duration-300 ${isDarkMode ? 'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-lg' : 'border-transparent bg-gray-100 dark:bg-[var(--color-surface)]/50 opacity-60 hover:opacity-100'}`}
+                        className={`p-4 rounded-2xl border-2 flex items-center justify-center gap-3 transition-all duration-300 ${isDarkMode ? 'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-lg' : 'border-transparent bg-[var(--color-surface)]/50 opacity-60 hover:opacity-100 hover:bg-[var(--color-surface)]'}`}
                     >
                         <Moon weight={isDarkMode ? "fill" : "duotone"} size={24} className={isDarkMode ? "text-[var(--color-primary)]" : ""} />
                         <span className="font-bold">Dark Mode</span>
@@ -48,10 +48,10 @@ export default function LookAndFeelTab() {
                                 key={key}
                                 onClick={() => setTheme(key as any)}
                                 className={`
-                                    relative p-5 rounded-3xl text-left transition-all duration-500 group
+                                    relative p-5 rounded-3xl text-left transition-all duration-500 group border
                                     ${isSelected 
-                                        ? 'ring-4 ring-[var(--color-primary)]/30 scale-[1.02] shadow-2xl bg-[var(--color-surface)]' 
-                                        : 'bg-gray-50 dark:bg-[var(--color-surface)]/50 hover:bg-gray-100 dark:hover:bg-white/10 grayscale hover:grayscale-0 opacity-70 hover:opacity-100 scale-100'
+                                        ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20 scale-[1.02] shadow-2xl bg-[var(--color-surface)]' 
+                                        : 'border-transparent bg-[var(--color-surface)]/50 hover:bg-[var(--color-surface)] grayscale hover:grayscale-0 opacity-70 hover:opacity-100 scale-100'
                                     }
                                 `}
                             >
@@ -61,10 +61,10 @@ export default function LookAndFeelTab() {
                                             {theme.name}
                                             {isSelected && <CheckCircle weight="fill" className="text-[var(--color-primary)] animate-scale-in" />}
                                         </h4>
-                                        <p className="text-xs font-bold uppercase tracking-wider opacity-50 mt-1">{theme.type}</p>
+                                        <p className="text-xs font-bold uppercase tracking-wider opacity-50 mt-1 text-[var(--color-text-muted)]">{theme.type}</p>
                                     </div>
                                     
-                                    {/* Color Dots */}
+                                    {/* Color Dots (Preview - uses literal theme colors) */}
                                     <div className="flex -space-x-2">
                                         <div className="w-6 h-6 rounded-full border-2 border-white dark:border-black" style={{ backgroundColor: colors.bg }} />
                                         <div className="w-6 h-6 rounded-full border-2 border-white dark:border-black" style={{ backgroundColor: colors.surface }} />
@@ -72,7 +72,7 @@ export default function LookAndFeelTab() {
                                     </div>
                                 </div>
 
-                                {/* MOCK WINDOW PREVIEW */}
+                                {/* MOCK WINDOW PREVIEW (Uses literal theme colors) */}
                                 <div 
                                     className="w-full h-32 rounded-xl overflow-hidden shadow-inner relative transition-colors duration-500 flex"
                                     style={{ backgroundColor: colors.bg }}

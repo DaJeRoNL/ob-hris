@@ -3,8 +3,8 @@ import { X, CheckCircle, ShieldCheck, Database, LockKey, Globe } from '@phosphor
 export default function SystemHealthModal({ onClose }: { onClose: () => void }) {
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-white/10 overflow-hidden" onClick={e => e.stopPropagation()}>
-                <div className="bg-emerald-600 p-6 text-white flex justify-between items-center">
+            <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-[var(--color-border)] overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="bg-[var(--color-success)] p-6 text-white flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <ShieldCheck size={32} weight="fill" />
                         <div>
@@ -16,37 +16,37 @@ export default function SystemHealthModal({ onClose }: { onClose: () => void }) 
                 </div>
                 
                 <div className="p-6 space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[var(--color-surface)]/50 rounded-xl border border-gray-200 dark:border-white/5">
+                    <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg"><Database size={20} weight="fill" /></div>
+                            <div className="p-2 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-lg"><Database size={20} weight="fill" /></div>
                             <div>
-                                <div className="font-bold text-sm text-gray-900 ">Database Integrity</div>
-                                <div className="text-xs opacity-50">Backups Synced (2 mins ago)</div>
+                                <div className="font-bold text-sm text-[var(--color-text)]">Database Integrity</div>
+                                <div className="text-xs opacity-50 text-[var(--color-text-muted)]">Backups Synced (2 mins ago)</div>
                             </div>
                         </div>
-                        <CheckCircle size={20} className="text-emerald-500" weight="fill" />
+                        <CheckCircle size={20} className="text-[var(--color-success)]" weight="fill" />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[var(--color-surface)]/50 rounded-xl border border-gray-200 dark:border-white/5">
+                    <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg"><LockKey size={20} weight="fill" /></div>
+                            <div className="p-2 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-lg"><LockKey size={20} weight="fill" /></div>
                             <div>
-                                <div className="font-bold text-sm text-gray-900 ">Encryption Layer</div>
-                                <div className="text-xs opacity-50">AES-256 Enabled</div>
+                                <div className="font-bold text-sm text-[var(--color-text)]">Encryption Layer</div>
+                                <div className="text-xs opacity-50 text-[var(--color-text-muted)]">AES-256 Enabled</div>
                             </div>
                         </div>
-                        <CheckCircle size={20} className="text-emerald-500" weight="fill" />
+                        <CheckCircle size={20} className="text-[var(--color-success)]" weight="fill" />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[var(--color-surface)]/50 rounded-xl border border-gray-200 dark:border-white/5">
+                    <div className="flex items-center justify-between p-4 bg-[var(--color-bg)] rounded-xl border border-[var(--color-border)]">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg"><Globe size={20} weight="fill" /></div>
+                            <div className="p-2 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded-lg"><Globe size={20} weight="fill" /></div>
                             <div>
-                                <div className="font-bold text-sm text-gray-900 ">Global CDN</div>
-                                <div className="text-xs opacity-50">Latency: 24ms</div>
+                                <div className="font-bold text-sm text-[var(--color-text)]">Global CDN</div>
+                                <div className="text-xs opacity-50 text-[var(--color-text-muted)]">Latency: 24ms</div>
                             </div>
                         </div>
-                        <CheckCircle size={20} className="text-emerald-500" weight="fill" />
+                        <CheckCircle size={20} className="text-[var(--color-success)]" weight="fill" />
                     </div>
                 </div>
             </div>

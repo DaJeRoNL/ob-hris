@@ -1,4 +1,4 @@
-import { X, FilePdf, DownloadSimple, Printer, ShareNetwork } from '@phosphor-icons/react';
+import { X, FilePdf, DownloadSimple } from '@phosphor-icons/react';
 import { CountryData, Person } from '../types';
 
 interface Props {
@@ -10,11 +10,8 @@ interface Props {
 
 export default function ReportModal({ onClose, stats, locationStats, pendingReviews }: Props) {
     const timestamp = new Date().toLocaleString();
-    
-    // Sort locations by count to show most relevant first
     const sortedLocations = [...locationStats].sort((a,b) => b.count - a.count);
 
-    // Helpers for dynamic policy text generation
     const getPolicyText = (region: string) => {
         if (region === 'Germany' || region === 'France' || region === 'UK') {
             return "Strict adherence to GDPR and local labor laws. Works councils consultation required for major changes. Standard 25-30 days PTO. Data residency within EU/UK borders enforced.";
@@ -30,39 +27,39 @@ export default function ReportModal({ onClose, stats, locationStats, pendingRevi
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-[var(--color-surface)] w-full max-w-5xl h-[85vh] rounded-xl shadow-2xl border border-white/10 flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-5xl h-[85vh] rounded-xl shadow-2xl border border-[var(--color-border)] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
                 
                 {/* Toolbar */}
-                <div className="bg-gray-100 dark:bg-[var(--color-surface)] p-4 flex justify-between items-center border-b border-gray-200 dark:border-white/10 shrink-0">
+                <div className="bg-[var(--color-bg)] p-4 flex justify-between items-center border-b border-[var(--color-border)] shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="bg-red-500 text-white p-2 rounded shadow-sm"><FilePdf size={20} weight="fill" /></div>
+                        <div className="bg-[var(--color-danger)] text-white p-2 rounded shadow-sm"><FilePdf size={20} weight="fill" /></div>
                         <div>
-                            <h3 className="font-bold text-sm">Global_Compliance_Report_LIVE.pdf</h3>
-                            <p className="text-[10px] opacity-60">Snapshot: {timestamp}</p>
+                            <h3 className="font-bold text-sm text-[var(--color-text)]">Global_Compliance_Report_LIVE.pdf</h3>
+                            <p className="text-[10px] opacity-60 text-[var(--color-text-muted)]">Snapshot: {timestamp}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition shadow-lg">
+                        <button className="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold rounded-lg flex items-center gap-2 transition shadow-lg">
                             <DownloadSimple size={16} /> Download
                         </button>
-                        <button onClick={onClose} className="ml-2 p-2 hover:bg-red-500/10 hover:text-red-500 rounded transition"><X size={20} /></button>
+                        <button onClick={onClose} className="ml-2 p-2 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] rounded transition text-[var(--color-text)]"><X size={20} /></button>
                     </div>
                 </div>
 
                 {/* PDF Content */}
-                <div className="flex-1 bg-gray-200  overflow-y-auto p-8 flex flex-col items-center gap-8 custom-scrollbar">
+                <div className="flex-1 bg-[var(--color-bg)]/50 overflow-y-auto p-8 flex flex-col items-center gap-8 custom-scrollbar">
                     
-                    {/* PAGE 1: Executive Summary */}
+                    {/* PAGE 1: Executive Summary - Keeps white bg for document look */}
                     <div className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-16 text-black flex flex-col gap-8 relative shrink-0">
                         {/* Header */}
                         <div className="border-b-4 border-black pb-8 mb-4 flex justify-between items-end">
                             <div>
-                                <h1 className="text-4xl font-bold font-serif mb-2 text-[var(--color-text)]">Compliance Audit</h1>
+                                <h1 className="text-4xl font-bold font-serif mb-2">Compliance Audit</h1>
                                 <p className="text-sm uppercase tracking-widest text-gray-500 font-bold">OB-HRIS • Live Snapshot</p>
                             </div>
                             <div className="text-right">
                                 <div className="text-5xl font-black text-indigo-600 tracking-tighter">{stats.complianceScore}%</div>
-                                <div className="text-xs font-bold uppercase text-[var(--color-text)] mt-1">Safety Score</div>
+                                <div className="text-xs font-bold uppercase mt-1">Safety Score</div>
                             </div>
                         </div>
 
@@ -71,7 +68,7 @@ export default function ReportModal({ onClose, stats, locationStats, pendingRevi
                             <h3 className="text-lg font-bold border-b border-slate-200 pb-2 text-slate-800">1. Executive Summary</h3>
                             <div className="grid grid-cols-4 gap-4">
                                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
-                                    <div className="text-xl font-bold text-[var(--color-text)]">{stats.total}</div>
+                                    <div className="text-xl font-bold">{stats.total}</div>
                                     <div className="text-[9px] uppercase font-bold text-slate-500">Total Workforce</div>
                                 </div>
                                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
@@ -130,14 +127,11 @@ export default function ReportModal({ onClose, stats, locationStats, pendingRevi
                     {/* DYNAMIC PAGES: Country Policies */}
                     {sortedLocations.map((loc, idx) => (
                         <div key={loc.name} className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-16 text-black flex flex-col gap-8 relative shrink-0">
-                            
-                            {/* Page Header */}
                             <div className="border-b border-slate-200 pb-4 flex justify-between items-center">
-                                <h2 className="text-2xl font-bold font-serif text-[var(--color-text)]">{loc.name} Annex</h2>
+                                <h2 className="text-2xl font-bold font-serif">{loc.name} Annex</h2>
                                 <span className="text-xs font-mono bg-slate-100 px-2 py-1 rounded">ISO: {loc.isoCode?.toUpperCase() || 'N/A'}</span>
                             </div>
 
-                            {/* Section 1: Entity Info */}
                             <div className="grid grid-cols-2 gap-8">
                                 <div className="space-y-2">
                                     <h4 className="text-xs font-bold uppercase text-slate-500 border-b border-slate-100 pb-1">Primary Entity</h4>
@@ -151,7 +145,6 @@ export default function ReportModal({ onClose, stats, locationStats, pendingRevi
                                 </div>
                             </div>
 
-                            {/* Section 2: Policy Text */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-bold border-b border-slate-200 pb-2 text-slate-800">Policy Framework</h3>
                                 <div className="p-6 bg-slate-50 border border-slate-100 rounded-lg text-sm leading-relaxed text-justify opacity-80 font-serif">
@@ -161,9 +154,8 @@ export default function ReportModal({ onClose, stats, locationStats, pendingRevi
                                 </div>
                             </div>
 
-                            {/* Section 3: Approval Box */}
                             <div className="mt-auto border-2 border-slate-800 rounded-xl p-8 bg-white relative">
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-xs font-bold uppercase tracking-widest text-[var(--color-text)]">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-xs font-bold uppercase tracking-widest">
                                     Director Authorization
                                 </div>
                                 

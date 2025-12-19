@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/ui/CustomDatePicker.tsx
 import { useState, useRef, useEffect } from 'react';
 import { CalendarBlank, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { getLocalDateStr } from '../../utils';
@@ -52,7 +51,7 @@ export const CustomDatePicker = ({ startDate, endDate, onStartChange, onEndChang
         <div className={`relative w-full ${disabled ? 'opacity-50 pointer-events-none' : ''}`} ref={containerRef}>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full bg-black/5 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-black/10 transition"
+                className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[var(--color-bg)] transition text-[var(--color-text)]"
             >
                 <div className="flex items-center gap-2">
                     <CalendarBlank className="opacity-60" />
@@ -65,11 +64,11 @@ export const CustomDatePicker = ({ startDate, endDate, onStartChange, onEndChang
             </div>
 
             {isOpen && (
-                <div className="absolute top-full left-0 w-[300px] mt-2 bg-white dark:bg-[#1f2937] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl z-50 p-4 animate-fade-in">
+                <div className="absolute top-full left-0 w-[300px] mt-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl z-50 p-4 animate-fade-in text-[var(--color-text)]">
                     <div className="flex justify-between items-center mb-4">
-                        <button onClick={() => setViewDate(new Date(viewDate.setMonth(viewDate.getMonth()-1)))} className="p-1 hover:bg-black/5 rounded"><CaretLeft /></button>
+                        <button onClick={() => setViewDate(new Date(viewDate.setMonth(viewDate.getMonth()-1)))} className="p-1 hover:bg-[var(--color-bg)] rounded"><CaretLeft /></button>
                         <span className="text-sm font-bold">{viewDate.toLocaleDateString(undefined, {month:'long', year:'numeric'})}</span>
-                        <button onClick={() => setViewDate(new Date(viewDate.setMonth(viewDate.getMonth()+1)))} className="p-1 hover:bg-black/5 rounded"><CaretRight /></button>
+                        <button onClick={() => setViewDate(new Date(viewDate.setMonth(viewDate.getMonth()+1)))} className="p-1 hover:bg-[var(--color-bg)] rounded"><CaretRight /></button>
                     </div>
                     <div className="grid grid-cols-7 gap-1 text-center">
                         {['S','M','T','W','T','F','S'].map(d => <div key={d} className="text-[10px] font-bold opacity-40 mb-2">{d}</div>)}
@@ -80,8 +79,8 @@ export const CustomDatePicker = ({ startDate, endDate, onStartChange, onEndChang
                                 onClick={() => handleDateClick(d)}
                                 className={`
                                     h-8 w-8 flex items-center justify-center text-xs rounded-full cursor-pointer transition
-                                    ${isStartOrEnd(d) ? 'bg-indigo-500 text-white font-bold shadow-md' : 
-                                      isSelected(d) ? 'bg-indigo-500/20 text-indigo-500' : 'hover:bg-black/5 dark:hover:bg-white/10'}
+                                    ${isStartOrEnd(d) ? 'bg-[var(--color-primary)] text-white font-bold shadow-md' : 
+                                      isSelected(d) ? 'bg-[var(--color-primary)]/20 text-[var(--color-primary)]' : 'hover:bg-[var(--color-bg)]'}
                                 `}
                             >
                                 {d}

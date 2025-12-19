@@ -166,12 +166,12 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
                          pathData = `M ${x1} ${y1} C ${x1} ${y1 + 150}, ${x2} ${y2 - 150}, ${x2} ${y2}`;
                     }
 
-                    // COLOR LOGIC
+                    // COLOR LOGIC - Kept static/functional colors for arrows, but could map to CSS vars if needed.
                     // Source Focused = Green (Forward)
                     // Dest Focused = Grey (Backward)
-                    const lineColor = isSourceFocused ? '#10b981' : '#64748b'; // Green or Slate-500
+                    const lineColor = isSourceFocused ? '#10b981' : '#64748b'; 
                     const markerId = isSourceFocused ? 'url(#arrowhead-green)' : 'url(#arrowhead-grey)';
-                    const strokeStyle = isSourceFocused ? '6,4' : '4,4'; // Different dash style for variety
+                    const strokeStyle = isSourceFocused ? '6,4' : '4,4'; 
 
                     paths.push(
                         <g key={`${task.id}-${targetId}`}>
@@ -494,39 +494,34 @@ export default function TaskBoard() {
         });
     }, [tasks, filter, sortBy]);
 
-    // Handle background click to clear flow focus
     const handleBackgroundClick = (e: React.MouseEvent) => {
-        // Clear flow focus when clicking anywhere
         if (flowFocusId) {
             setFlowFocusId(null);
         }
     };
 
-    // Handle card click - opens flow panel and clears any flow focus
     const handleCardClick = (task: Task, e: React.MouseEvent) => {
         e.stopPropagation();
-        console.log('Card clicked:', task.id, 'Current flowFocusId:', flowFocusId);
-        setFlowFocusId(null); // Clear any flow visualization
+        setFlowFocusId(null);
         setSelectedTask(task);
         setIsFlowOpen(true);
-        console.log('After click - selectedTask should be:', task.id, 'isFlowOpen should be: true');
     };
 
     return (
-        <div className="h-full flex flex-col p-6 animate-fade-in bg-[#f3f4f6] dark:bg-[#020617] text-[var(--text-main)] relative overflow-hidden" onClick={handleBackgroundClick}>
+        <div className="h-full flex flex-col p-6 animate-fade-in bg-[var(--color-bg)] text-[var(--color-text)] relative overflow-hidden transition-colors duration-300" onClick={handleBackgroundClick}>
             
             <header className="flex flex-col md:flex-row justify-between items-end gap-4 mb-6 shrink-0 z-20">
                 <div>
-                    <h1 className="text-3xl font-black font-['Montserrat'] flex items-center gap-3">
-                        <Kanban weight="duotone" className="text-indigo-500" /> Central Task Board
+                    <h1 className="text-3xl font-black font-['Montserrat'] flex items-center gap-3 text-[var(--color-text)]">
+                        <Kanban weight="duotone" className="text-[var(--color-primary)]" /> Central Task Board
                     </h1>
-                    <p className="text-sm opacity-60 font-medium mt-1">Global Operations Center • {tasks.length} Active Items</p>
+                    <p className="text-sm opacity-60 font-medium mt-1 text-[var(--color-text-muted)]">Global Operations Center • {tasks.length} Active Items</p>
                 </div>
                 
                 <div className="flex gap-3">
                     <div className="relative">
-                        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40" />
-                        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search tasks..." className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-64 shadow-sm" />
+                        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 text-[var(--color-text-muted)]" />
+                        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search tasks..." className="pl-9 pr-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-primary)] outline-none w-64 shadow-sm" />
                     </div>
                     
                     <div 
@@ -534,28 +529,28 @@ export default function TaskBoard() {
                         onMouseEnter={handleSortEnter}
                         onMouseLeave={handleSortLeave}
                     >
-                        <button className={`p-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:border-indigo-500 text-indigo-500 transition shadow-sm ${isSortMenuOpen ? 'border-indigo-500' : ''}`}>
+                        <button className={`p-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-primary)] text-[var(--color-primary)] transition shadow-sm ${isSortMenuOpen ? 'border-[var(--color-primary)]' : ''}`}>
                             <SortAscending weight="bold" size={20} />
                         </button>
                         {isSortMenuOpen && (
-                            <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-[#1e293b] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 p-2 z-50 animate-fade-in-up">
-                                <button onClick={() => setSortBy('priority')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition ${sortBy === 'priority' ? 'bg-indigo-50 text-indigo-600' : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}>Priority (High-Low)</button>
-                                <button onClick={() => setSortBy('deadline')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition ${sortBy === 'deadline' ? 'bg-indigo-50 text-indigo-600' : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}>Deadline (Soonest)</button>
-                                <button onClick={() => setSortBy('newest')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition ${sortBy === 'newest' ? 'bg-indigo-50 text-indigo-600' : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}>Newest First</button>
+                            <div className="absolute right-0 top-full mt-2 w-40 bg-[var(--color-surface)] rounded-xl shadow-xl border border-[var(--color-border)] p-2 z-50 animate-fade-in-up">
+                                <button onClick={() => setSortBy('priority')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition text-[var(--color-text)] ${sortBy === 'priority' ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'hover:bg-[var(--color-bg)]'}`}>Priority (High-Low)</button>
+                                <button onClick={() => setSortBy('deadline')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition text-[var(--color-text)] ${sortBy === 'deadline' ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'hover:bg-[var(--color-bg)]'}`}>Deadline (Soonest)</button>
+                                <button onClick={() => setSortBy('newest')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition text-[var(--color-text)] ${sortBy === 'newest' ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'hover:bg-[var(--color-bg)]'}`}>Newest First</button>
                             </div>
                         )}
                     </div>
 
-                    {isAdmin && <button onClick={handleAddColumn} className="px-4 py-2.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-xl font-bold flex items-center gap-2 transition text-xs uppercase">Add Column</button>}
-                    <button onClick={() => openEditModal()} className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg transition"><Plus weight="bold" /> New Ticket</button>
+                    {isAdmin && <button onClick={handleAddColumn} className="px-4 py-2.5 bg-[var(--color-surface)]/50 hover:bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl font-bold flex items-center gap-2 transition text-xs uppercase text-[var(--color-text)]">Add Column</button>}
+                    <button onClick={() => openEditModal()} className="px-4 py-2.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white font-bold rounded-xl flex items-center gap-2 shadow-lg transition"><Plus weight="bold" /> New Ticket</button>
                 </div>
             </header>
 
             {canScrollLeft && !isFlowOpen && (
-                <button onClick={() => scrollBoard('left')} className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-full shadow-xl hover:bg-white dark:hover:bg-[#1e293b] text-indigo-600 transition-all border border-gray-200 dark:border-white/10"><CaretLeft weight="bold" size={24} /></button>
+                <button onClick={() => scrollBoard('left')} className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-full shadow-xl hover:bg-[var(--color-surface)] text-[var(--color-primary)] transition-all border border-[var(--color-border)]"><CaretLeft weight="bold" size={24} /></button>
             )}
             {canScrollRight && !isFlowOpen && (
-                <button onClick={() => scrollBoard('right')} className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-sm rounded-full shadow-xl hover:bg-white dark:hover:bg-[#1e293b] text-indigo-600 transition-all border border-gray-200 dark:border-white/10"><CaretRight weight="bold" size={24} /></button>
+                <button onClick={() => scrollBoard('right')} className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-[var(--color-surface)]/80 backdrop-blur-sm rounded-full shadow-xl hover:bg-[var(--color-surface)] text-[var(--color-primary)] transition-all border border-[var(--color-border)]"><CaretRight weight="bold" size={24} /></button>
             )}
 
             <div 
@@ -578,33 +573,33 @@ export default function TaskBoard() {
                         const isDragOver = dragOverCol === col;
                         let dragClasses = '';
                         if (isDragOver) {
-                            if (col === 'Review') dragClasses = 'border-emerald-500 border-4 bg-emerald-500/5';
-                            else if (col === 'Done') dragClasses = 'border-amber-500 border-4 bg-amber-500/5';
-                            else dragClasses = 'border-indigo-500 border-4 bg-indigo-500/5';
+                            if (col === 'Review') dragClasses = 'border-[var(--color-success)] border-4 bg-[var(--color-success)]/5';
+                            else if (col === 'Done') dragClasses = 'border-[var(--color-warning)] border-4 bg-[var(--color-warning)]/5';
+                            else dragClasses = 'border-[var(--color-primary)] border-4 bg-[var(--color-primary)]/5';
                         }
 
                         return (
                             <div 
                                 key={col} 
-                                className={`w-[350px] flex flex-col bg-gray-100/50 dark:bg-white/[0.02] rounded-2xl border border-gray-200 dark:border-white/5 h-full transition-all duration-300 ${dragClasses}`}
+                                className={`w-[350px] flex flex-col bg-[var(--color-surface)]/30 rounded-2xl border border-[var(--color-border)] h-full transition-all duration-300 ${dragClasses}`}
                                 onDragEnter={() => handleDragEnter(col)}
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, col)}
                             >
-                                <div className="p-4 flex justify-between items-center border-b border-gray-200 dark:border-white/5 shrink-0 group/col">
+                                <div className="p-4 flex justify-between items-center border-b border-[var(--color-border)] shrink-0 group/col">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-sm uppercase tracking-wider">{col}</span>
-                                        <span className="bg-gray-200 dark:bg-white/10 text-[10px] font-bold px-2 py-0.5 rounded-full">{colTasks.length}</span>
+                                        <span className="font-bold text-sm uppercase tracking-wider text-[var(--color-text)]">{col}</span>
+                                        <span className="bg-[var(--color-surface)] text-[var(--color-text)] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[var(--color-border)]">{colTasks.length}</span>
                                     </div>
                                     <div className="flex gap-1 items-center">
                                         {!isProtected && (
                                             <>
-                                                {/* Column Move Arrows - appear on hover */}
+                                                {/* Column Move Arrows */}
                                                 <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1 mr-2">
                                                     <button 
                                                         onClick={() => moveColumn(col, 'left')} 
                                                         disabled={idx === 0 || PROTECTED_COLUMNS.includes(columns[idx - 1])}
-                                                        className="p-1 hover:bg-indigo-500/10 text-indigo-500 rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                                        className="p-1 hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
                                                         title="Move Left"
                                                     >
                                                         <CaretLeft size={14} weight="bold" />
@@ -612,24 +607,23 @@ export default function TaskBoard() {
                                                     <button 
                                                         onClick={() => moveColumn(col, 'right')} 
                                                         disabled={idx === columns.length - 1 || PROTECTED_COLUMNS.includes(columns[idx + 1])}
-                                                        className="p-1 hover:bg-indigo-500/10 text-indigo-500 rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                                        className="p-1 hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
                                                         title="Move Right"
                                                     >
                                                         <CaretRight size={14} weight="bold" />
                                                     </button>
                                                 </div>
                                                 
-                                                {/* Edit/Delete buttons */}
-                                                <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1">
+                                                <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1 text-[var(--color-text-muted)]">
                                                     <button onClick={() => {
                                                         const newName = prompt("Rename column:", col);
                                                         if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
-                                                    }} className="p-1 hover:bg-black/5 rounded"><PencilSimple size={12} /></button>
-                                                    <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-red-500/10 text-red-500 rounded"><X size={12} /></button>
+                                                    }} className="p-1 hover:bg-[var(--color-bg)] rounded"><PencilSimple size={12} /></button>
+                                                    <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-[var(--color-danger)]/10 text-[var(--color-danger)] rounded"><X size={12} /></button>
                                                 </div>
                                             </>
                                         )}
-                                        {isProtected && <LockKey className="opacity-30" weight="bold" />}
+                                        {isProtected && <LockKey className="opacity-30 text-[var(--color-text-muted)]" weight="bold" />}
                                     </div>
                                 </div>
 
@@ -639,46 +633,26 @@ export default function TaskBoard() {
                                         const total = task.subtasks.length;
                                         const pct = total > 0 ? (completed / total) * 100 : 0;
                                         
-                                        // THE FIX: Check if this task is currently selected AND flow panel is open
                                         const isActiveInFlow = selectedTask?.id === task.id && isFlowOpen;
                                         
-                                        // FLOW BLUR LOGIC - BUT EXCLUDE ACTIVE TASK
                                         const isFocused = flowFocusId === task.id;
                                         const isLinkedToFocused = flowFocusId && (
                                             (tasks.find(t => t.id === flowFocusId)?.links?.includes(task.id)) || 
                                             (task.links?.includes(flowFocusId)) 
                                         );
                                         
-                                        // NEW LOGIC: When flow panel is open, blur everything EXCEPT the active card
-                                        // When flow focus is active (Flow Table button), blur everything except focused and linked
                                         const isDimmed = (isFlowOpen && !isActiveInFlow && !flowFocusId) || 
                                                         (!isActiveInFlow && flowFocusId && !isFocused && !isLinkedToFocused);
 
-                                        // Debug logging for the first card only
-                                        if (task.id === 't-1') {
-                                            console.log('Card t-1 render:', {
-                                                selectedTaskId: selectedTask?.id,
-                                                isFlowOpen,
-                                                isActiveInFlow,
-                                                flowFocusId,
-                                                isFocused,
-                                                isLinkedToFocused,
-                                                isDimmed
-                                            });
-                                        }
-
                                         let cardStateClass = '';
                                         if (isDimmed) {
-                                            // Blur and dim cards that aren't active
                                             cardStateClass = 'opacity-30 blur-sm grayscale transition-all duration-500';
                                         } else if (isFocused) {
-                                            cardStateClass = 'ring-4 ring-purple-500 shadow-2xl scale-105 z-50 !bg-white dark:!bg-[#1e293b]';
+                                            cardStateClass = 'ring-4 ring-purple-500 shadow-2xl scale-105 z-50 !bg-[var(--color-surface)]';
                                         } else if (isActiveInFlow) {
-                                            // Active card in flow panel - stays clear with highlight
-                                            cardStateClass = 'ring-2 ring-indigo-400 shadow-2xl scale-105 z-50 !bg-white dark:!bg-[#1e293b] transition-all duration-500';
+                                            cardStateClass = 'ring-2 ring-[var(--color-primary)]/50 shadow-2xl scale-105 z-50 !bg-[var(--color-surface)] transition-all duration-500';
                                         }
 
-                                        // DRAG & DROP FLASH LOGIC
                                         const isDraggingThis = draggedTaskId === task.id;
                                         const isJustDropped = justDroppedId === task.id;
 
@@ -691,8 +665,6 @@ export default function TaskBoard() {
                                             return days <= 1 || t.subtasks.length > days;
                                         };
 
-                                        // DESTINATION TEXT CHECK
-                                        // Find if any OTHER task links TO this current task
                                         const incomingLinkTask = tasks.find(t => t.links?.includes(task.id));
 
                                         return (
@@ -703,59 +675,59 @@ export default function TaskBoard() {
                                                 onDragStart={(e) => handleDragStart(e, task.id)}
                                                 onClick={(e) => handleCardClick(task, e)}
                                                 className={`
-                                                    glass-card !p-4 group hover:border-indigo-500/30 transition-all duration-300 relative bg-white dark:bg-[#1e293b] cursor-pointer
+                                                    glass-card !p-4 group hover:border-[var(--color-primary)]/30 transition-all duration-300 relative bg-[var(--color-surface)] cursor-pointer
                                                     ${cardStateClass}
                                                     ${tiltClass}
                                                 `}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex flex-wrap gap-1">
-                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-1.5 py-0.5 rounded text-gray-500">{tag}</span>))}
+                                                        {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-[var(--color-bg)] border border-[var(--color-border)] px-1.5 py-0.5 rounded text-[var(--color-text-muted)]">{tag}</span>))}
                                                     </div>
                                                     <div className="flex gap-1">
-                                                        <button onClick={(e) => openEditModal(task, e)} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded text-gray-400 hover:text-indigo-500"><PencilSimple /></button>
+                                                        <button onClick={(e) => openEditModal(task, e)} className="p-1 hover:bg-[var(--color-bg)] rounded text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"><PencilSimple /></button>
                                                         {(task.priority === 'Critical' || getUrgency(task)) && (
                                                             <div title={task.priority === 'Critical' ? "Critical Priority" : "High Risk: Deadline approaching"}>
-                                                                <Fire weight="fill" className={`${task.priority === 'Critical' ? 'text-red-500' : 'text-orange-400'} animate-pulse`} />
+                                                                <Fire weight="fill" className={`${task.priority === 'Critical' ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]'} animate-pulse`} />
                                                             </div>
                                                         )}
                                                     </div>
                                                 </div>
 
-                                                <h3 className="font-bold text-sm mb-2 leading-tight">{task.title}</h3>
+                                                <h3 className="font-bold text-sm mb-2 leading-tight text-[var(--color-text)]">{task.title}</h3>
                                                 
                                                 {task.deadline && (
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2">
+                                                    <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2 text-[var(--color-text-muted)]">
                                                         <CalendarBlank weight="bold" /> {task.deadline}
                                                     </div>
                                                 )}
 
                                                 {total > 0 && (
                                                     <div className="mb-3">
-                                                        <div className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${pct}%` }}></div>
+                                                        <div className="w-full h-1.5 bg-[var(--color-bg)] rounded-full overflow-hidden">
+                                                            <div className="h-full bg-[var(--color-primary)] transition-all duration-500" style={{ width: `${pct}%` }}></div>
                                                         </div>
                                                     </div>
                                                 )}
 
-                                                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-white/5">
+                                                <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
                                                     <div className="flex -space-x-2 overflow-hidden">
                                                         {task.collaborators.length > 0 ? (
                                                             task.collaborators.map((c, i) => (
-                                                                <div key={i} className="w-6 h-6 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
+                                                                <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[var(--color-surface)]" title={c}>
                                                                     {c.charAt(0)}
                                                                 </div>
                                                             ))
                                                         ) : (
-                                                            <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-[10px] opacity-50">?</div>
+                                                            <div className="w-6 h-6 rounded-full bg-[var(--color-bg)] text-[var(--color-text-muted)] flex items-center justify-center text-[10px] opacity-50">?</div>
                                                         )}
                                                     </div>
 
                                                     <div className="flex gap-2">
-                                                        {/* UPSTREAM INDICATOR - Tasks that link TO this one (blockers) */}
+                                                        {/* UPSTREAM INDICATOR */}
                                                         {incomingLinkTask && (
                                                             <div className="group/link relative flex items-center justify-center">
-                                                                <div className="flex items-center gap-1 text-[10px] font-bold bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400 px-2 py-1 rounded shadow-sm border border-orange-200 dark:border-orange-500/20 cursor-help">
+                                                                <div className="flex items-center gap-1 text-[10px] font-bold bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-1 rounded shadow-sm border border-[var(--color-warning)]/20 cursor-help">
                                                                     <LinkIcon weight="bold" size={12} />
                                                                     <span>Blocked</span>
                                                                 </div>
@@ -766,7 +738,7 @@ export default function TaskBoard() {
                                                             </div>
                                                         )}
 
-                                                        {/* DOWNSTREAM INDICATOR - Tasks this links TO (blocking others) */}
+                                                        {/* DOWNSTREAM INDICATOR */}
                                                         {task.links && task.links.length > 0 && (
                                                             <button 
                                                                 onClick={(e) => { 
@@ -786,11 +758,10 @@ export default function TaskBoard() {
                                                             </button>
                                                         )}
 
-                                                        {/* MAGIC FLOW BUTTON - Only if has subtasks */}
                                                         {task.subtasks.length > 0 && (
                                                             <button 
                                                                 onClick={(e) => { e.stopPropagation(); handleCardClick(task, e); }}
-                                                                className="text-xs font-bold text-indigo-500 flex items-center gap-1 hover:underline"
+                                                                className="text-xs font-bold text-[var(--color-primary)] flex items-center gap-1 hover:underline"
                                                                 title="Open Workflow"
                                                             >
                                                                 <FlowArrow weight="bold" />
@@ -802,7 +773,7 @@ export default function TaskBoard() {
                                                 {task.status === 'Review' && (
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); moveTaskToColumn(task.id, 'Done'); }}
-                                                        className="w-full mt-3 py-1.5 bg-emerald-500/10 text-emerald-600 rounded text-[10px] font-bold border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center gap-1"
+                                                        className="w-full mt-3 py-1.5 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded text-[10px] font-bold border border-[var(--color-success)]/20 hover:bg-[var(--color-success)] hover:text-white transition flex items-center justify-center gap-1"
                                                     >
                                                         <CheckCircle weight="fill" /> Approve & Finish
                                                     </button>
@@ -810,7 +781,7 @@ export default function TaskBoard() {
                                                 {task.status === 'Done' && (
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); handleArchiveTask(task.id); }}
-                                                        className="w-full mt-3 py-1.5 bg-gray-100 dark:bg-white/5 text-gray-500 rounded text-[10px] font-bold hover:bg-gray-200 dark:hover:bg-white/10 transition flex items-center justify-center gap-1"
+                                                        className="w-full mt-3 py-1.5 bg-[var(--color-bg)] text-[var(--color-text-muted)] rounded text-[10px] font-bold hover:bg-[var(--color-border)] transition flex items-center justify-center gap-1"
                                                     >
                                                         <Archive weight="fill" /> Archive Ticket
                                                     </button>

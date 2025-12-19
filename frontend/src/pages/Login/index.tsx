@@ -1,99 +1,131 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { useNavigate } from 'react-router-dom';
-import './Login.css'; 
+import { useMemo } from 'react';
+import { MOCK_DB } from '../../utils/mockData';
+import { useAuth } from '../../context/AuthContext';
+import { TrendUp, TrendDown, CurrencyDollar, FileText, DownloadSimple, Wallet, CreditCard, Bank } from '@phosphor-icons/react';
 
-export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<{ type: 'error' | 'success', text: string } | null>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
+export default function Finance() {
+  const { currentClientId } = useAuth();
+  
+  const records = useMemo(() => MOCK_DB.finance.filter(f => f.clientId === currentClientId), [currentClientId]);
+  const totalRevenue = records.reduce((acc, curr) => acc + (parseFloat(curr.amount.replace(/[^0-9.-]+/g,"")) || 0), 0);
 
-  // Animation Logic (Same as before but strictly maintained)
-  useEffect(() => {
-    const bg = bgRef.current;
-    if (!bg) return;
-    const layers = [{ strength: 20, phase: Math.random() * 2 * Math.PI, speed: 0.0003 }, { strength: 15, phase: Math.random() * 2 * Math.PI, speed: 0.0004 }, { strength: 10, phase: Math.random() * 2 * Math.PI, speed: 0.0005 }];
-    const state = layers.map(() => ({ x: 50, y: 50 }));
-    let noiseX = 0, noiseY = 0;
-    let mouseX: number | null = null, mouseY: number | null = null;
-    let animationFrameId: number;
-
-    const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-    const handleMouseMove = (e: MouseEvent) => { mouseX = e.clientX; mouseY = e.clientY; };
-    const handleMouseLeave = () => { mouseX = null; mouseY = null; };
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-
-    const animate = (ts: number) => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        noiseX = lerp(noiseX, noiseX + (Math.random() - 0.5) * 0.04, 0.08);
-        noiseY = lerp(noiseY, noiseY + (Math.random() - 0.5) * 0.04, 0.08);
-        noiseX = clamp(noiseX, -5, 5); noiseY = clamp(noiseY, -5, 5);
-
-        for (let i = 0; i < layers.length; i++) {
-            const l = layers[i]; const s = state[i]; const t = ts * l.speed;
-            const amp1 = 15, amp2 = 8;
-            const ambientX = (Math.sin(t * (0.6 + i * 0.13) + l.phase) * amp1) + (Math.sin(t * (1.3 + i * 0.2)) * amp2);
-            const ambientY = (Math.cos(t * (0.7 + i * 0.11) + l.phase) * amp1) + (Math.cos(t * (1.5 + i * 0.25)) * amp2);
-            let targetX = 50 + ambientX + noiseX * (1 + i * 0.2);
-            let targetY = 50 + ambientY + noiseY * (1 + i * 0.2);
-
-            if (mouseX !== null && mouseY !== null) {
-                const layerPxX = (s.x / 100) * w; const layerPxY = (s.y / 100) * h;
-                let vx = layerPxX - mouseX; let vy = layerPxY - mouseY;
-                const dist = Math.hypot(vx, vy);
-                if (dist > 0.0001) { vx /= dist; vy /= dist; } else { vx = 0; vy = 0; }
-                const maxInfluenceDist = Math.max(w, h) * 0.5;
-                const falloff = clamp(1 - dist / maxInfluenceDist, 0, 1);
-                const repulse = l.strength * falloff * 1.5;
-                targetX += (vx * repulse) * (100 / w); targetY += (vy * repulse) * (100 / h);
-                const mouseInfluenceX = lerp(0, (mouseX - w / 2) / w * 100, 0.1);
-                const mouseInfluenceY = lerp(0, (mouseY - h / 2) / h * 100, 0.1);
-                targetX += mouseInfluenceX * 0.5; targetY += mouseInfluenceY * 0.5;
-            }
-            targetX = clamp(targetX, 2, 98); targetY = clamp(targetY, 2, 98);
-            const ease = 0.05 + i * 0.01;
-            s.x = lerp(s.x, targetX, ease); s.y = lerp(s.y, targetY, ease);
-        }
-        const css = `${state[0].x.toFixed(2)}% ${state[0].y.toFixed(2)}%, ` + `${state[1].x.toFixed(2)}% ${state[1].y.toFixed(2)}%, ` + `${state[2].x.toFixed(2)}% ${state[2].y.toFixed(2)}%`;
-        if (bg) bg.style.backgroundPosition = css;
-        animationFrameId = requestAnimationFrame(animate);
-    };
-    animationFrameId = requestAnimationFrame(animate);
-    return () => { document.removeEventListener('mousemove', handleMouseMove); document.removeEventListener('mouseleave', handleMouseLeave); cancelAnimationFrame(animationFrameId); };
-  }, []);
-
-  const handleSignIn = async (e: React.FormEvent) => { e.preventDefault(); if (!email || !password) return setMsg({ type: 'error', text: 'Enter email and password' }); setLoading(true); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) setMsg({ type: 'error', text: error.message }); else navigate('/dashboard'); setLoading(false); };
-  const handleSignUp = async (e: React.FormEvent) => { e.preventDefault(); if (!email || !password) return setMsg({ type: 'error', text: 'Enter email and password' }); setLoading(true); const { error } = await supabase.auth.signUp({ email, password }); if (error) setMsg({ type: 'error', text: error.message }); else setMsg({ type: 'success', text: 'Account created! Check email.' }); setLoading(false); };
-  const enterDevMode = () => { sessionStorage.setItem('dev_bypass', 'true'); window.location.reload(); };
+  // Mock Graph Data
+  const chartHeight = [40, 65, 45, 80, 55, 90, 75, 100, 85, 60, 70, 95];
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center font-['Raleway']">
-      <div id="bg-overlay" ref={bgRef}></div>
-      <div className="login-glass-container">
-        <div className="title-sequence">
-            <h1 className="welcome-text">Welcome!</h1>
-            <div className="title-line"></div>
-            <h1 className="pb-text">PB // HRIS</h1>
+    <div className="p-8 text-[var(--color-text)] animate-fade-in h-full flex flex-col overflow-hidden">
+      <header className="mb-8 flex justify-between items-end shrink-0">
+        <div>
+          <h1 className="text-3xl font-black font-['Montserrat'] tracking-tight flex items-center gap-2">
+            Financial Overview
+          </h1>
+          <p className="text-sm opacity-60 mt-1 font-medium text-[var(--color-text-muted)]">Real-time cash flow analysis & invoice management.</p>
         </div>
-        <form className="w-full max-w-[350px]">
-            <div className="input-group"><input type="email" className="login-input" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} /></div>
-            <div className="input-group"><input type="password" className="login-input" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} /></div>
-            <div className="btn-container">
-                <button onClick={handleSignIn} className="action-button btn-primary" disabled={loading}>{loading ? '...' : 'Sign In'}</button>
-                <button onClick={handleSignUp} className="action-button btn-secondary" disabled={loading}>Sign Up</button>
+        <div className="flex gap-2">
+            <button className="px-4 py-2 bg-[var(--color-surface)]/50 border border-[var(--color-border)] rounded-xl font-bold text-xs hover:bg-[var(--color-surface)] transition text-[var(--color-text)]">Export CSV</button>
+            <button className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-xl font-bold text-xs hover:bg-[var(--color-primary-hover)] transition shadow-lg shadow-[var(--color-primary)]/20">New Invoice</button>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 shrink-0">
+        {/* Main Balance Card */}
+        <div className="lg:col-span-2 glass-card bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] text-white relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="relative z-10 flex justify-between items-start">
+                <div>
+                    <div className="text-xs font-bold uppercase opacity-50 mb-1 tracking-widest text-white">Total Balance (USD)</div>
+                    <div className="text-5xl font-black font-['Montserrat'] tracking-tight mb-4">${(totalRevenue * 1.25).toLocaleString()}</div>
+                    <div className="flex items-center gap-2 text-sm">
+                        <span className="bg-[var(--color-success)]/20 text-[var(--color-success)] px-2 py-0.5 rounded flex items-center gap-1 font-bold border border-[var(--color-success)]/30">
+                            <TrendUp weight="bold" /> +12.4%
+                        </span>
+                        <span className="opacity-60 text-white">vs last month</span>
+                    </div>
+                </div>
+                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl">
+                    <CurrencyDollar size={32} className="text-white" weight="duotone" />
+                </div>
             </div>
-        </form>
-        <button onClick={enterDevMode} className="dev-mode-btn">( Developer Bypass )</button>
-        {msg && <div className={`mt-4 p-2 rounded text-sm text-center w-full animate-fade-in ${msg.type === 'error' ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'}`}>{msg.text}</div>}
+            
+            {/* Chart */}
+            <div className="mt-8 flex items-end justify-between h-24 gap-2 opacity-80">
+                {chartHeight.map((h, i) => (
+                    <div key={i} className="w-full bg-gradient-to-t from-white/30 to-transparent rounded-t-sm relative group/bar hover:opacity-100 transition-opacity" style={{ height: `${h}%` }}>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-white/50 rounded-full"></div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        {/* Quick Actions / Cards */}
+        <div className="flex flex-col gap-4">
+            <div className="flex-1 glass-card p-5 flex items-center gap-4 hover:border-[var(--color-primary)]/30 transition cursor-pointer group bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-info)]/10 text-[var(--color-info)] flex items-center justify-center group-hover:scale-110 transition-transform"><Wallet weight="duotone" size={24} /></div>
+                <div>
+                    <div className="font-bold text-lg text-[var(--color-text)]">$14,200</div>
+                    <div className="text-xs opacity-60 text-[var(--color-text-muted)]">Pending Payouts</div>
+                </div>
+            </div>
+            <div className="flex-1 glass-card p-5 flex items-center gap-4 hover:border-[var(--color-primary)]/30 transition cursor-pointer group bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] flex items-center justify-center group-hover:scale-110 transition-transform"><CreditCard weight="duotone" size={24} /></div>
+                <div>
+                    <div className="font-bold text-lg text-[var(--color-text)]">**** 4291</div>
+                    <div className="text-xs opacity-60 text-[var(--color-text-muted)]">Corporate Card</div>
+                </div>
+            </div>
+            <div className="flex-1 glass-card p-5 flex items-center gap-4 hover:border-[var(--color-primary)]/30 transition cursor-pointer group bg-[var(--color-surface)] border border-[var(--color-border)]">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-success)]/10 text-[var(--color-success)] flex items-center justify-center group-hover:scale-110 transition-transform"><Bank weight="duotone" size={24} /></div>
+                <div>
+                    <div className="font-bold text-lg text-[var(--color-text)]">Healthy</div>
+                    <div className="text-xs opacity-60 text-[var(--color-text-muted)]">Runway Status</div>
+                </div>
+            </div>
+        </div>
       </div>
-      <footer className="footer"><span className="footer-text">Powered by CoreByte!</span></footer>
+
+      {/* Invoice Table */}
+      <div className="glass-card flex-1 overflow-hidden flex flex-col p-0 bg-[var(--color-surface)] border border-[var(--color-border)]">
+        <div className="p-5 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-bg)]/50">
+            <h3 className="font-bold flex items-center gap-2 text-[var(--color-text)]"><FileText className="text-[var(--color-primary)]" size={20} weight="duotone" /> Recent Transactions</h3>
+            <button className="text-xs font-bold text-[var(--color-primary)] hover:underline">View All</button>
+        </div>
+        <div className="overflow-y-auto custom-scrollbar flex-1">
+            <table className="w-full text-left">
+              <thead className="sticky top-0 bg-[var(--color-surface)] text-xs font-bold uppercase opacity-50 z-10 shadow-sm text-[var(--color-text)]">
+                <tr>
+                  <th className="p-4">Transaction</th>
+                  <th className="p-4">Entity</th>
+                  <th className="p-4">Date</th>
+                  <th className="p-4">Amount</th>
+                  <th className="p-4 text-right">Status</th>
+                  <th className="p-4 text-center">Receipt</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)] text-sm text-[var(--color-text)]">
+                {records.map((r, i) => (
+                  <tr key={r.id} className="group hover:bg-[var(--color-primary)]/5 transition-colors">
+                    <td className="p-4 font-bold font-mono text-xs opacity-70">{r.id}</td>
+                    <td className="p-4 font-medium">{r.entity}</td>
+                    <td className="p-4 opacity-60 text-xs">{r.date}</td>
+                    <td className="p-4 font-bold font-mono">{r.amount}</td>
+                    <td className="p-4 text-right">
+                      <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${
+                          r.status === 'Paid' ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20' : 
+                          r.status === 'Pending' ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border-[var(--color-warning)]/20' : 
+                          'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20'
+                      }`}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-center">
+                        <button className="opacity-30 group-hover:opacity-100 hover:text-[var(--color-primary)] transition"><DownloadSimple size={16} /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+        </div>
+      </div>
     </div>
   );
 }

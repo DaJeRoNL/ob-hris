@@ -20,17 +20,16 @@ export default function Admin() {
     ];
 
     return (
-        // FIXED: Uses var(--color-bg) instead of hardcoded colors
         <div className="flex h-full bg-[var(--color-bg)] text-[var(--color-text)] animate-fade-in overflow-hidden relative transition-colors duration-500">
             
             {/* SIDEBAR NAVIGATION */}
-            <div className="w-80 bg-[var(--color-surface)] border-r border-gray-200 dark:border-white/10 flex flex-col shrink-0 z-20 shadow-2xl transition-colors duration-500">
+            <div className="w-80 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col shrink-0 z-20 shadow-2xl transition-colors duration-500">
                 <div className="p-8 pb-4">
-                    <h1 className="text-2xl font-black font-['Montserrat'] tracking-tight flex items-center gap-2">
+                    <h1 className="text-2xl font-black font-['Montserrat'] tracking-tight flex items-center gap-2 text-[var(--color-text)]">
                         <ShieldCheck className="text-[var(--color-primary)]" weight="duotone" />
                         Admin
                     </h1>
-                    <p className="text-xs opacity-50 font-medium mt-1 pl-1">System Control Panel</p>
+                    <p className="text-xs opacity-50 font-medium mt-1 pl-1 text-[var(--color-text-muted)]">System Control Panel</p>
                 </div>
                 
                 <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
@@ -43,11 +42,11 @@ export default function Admin() {
                                 onClick={() => setActiveTab(item.id as Tab)}
                                 className={`w-full text-left p-3 rounded-xl transition-all duration-300 group relative flex items-center gap-4 ${
                                     isActive 
-                                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-indigo-500/20 translate-x-1' 
-                                    : 'hover:bg-gray-100 dark:hover:bg-[var(--color-surface)]/50 text-gray-500 dark:text-gray-400'
+                                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20 translate-x-1' 
+                                    : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                                 }`}
                             >
-                                <div className={`p-2.5 rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-[var(--color-surface)]/50 group-hover:bg-white/10'}`}>
+                                <div className={`p-2.5 rounded-lg transition-colors ${isActive ? 'bg-white/20' : 'bg-[var(--color-bg)] group-hover:bg-[var(--color-surface)]'}`}>
                                     <Icon size={20} weight={isActive ? 'fill' : 'duotone'} />
                                 </div>
                                 <div className="flex-1">
@@ -60,9 +59,9 @@ export default function Admin() {
                     })}
                 </div>
 
-                <div className="p-6 border-t border-gray-100 dark:border-white/5">
-                    <div className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <div className="p-6 border-t border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-opacity cursor-pointer text-[var(--color-text)]">
+                        <div className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse"></div>
                         <span className="text-[10px] font-bold uppercase tracking-widest">System Operational</span>
                     </div>
                 </div>
@@ -70,8 +69,6 @@ export default function Admin() {
 
             {/* MAIN CONTENT AREA */}
             <div className="flex-1 overflow-y-auto custom-scrollbar relative bg-[var(--color-bg)] transition-colors duration-500">
-                {/* REMOVED: The Gradient line that was causing the visual break */}
-                
                 <div className="relative z-10 max-w-5xl mx-auto p-10 min-h-full">
                     {activeTab === 'profile' && <ProfileTab />}
                     {activeTab === 'general' && <GeneralTab />}

@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/StatsSidebar.tsx
 import { Clock, CalendarPlus, CalendarCheck } from '@phosphor-icons/react';
 import { TimeEntry } from '../../../types';
 import { getLocalDateStr } from '../utils';
@@ -24,7 +23,6 @@ export default function StatsSidebar({ entries, currentClientId, selectedDate, o
         }, 0);
 
         const totalHours = totalSeconds / 3600;
-        // Round to nearest 0.25
         const increments = Math.round(totalHours * 4) / 4; 
         return `${increments}h`;
     };
@@ -62,38 +60,38 @@ export default function StatsSidebar({ entries, currentClientId, selectedDate, o
             {/* Merged Stats Widget */}
             <div className="glass-card p-4 h-32 flex items-center">
                 {/* Left: Daily */}
-                <div className="flex-1 border-r border-gray-200 dark:border-white/10 pr-4 flex flex-col justify-center h-full">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-2">
+                <div className="flex-1 border-r border-[var(--color-border)] pr-4 flex flex-col justify-center h-full">
+                    <div className="w-8 h-8 rounded-full bg-[var(--color-success)]/10 flex items-center justify-center text-[var(--color-success)] mb-2">
                         <CalendarCheck size={18} weight="duotone" />
                     </div>
                     <div>
-                        <div className="text-[10px] uppercase font-bold opacity-60">Daily</div>
-                        <div className="text-xl font-bold">{getDailyTotal()}</div>
+                        <div className="text-[10px] uppercase font-bold opacity-60 text-[var(--color-text)]">Daily</div>
+                        <div className="text-xl font-bold text-[var(--color-text)]">{getDailyTotal()}</div>
                     </div>
                 </div>
 
                 {/* Right: Weekly */}
                 <div className="flex-1 pl-4 flex flex-col justify-center h-full">
-                    <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] mb-2">
                         <Clock size={18} weight="duotone" />
                     </div>
                     <div>
-                        <div className="text-[10px] uppercase font-bold opacity-60">Weekly</div>
-                        <div className="text-xl font-bold">{getWeeklyTotal()}</div>
+                        <div className="text-[10px] uppercase font-bold opacity-60 text-[var(--color-text)]">Weekly</div>
+                        <div className="text-xl font-bold text-[var(--color-text)]">{getWeeklyTotal()}</div>
                     </div>
                 </div>
             </div>
 
             {/* Time Off Request Widget */}
             <div className="glass-card p-4 flex flex-col justify-between h-28">
-                <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-2">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] mb-2">
                     <CalendarPlus size={20} weight="duotone" />
                 </div>
                 <div>
-                    <div className="text-xs uppercase font-bold opacity-60 mb-1">Time Off</div>
+                    <div className="text-xs uppercase font-bold opacity-60 mb-1 text-[var(--color-text)]">Time Off</div>
                     <button 
                         onClick={onOpenLeavePopup} 
-                        className="text-xs font-bold bg-indigo-500 text-white px-3 py-1.5 rounded-lg w-full hover:bg-indigo-600 transition"
+                        className="text-xs font-bold bg-[var(--color-primary)] text-white px-3 py-1.5 rounded-lg w-full hover:bg-[var(--color-primary-hover)] transition"
                     >
                         Request
                     </button>

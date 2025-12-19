@@ -48,9 +48,9 @@ export default function EmployeeSetupModal({ candidate, onClose, onComplete }: P
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[120] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-[var(--color-surface)] w-full max-w-sm rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-[var(--color-surface)] w-full max-w-sm rounded-2xl shadow-2xl border border-[var(--color-border)] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
                 
-                <div className="bg-emerald-600 p-6 text-white text-center relative overflow-hidden">
+                <div className="bg-[var(--color-success)] p-6 text-white text-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                     <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-inner border border-white/20">
                         <UserPlus size={32} weight="fill" />
@@ -60,32 +60,32 @@ export default function EmployeeSetupModal({ candidate, onClose, onComplete }: P
                     <button onClick={onClose} className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition"><X size={18} /></button>
                 </div>
 
-                <div className="p-6 space-y-4 bg-gray-50 dark:bg-[var(--color-surface)]/50">
+                <div className="p-6 space-y-4 bg-[var(--color-bg)]">
                     {steps.map((s, i) => {
                         const isCompleted = step > i;
                         const isCurrent = step === i && isProcessing;
                         
                         return (
-                            <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-500 ${isCurrent ? 'bg-[var(--color-surface)] border-emerald-500 shadow-lg scale-105' : 'bg-transparent border-transparent opacity-50'}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCompleted ? 'bg-emerald-500 text-white' : isCurrent ? 'bg-emerald-500/10 text-emerald-500' : 'bg-gray-200 dark:bg-white/10'}`}>
+                            <div key={i} className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-500 ${isCurrent ? 'bg-[var(--color-surface)] border-[var(--color-success)] shadow-lg scale-105' : 'bg-transparent border-transparent opacity-50'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCompleted ? 'bg-[var(--color-success)] text-white' : isCurrent ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--color-bg)]'}`}>
                                     {isCompleted ? <CheckCircle weight="fill" /> : isCurrent ? <CircleNotch className="animate-spin" weight="bold" /> : <s.icon weight="bold" />}
                                 </div>
-                                <span className={`text-xs font-bold ${isCurrent ? 'text-emerald-600 dark:text-emerald-400' : ''}`}>{s.label}</span>
+                                <span className={`text-xs font-bold ${isCurrent ? 'text-[var(--color-success)]' : 'text-[var(--color-text)]'}`}>{s.label}</span>
                             </div>
                         );
                     })}
                 </div>
 
-                <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-[var(--color-surface)]">
+                <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
                     {!isProcessing ? (
                         <button 
                             onClick={startAutomation}
-                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition transform active:scale-95 flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 text-white rounded-xl font-bold text-sm shadow-lg shadow-[var(--color-success)]/20 transition transform active:scale-95 flex items-center justify-center gap-2"
                         >
                             <PaperPlaneRight weight="bold" /> Initialize Setup
                         </button>
                     ) : (
-                        <div className="text-center text-xs font-bold opacity-50 py-3 animate-pulse">Processing... do not close</div>
+                        <div className="text-center text-xs font-bold opacity-50 py-3 animate-pulse text-[var(--color-text)]">Processing... do not close</div>
                     )}
                 </div>
             </div>

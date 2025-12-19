@@ -1,4 +1,3 @@
-// frontend/src/pages/TimeTracker/components/LeaveModal.tsx
 import { useState, useEffect } from 'react';
 import { Suitcase, Smiley, FirstAid, User, Clock, CheckCircle } from '@phosphor-icons/react';
 import { CustomSelect } from './ui/CustomSelect';
@@ -10,7 +9,6 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
-    // Reset internal state when form opens
     useEffect(() => {
         setIsFullDay(false);
         setIsSubmitting(false);
@@ -19,9 +17,6 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
-        
-        // If Full Day, we might want to standardize times or set a flag
-        // For now, let's enforce standard business hours if full day is checked
         if (isFullDay) {
             setForm((prev: any) => ({
                 ...prev,
@@ -29,15 +24,10 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                 endTime: '17:00:00'
             }));
         }
-
-        // Simulate network request
         await new Promise(resolve => setTimeout(resolve, 800));
-        
         onSubmit();
         setIsSubmitting(false);
         setShowSuccess(true);
-
-        // Close after showing success briefly
         setTimeout(() => {
             onClose();
         }, 1500);
@@ -46,12 +36,12 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
     if (showSuccess) {
         return (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-                <div className="bg-[var(--color-surface)] w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-white/10 flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4 text-green-500">
+                <div className="bg-[var(--color-surface)] w-full max-w-sm rounded-2xl shadow-2xl p-8 border border-[var(--color-border)] flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-[var(--color-success)]/10 rounded-full flex items-center justify-center mb-4 text-[var(--color-success)]">
                         <CheckCircle weight="fill" size={32} />
                     </div>
-                    <h2 className="text-xl font-bold font-['Montserrat'] mb-2">Request Submitted</h2>
-                    <p className="text-sm opacity-70">
+                    <h2 className="text-xl font-bold font-['Montserrat'] mb-2 text-[var(--color-text)]">Request Submitted</h2>
+                    <p className="text-sm opacity-70 text-[var(--color-text-muted)]">
                         Your request has been sent to your manager for approval. You will be notified once confirmed.
                     </p>
                 </div>
@@ -61,12 +51,11 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-             <div className="bg-[var(--color-surface)] w-full max-w-xl rounded-2xl shadow-2xl p-8 border border-white/10">
-                 <h2 className="text-2xl font-bold font-['Montserrat'] mb-6">Request Time Off</h2>
+             <div className="bg-[var(--color-surface)] w-full max-w-xl rounded-2xl shadow-2xl p-8 border border-[var(--color-border)]">
+                 <h2 className="text-2xl font-bold font-['Montserrat'] mb-6 text-[var(--color-text)]">Request Time Off</h2>
                  <div className="space-y-6">
-                     {/* Leave Type */}
                      <div>
-                         <label className="block text-xs font-bold uppercase opacity-60 mb-2">Leave Type</label>
+                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 text-[var(--color-text)]">Leave Type</label>
                          <CustomSelect 
                             value={form.type} 
                             onChange={(val: any) => setForm((prev: any) => ({ ...prev, type: val }))}
@@ -79,9 +68,8 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                          />
                      </div>
 
-                     {/* Single Date Range Picker */}
                      <div>
-                         <label className="block text-xs font-bold uppercase opacity-60 mb-2">Date Range</label>
+                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 text-[var(--color-text)]">Date Range</label>
                          <CustomDatePicker 
                             startDate={form.startDate} 
                             endDate={form.endDate} 
@@ -91,7 +79,6 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                          />
                      </div>
 
-                     {/* Full Day Toggle & Time Pickers */}
                      {form.type !== 'Sick' && (
                         <div className="space-y-4">
                              <div className="flex items-center gap-2">
@@ -100,15 +87,15 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                                     id="fullDay" 
                                     checked={isFullDay} 
                                     onChange={(e) => setIsFullDay(e.target.checked)}
-                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                    className="w-4 h-4 rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-[var(--color-border)]"
                                 />
-                                <label htmlFor="fullDay" className="text-sm font-bold cursor-pointer select-none">Full Day (09:00 - 17:00)</label>
+                                <label htmlFor="fullDay" className="text-sm font-bold cursor-pointer select-none text-[var(--color-text)]">Full Day (09:00 - 17:00)</label>
                              </div>
 
                              {!isFullDay && (
                                  <div className="grid grid-cols-2 gap-6 animate-fade-in">
                                      <div>
-                                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 flex items-center gap-2">
+                                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 flex items-center gap-2 text-[var(--color-text)]">
                                              <Clock weight="fill" className="opacity-50" /> Start Time
                                          </label>
                                          <CustomTimePicker 
@@ -117,7 +104,7 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                                          />
                                      </div>
                                      <div>
-                                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 flex items-center gap-2">
+                                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 flex items-center gap-2 text-[var(--color-text)]">
                                              <Clock weight="fill" className="opacity-50" /> End Time
                                          </label>
                                          <CustomTimePicker 
@@ -130,20 +117,18 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                         </div>
                      )}
 
-                     {/* Notes */}
                      <div>
-                         <label className="block text-xs font-bold uppercase opacity-60 mb-2">Notes</label>
+                         <label className="block text-xs font-bold uppercase opacity-60 mb-2 text-[var(--color-text)]">Notes</label>
                          <textarea 
                              value={form.notes}
                              onChange={e => setForm({...form, notes: e.target.value})}
-                             className="w-full bg-black/5 dark:bg-[var(--color-surface)]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 h-24 resize-none"
+                             className="w-full bg-[var(--color-bg)]/50 border border-[var(--color-border)] rounded-xl px-4 py-3 outline-none focus:border-[var(--color-primary)] h-24 resize-none text-[var(--color-text)]"
                              placeholder="Reason (optional)..."
                          />
                      </div>
 
-                     {/* Mock Admin Toggle */}
                      {form.type !== 'Sick' && (
-                        <div className="flex items-center gap-2 text-xs opacity-50">
+                        <div className="flex items-center gap-2 text-xs opacity-50 text-[var(--color-text-muted)]">
                              <input type="checkbox" id="mockAdmin" onChange={(e) => { 
                                  // @ts-ignore
                                  window.confirmMockAdmin = e.target.checked 
@@ -153,8 +138,8 @@ export default function LeaveModal({ onClose, onSubmit, form, setForm }: any) {
                      )}
 
                      <div className="flex gap-4 mt-2">
-                         <button onClick={onClose} disabled={isSubmitting} className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-black/5 font-semibold disabled:opacity-50">Cancel</button>
-                         <button onClick={handleSubmit} disabled={isSubmitting} className="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 disabled:opacity-50 flex justify-center items-center gap-2">
+                         <button onClick={onClose} disabled={isSubmitting} className="flex-1 py-3 rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-bg)] font-semibold disabled:opacity-50 text-[var(--color-text)]">Cancel</button>
+                         <button onClick={handleSubmit} disabled={isSubmitting} className="flex-1 py-3 rounded-xl bg-[var(--color-primary)] text-white font-bold hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/30 disabled:opacity-50 flex justify-center items-center gap-2">
                              {isSubmitting ? 'Sending...' : (form.type === 'Sick' ? 'Submit Report' : 'Submit Request')}
                          </button>
                      </div>
