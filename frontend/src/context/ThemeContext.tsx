@@ -287,9 +287,16 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({} as any);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-    const [currentTheme, setCurrentTheme] = useState<ThemeKey>('nexus');
+    // 1. INITIALIZE FROM LOCALSTORAGE
+    const [currentTheme, setCurrentTheme] = useState<ThemeKey>(() => {
+        const saved = localStorage.getItem('ob_theme_preference');
+        return (saved && THEMES[saved]) ? (saved as ThemeKey) : 'nexus';
+    });
     
+    // 2. INITIALIZE DARK MODE FROM LOCALSTORAGE
     const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedMode = localStorage.getItem('ob_theme_mode');
+        if (savedMode) return savedMode === 'dark';
         if (typeof window !== 'undefined') {
             return document.documentElement.classList.contains('dark');
         }
@@ -314,6 +321,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
             root.classList.remove('dark');
         }
+
+        // 3. SAVE PREFERENCES
+        localStorage.setItem('ob_theme_preference', currentTheme);
+        localStorage.setItem('ob_theme_mode', isDarkMode ? 'dark' : 'light');
 
     }, [currentTheme, isDarkMode]);
 
