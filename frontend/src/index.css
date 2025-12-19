@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- THEME VARIABLES --- */
+/* =========================================
+   1. THEME VARIABLES
+   ========================================= */
 :root {
     --bg-body: #f3f4f6;
     --bg-island: #ffffff;
@@ -33,39 +35,59 @@
     --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
-html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
-body { font-family: 'Raleway', sans-serif; background-color: var(--bg-body); display: block; padding: 0; transition: background-color 0.3s ease; }
+/* =========================================
+   2. GLOBAL RESET & SCROLLBARS
+   ========================================= */
+html, body { 
+    height: 100%; 
+    width: 100%; 
+    margin: 0; 
+    padding: 0; 
+    overflow: hidden; 
+}
 
-/* --- PROFESSIONAL SCROLLBAR --- */
-/* A subtle, functional scrollbar that feels like native OS UI */
+body { 
+    font-family: 'Raleway', sans-serif; 
+    background-color: var(--bg-body); 
+    display: block; 
+    padding: 0; 
+    transition: background-color 0.3s ease; 
+}
+
+h1, h2, h3, h4 { 
+    font-family: 'Montserrat', sans-serif; 
+}
+
+/* Professional Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
-
 ::-webkit-scrollbar-track {
     background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.3); /* Neutral Gray, low opacity */
+    background-color: rgba(156, 163, 175, 0.3);
     border-radius: 4px;
-    border: 2px solid transparent; /* Creates a 'floating' padding effect */
+    border: 2px solid transparent;
     background-clip: content-box;
     transition: background-color 0.2s ease;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(99, 102, 241, 0.6); /* Indigo on interaction */
+    background-color: rgba(99, 102, 241, 0.6);
 }
-
 /* Firefox Fallback */
 * {
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
 }
+/* Sidebar Specific */
+.no-scrollbar::-webkit-scrollbar { width: 0px; }
 
-/* --- APP LAYOUT --- */
+
+/* =========================================
+   3. APP LAYOUT
+   ========================================= */
 .app-island { 
     width: 100vw; height: 100vh; max-width: none; background: var(--bg-island); 
     border-radius: 0; box-shadow: none; overflow: hidden; display: flex; 
@@ -77,29 +99,24 @@ main {
     overflow-x: hidden;
     background: var(--bg-main-gradient);
     color: var(--text-main);
-    scrollbar-gutter: stable; /* Prevents content jumping when scrollbar appears */
-    
-    /* PROFESSIONAL SNAP LOGIC */
-    /* 'proximity' is key: it snaps only if you are close, but lets you scroll freely otherwise. */
-    /* 'mandatory' feels jerky and unprofessional for apps. */
+    scrollbar-gutter: stable;
     scroll-snap-type: y proximity; 
     scroll-padding-top: 2rem;
 }
 
-/* Forces the container to vanish from the DOM tree so 'main' sees the children directly */
-.snap-container {
-    display: contents; 
-}
+.snap-container { display: contents; }
 
 .snap-card {
     scroll-snap-align: start;
-    scroll-margin-top: 1.5rem; /* Breathing room at top when snapped */
+    scroll-margin-top: 1.5rem;
 }
 
-/* Remove scrollbar for sidebar specifically */
-.no-scrollbar::-webkit-scrollbar { width: 0px; }
 
-/* --- COMPONENTS --- */
+/* =========================================
+   4. UI COMPONENTS
+   ========================================= */
+
+/* Navigation */
 .nav-item { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; margin-bottom: 0.5rem; flex-shrink: 0; position: relative; }
 .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: var(--accent-primary); }
 .nav-item.active { background: var(--accent-primary); color: white; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
@@ -107,270 +124,264 @@ main {
 .nav-item-tooltip { position: absolute; left: 120%; background: #1f2937; color: white; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); z-index: 100; }
 .nav-item:hover .nav-item-tooltip { opacity: 1; left: 130%; }
 
+/* Cards & Inputs */
 .glass-card { background: var(--bg-glass-card); backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow-card); transition: all 0.3s ease; position: relative; overflow: hidden; color: var(--text-main); }
 .input-glass { background: rgba(150, 150, 150, 0.05); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.75rem 1rem; border-radius: 12px; width: 100%; outline: none; transition: all 0.2s; }
 .input-glass:focus { border-color: var(--accent-primary); background: rgba(150, 150, 150, 0.1); }
-h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
+
+/* Pills / Tags */
 .pill { padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
 .pill-green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
 .pill-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 .pill-yellow { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .pill-red { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+/* Text Utilities */
+.text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+/* Map Components */
 .map-card-container { position: relative; width: 100%; aspect-ratio: 1.8 / 1; background: #1e1b4b; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: inset 0 0 40px rgba(0,0,0,0.5); }
 .map-image { width: 100%; height: 100%; object-fit: cover; filter: invert(1) hue-rotate(180deg) brightness(0.7) contrast(1.1) grayscale(0.2); transition: transform 0.5s ease; }
 .map-dot { position: absolute; transform: translate(-50%, -50%); background: #60a5fa; border-radius: 99px; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; color: #0f172a; box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3); cursor: pointer; z-index: 10; white-space: nowrap; }
 .map-dot.active { animation: pulse-dot 2s infinite; }
-@keyframes pulse-dot { 0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); } 100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); } }
-/* --- 3D AI Button Animations --- */
+
+
+/* =========================================
+   5. 3D UTILITIES & STRUCTURES
+   ========================================= */
+.perspective-1000 { perspective: 1000px; }
+.transform-style-3d { transform-style: preserve-3d; }
+
+/* 3D Translations (Z-Axis) */
+.translate-z-2 { transform: translateZ(8px); } 
+.-translate-z-2 { transform: translateZ(-8px); }
+.translate-z-3 { transform: translateZ(12px); }
+.-translate-z-3 { transform: translateZ(-12px); }
+.translate-z-4 { transform: translateZ(16px); } 
+.-translate-z-4 { transform: translateZ(-16px); }
+
+/* 3D Rotations (Static) */
+.rotate-y-0 { transform: rotateY(0deg) rotateX(30deg); }
+.rotate-y-90 { transform: rotateY(90deg) rotateX(30deg); } /* Also handles standard rotate-y-90 */
+.-rotate-y-90 { transform: rotateY(-90deg); }
+.rotate-y-180 { transform: rotateY(180deg) rotateX(30deg); }
+.rotate-y-270 { transform: rotateY(270deg) rotateX(30deg); }
+.rotate-x-90 { transform: rotateX(90deg); }
+.-rotate-x-90 { transform: rotateX(-90deg); }
+
+/* Pyramid/Crystal Faces */
+.pyramid-face {
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    transform-origin: bottom center;
+    backface-visibility: hidden; /* GPU Opt */
+}
+.pyramid-face-inv {
+    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+    transform-origin: top center;
+    backface-visibility: hidden; /* GPU Opt */
+}
+
+
+/* =========================================
+   6. ANIMATION UTILITY CLASSES
+   ========================================= */
+
+/* --- General AI Animations --- */
+.animate-bounce-slow { animation: bounce-slow 2s infinite; }
+.animate-scale-in { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-fade-in-delayed { animation: fade-in-delayed 0.8s ease-out forwards; animation-delay: 0.5s; opacity: 0; }
+.animate-pop-out { animation: pop-out-vanish 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+.animate-pop-in { animation: pop-in 0.4s cubic-bezier(.2,1.4,.4,1); } /* Uses refined pop-in */
+
+/* --- Pulse / Idle --- */
+.animate-ping-slow { animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-pulse-fast { animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; } /* Breathing Halo */
+.animate-idle-breath { animation: idle-breath 8s ease-in-out infinite; }
+.animate-idle-breathe { animation: idle-breathe 4s ease-in-out infinite; }
+.animate-fade-pulse { animation: fade-pulse 3s ease-in-out infinite; }
+
+/* --- Spins (2D & 3D Basic) --- */
+.animate-spin-slow { animation: spin-slow 10s linear infinite; }
+.animate-spin-reverse-slow { animation: spin-reverse-slow 12s linear infinite; }
+.animate-spin-fast { animation: spin-fast 1.5s linear infinite; }
+.animate-spin-reverse-fast { animation: spin-reverse-fast 1.5s linear infinite; }
+.animate-spin-idle { animation: spin 20s linear infinite; }
+.animate-spin-dynamic { animation: spin-basic linear infinite; }
+.animate-spin-reverse-dynamic { animation: spin-reverse linear infinite; }
+.animate-spin-ccw { animation: spin-3d-ccw 10s linear infinite; }
+.animate-spin-cw { animation: spin-cw-2d 4s linear infinite; }
+
+/* --- Cube Animations --- */
+.animate-cube-spin { animation: cube-spin 8s linear infinite; }
+.animate-cube-spin-fast { animation: cube-spin-fast 2s linear infinite; }
+.animate-cube-spin-slow { animation: cube-spin-very-slow 20s linear infinite; }
+.animate-cube-spin-reverse { animation: cube-spin-reverse 8s linear infinite; }
+.animate-cube-spin-reverse-fast { animation: cube-spin-reverse-fast 2s linear infinite; }
+.animate-cube-spin-reverse-slow { animation: cube-spin-reverse 20s linear infinite; }
+.animate-cube-warp { animation: cube-spin-warp 2s linear infinite; }
+
+/* --- Crystal & Pyramid Animations --- */
+.animate-crystal-spin { animation: crystal-spin 12s linear infinite; }
+.animate-crystal-tumble { animation: crystal-tumble 20s linear infinite; }
+.animate-crystal-tumble-slow { animation: crystal-tumble 25s linear infinite; }
+.animate-crystal-tumble-fast { animation: crystal-tumble 5s linear infinite; }
+
+/* --- Shape Shifting & Morphing --- */
+.animate-shape-shift-fast { animation: shape-shift 0.8s linear infinite; }
+.animate-shape-shift-fast-delay { animation: shape-shift 0.8s linear infinite; animation-delay: 0.4s; }
+.animate-shape-morph { animation: shape-morph 0.6s ease-in-out infinite; }
+.animate-morph-cycle { animation: morph-cycle 0.6s ease-in-out infinite; }
+
+/* --- Flash / Glitch Cycles --- */
+.animate-flash-1 { animation: flash-cycle-1 0.6s steps(1) infinite; }
+.animate-flash-2 { animation: flash-cycle-2 0.6s steps(1) infinite; }
+.animate-flash-3 { animation: flash-cycle-3 0.6s steps(1) infinite; }
+.animate-glitch-1 { animation: glitch-snap-1 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-glitch-2 { animation: glitch-snap-2 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-glitch-3 { animation: glitch-snap-3 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* --- Liquid / Melt Animations --- */
+/* (Refined / Optimized versions prioritized) */
+.animate-liquid-1 { animation: liquid-1 1.8s ease-in-out infinite; }
+.animate-liquid-2 { animation: liquid-2 1.8s ease-in-out infinite; }
+.animate-liquid-3 { animation: liquid-3 1.8s ease-in-out infinite; }
+/* Original melters for reference/legacy */
+.animate-liquid-melt-1 { animation: liquid-melt-1 2s ease-in-out infinite; }
+.animate-liquid-melt-2 { animation: liquid-melt-2 2s ease-in-out infinite; }
+.animate-liquid-melt-3 { animation: liquid-melt-3 2s ease-in-out infinite; }
+
+
+/* =========================================
+   7. KEYFRAMES
+   ========================================= */
+
+/* --- Basic Movement & Fades --- */
 @keyframes bounce-slow {
-  0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
-  50% { transform: translateY(5%); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+    0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+    50% { transform: translateY(5%); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
 }
-.animate-bounce-slow {
-  animation: bounce-slow 2s infinite;
-}
-
-.text-shadow {
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
 @keyframes scale-in {
     0% { transform: scale(0.8); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
-.animate-scale-in {
-    animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* --- AI Gyroscope Animations --- */
-.perspective-1000 { perspective: 1000px; }
-
-@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes spin-reverse-slow { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-
-@keyframes spin-fast { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes spin-reverse-fast { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-
-.animate-spin-slow { animation: spin-slow 10s linear infinite; }
-.animate-spin-reverse-slow { animation: spin-reverse-slow 12s linear infinite; }
-
-.animate-spin-fast { animation: spin-fast 1.5s linear infinite; }
-.animate-spin-reverse-fast { animation: spin-reverse-fast 1.5s linear infinite; }
-
-.animate-ping-slow { animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite; }
-.animate-pulse-fast { animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-
-/* --- 3D Cube Logic --- */
-.transform-style-3d { transform-style: preserve-3d; }
-.perspective-1000 { perspective: 1000px; }
-
-/* Custom Cube Utilities (Tailwind arbitrary values can be messy for these specific transforms) */
-.translate-z-3 { transform: translateZ(12px); } /* Half of w-6 (24px) */
-.-translate-z-3 { transform: translateZ(-12px); }
-.rotate-y-90 { transform: rotateY(90deg); }
-.-rotate-y-90 { transform: rotateY(-90deg); }
-.rotate-x-90 { transform: rotateX(90deg); }
-.-rotate-x-90 { transform: rotateX(-90deg); }
-
-/* Cube Animations */
-@keyframes cube-spin {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
-}
-@keyframes cube-spin-fast {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(720deg) rotateY(720deg) rotateZ(360deg); }
-}
-
-.animate-cube-spin { animation: cube-spin 8s linear infinite; }
-.animate-cube-spin-fast { animation: cube-spin-fast 2s linear infinite; }
-
-/* Updated Cube Transforms for w-8 (32px) */
-.translate-z-4 { transform: translateZ(16px); } 
-.-translate-z-4 { transform: translateZ(-16px); }
-
-/* --- Polished AI Animations --- */
-@keyframes cube-spin-very-slow {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
-}
-
-.animate-cube-spin-slow { animation: cube-spin-very-slow 20s linear infinite; }
-
-/* Delayed Fade In for the text result */
 @keyframes fade-in-delayed {
     0% { opacity: 0; transform: translateY(10px); }
-    20% { opacity: 0; transform: translateY(10px); } /* Wait 20% of time (approx 0.5s if duration is 2.5s? No let's hardcode delay) */
+    20% { opacity: 0; transform: translateY(10px); }
     100% { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in-delayed {
-    animation: fade-in-delayed 0.8s ease-out forwards;
-    animation-delay: 0.5s; /* The requested 0.5s pause */
-    opacity: 0; /* Start invisible */
-}
-
-/* Inner Cube Transforms (w-4 = 16px, so Z is 8px) */
-.translate-z-2 { transform: translateZ(8px); } 
-.-translate-z-2 { transform: translateZ(-8px); }
-
-/* --- Advanced 3D Animations --- */
-
-/* Reverse Spins */
-@keyframes cube-spin-reverse {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(-360deg) rotateY(-360deg) rotateZ(-360deg); }
-}
-@keyframes cube-spin-reverse-fast {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-  100% { transform: rotateX(-720deg) rotateY(-720deg) rotateZ(-360deg); }
-}
-
-.animate-cube-spin-reverse { animation: cube-spin-reverse 8s linear infinite; }
-.animate-cube-spin-reverse-fast { animation: cube-spin-reverse-fast 2s linear infinite; }
-.animate-cube-spin-reverse-slow { animation: cube-spin-reverse 20s linear infinite; }
-
-/* Pop Out Transition (Success) */
 @keyframes pop-out-vanish {
     0% { transform: scale(1.25); opacity: 1; }
-    40% { transform: scale(1.4); opacity: 1; } /* The Pop */
-    100% { transform: scale(0); opacity: 0; }   /* The Vanish */
+    40% { transform: scale(1.4); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
 }
-
-.animate-pop-out {
-    animation: pop-out-vanish 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+@keyframes pop-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
-
-/* --- Cube Warp Physics --- */
-@keyframes cube-spin-warp {
-  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg) scale(1); }
-  25% { transform: rotateX(90deg) rotateY(90deg) rotateZ(90deg) skew(10deg) scale(1.1); }
-  50% { transform: rotateX(180deg) rotateY(180deg) rotateZ(180deg) skew(0deg) scale(0.9); }
-  75% { transform: rotateX(270deg) rotateY(270deg) rotateZ(270deg) skew(-10deg) scale(1.1); }
-  100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg) skew(0deg) scale(1); }
-}
-
-.animate-cube-warp { animation: cube-spin-warp 2s linear infinite; }
-
-/* --- GEOMETRIC ORB ANIMATIONS --- */
-
-/* 1. Inner Cube Spin (Counter Clockwise) */
-@keyframes spin-3d-ccw {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(-360deg) rotateY(-360deg); }
-}
-.animate-spin-ccw { animation: spin-3d-ccw 10s linear infinite; }
-
-/* 2. Outer Static Pulse */
-@keyframes fade-pulse {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
-}
-.animate-fade-pulse { animation: fade-pulse 3s ease-in-out infinite; }
-
-/* 3. Outer Hover Spin (Clockwise) */
-@keyframes spin-cw-2d {
-  0% { transform: rotate(0deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1.2); }
-}
-.animate-spin-cw { animation: spin-cw-2d 4s linear infinite; }
-
-/* 4. Active Shape Shifting (Square -> Circle -> Triangle) */
-@keyframes shape-shift {
-  0% { border-radius: 0%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(0deg) scale(1.2); border-color: rgba(129, 140, 248, 0.8); }
-  25% { border-radius: 50%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(90deg) scale(1.1); border-color: rgba(192, 132, 252, 0.8); }
-  50% { border-radius: 0%; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); transform: rotate(180deg) scale(1.3); border-color: rgba(52, 211, 153, 0.8); }
-  75% { border-radius: 50%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(270deg) scale(1.1); border-color: rgba(192, 132, 252, 0.8); }
-  100% { border-radius: 0%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(360deg) scale(1.2); border-color: rgba(129, 140, 248, 0.8); }
-}
-
-.animate-shape-shift-fast { animation: shape-shift 0.6s linear infinite; }
-.animate-shape-shift-fast-delay { animation: shape-shift 0.6s linear infinite; animation-delay: 0.3s; } /* Offset to create chaos */
-
-/* 5. Success Pop In */
 @keyframes pop-in-elastic {
     0% { transform: scale(0); opacity: 0; }
     60% { transform: scale(1.2); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
 }
-.animate-pop-in { animation: pop-in-elastic 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-/* 3D Utilities */
-.transform-style-3d { transform-style: preserve-3d; }
-.translate-z-2 { transform: translateZ(8px); }
-.-translate-z-2 { transform: translateZ(-8px); }
-
-/* --- Geometric Orb Animations --- */
-
-/* Breathing Halo */
+/* --- Pulse & Breathe --- */
+@keyframes pulse-dot { 
+    0% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.7); } 
+    70% { box-shadow: 0 0 0 10px rgba(96, 165, 250, 0); } 
+    100% { box-shadow: 0 0 0 0 rgba(96, 165, 250, 0); } 
+}
 @keyframes pulse-slow {
     0%, 100% { opacity: 0.3; transform: scale(1); }
     50% { opacity: 0.6; transform: scale(1.05); }
 }
-.animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-
-/* Shape Shifting (Square -> Circle -> Triangle) */
-@keyframes shape-shift {
-  0% { border-radius: 0%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(0deg) scale(1.2); border-color: rgba(129, 140, 248, 0.8); }
-  33% { border-radius: 50%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(120deg) scale(1.0); border-color: rgba(192, 132, 252, 0.8); }
-  66% { border-radius: 0%; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); transform: rotate(240deg) scale(1.3); border-color: rgba(52, 211, 153, 0.8); }
-  100% { border-radius: 0%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(360deg) scale(1.2); border-color: rgba(129, 140, 248, 0.8); }
+@keyframes fade-pulse {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.05); }
+}
+@keyframes idle-breath {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+@keyframes idle-breathe {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
 }
 
-.animate-shape-shift-fast { animation: shape-shift 0.8s linear infinite; }
-.animate-shape-shift-fast-delay { animation: shape-shift 0.8s linear infinite; animation-delay: 0.4s; }
+/* --- Spins (2D & 3D Basic) --- */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin-basic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin-fast { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+@keyframes spin-reverse-slow { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+@keyframes spin-reverse-fast { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+@keyframes spin-3d-ccw {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(-360deg) rotateY(-360deg); }
+}
+@keyframes spin-cw-2d {
+    0% { transform: rotate(0deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1.2); }
+}
 
-/* Small Cube Transforms (w-6 = 24px, Z=12px) */
-.translate-z-3 { transform: translateZ(12px); }
-.-translate-z-3 { transform: translateZ(-12px); }
+/* --- Cube Logic --- */
+@keyframes cube-spin {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+}
+@keyframes cube-spin-fast {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(720deg) rotateY(720deg) rotateZ(360deg); }
+}
+@keyframes cube-spin-very-slow {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+}
+@keyframes cube-spin-reverse {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(-360deg) rotateY(-360deg) rotateZ(-360deg); }
+}
+@keyframes cube-spin-reverse-fast {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    100% { transform: rotateX(-720deg) rotateY(-720deg) rotateZ(-360deg); }
+}
+@keyframes cube-spin-warp {
+    0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg) scale(1); }
+    25% { transform: rotateX(90deg) rotateY(90deg) rotateZ(90deg) skew(10deg) scale(1.1); }
+    50% { transform: rotateX(180deg) rotateY(180deg) rotateZ(180deg) skew(0deg) scale(0.9); }
+    75% { transform: rotateX(270deg) rotateY(270deg) rotateZ(270deg) skew(-10deg) scale(1.1); }
+    100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg) skew(0deg) scale(1); }
+}
 
-/* --- Amethyst Crystal Animations --- */
-
-/* Spins while tilted to look like a floating gem */
+/* --- Crystal / Tumble Logic --- */
 @keyframes crystal-spin {
-  0% { transform: rotateX(45deg) rotateZ(45deg) rotateY(0deg) scaleY(1.3) scaleX(0.8); }
-  100% { transform: rotateX(45deg) rotateZ(45deg) rotateY(360deg) scaleY(1.3) scaleX(0.8); }
+    0% { transform: rotateX(45deg) rotateZ(45deg) rotateY(0deg) scaleY(1.3) scaleX(0.8); }
+    100% { transform: rotateX(45deg) rotateZ(45deg) rotateY(360deg) scaleY(1.3) scaleX(0.8); }
 }
-
-.animate-crystal-spin { animation: crystal-spin 12s linear infinite; }
-
-/* --- 3D Amethyst Animations --- */
-
-/* Faces of the pyramid */
-.pyramid-face {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transform-origin: bottom center;
-}
-.pyramid-face-inv {
-    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-    transform-origin: top center;
-}
-
-/* 3D Rotations for Faces */
-.rotate-y-0 { transform: rotateY(0deg) rotateX(30deg); }
-.rotate-y-90 { transform: rotateY(90deg) rotateX(30deg); }
-.rotate-y-180 { transform: rotateY(180deg) rotateX(30deg); }
-.rotate-y-270 { transform: rotateY(270deg) rotateX(30deg); }
-
-/* Tumble Animation */
 @keyframes crystal-tumble {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg); }
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
 }
-.animate-crystal-tumble { animation: crystal-tumble 12s linear infinite; }
 
-/* Pure Shape Morph (No Border Box) */
+/* --- Shape Shifters --- */
+@keyframes shape-shift {
+    0% { border-radius: 0%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(0deg) scale(1.2); border-color: rgba(129, 140, 248, 0.8); }
+    33% { border-radius: 50%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(120deg) scale(1.0); border-color: rgba(192, 132, 252, 0.8); }
+    66% { border-radius: 0%; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); transform: rotate(240deg) scale(1.3); border-color: rgba(52, 211, 153, 0.8); }
+    100% { border-radius: 0%; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: rotate(360deg) scale(1.2); border-color: rgba(129, 140, 248, 0.8); }
+}
 @keyframes shape-morph {
-  0% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); background-color: rgba(129, 140, 248, 0.8); border-radius: 0; }
-  33% { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background-color: rgba(192, 132, 252, 0.8); border-radius: 0; }
-  66% { clip-path: circle(50% at 50% 50%); background-color: rgba(52, 211, 153, 0.8); border-radius: 50%; }
-  100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); background-color: rgba(129, 140, 248, 0.8); border-radius: 0; }
+    0% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); background-color: rgba(129, 140, 248, 0.8); border-radius: 0; }
+    33% { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background-color: rgba(192, 132, 252, 0.8); border-radius: 0; }
+    66% { clip-path: circle(50% at 50% 50%); background-color: rgba(52, 211, 153, 0.8); border-radius: 50%; }
+    100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); background-color: rgba(129, 140, 248, 0.8); border-radius: 0; }
 }
-.animate-shape-morph { animation: shape-morph 0.6s ease-in-out infinite; }
-
-/* --- Outline Shape Shifter (Cycle) --- */
-/* Total cycle approx 0.6s for 3 shapes = 0.2s each */
-
+@keyframes morph-cycle {
+    0%, 100% { opacity: 0; transform: scale(0.8) rotate(-10deg); }
+    10% { opacity: 1; transform: scale(1.1) rotate(0deg); }
+    33% { opacity: 0; transform: scale(1.2) rotate(10deg); }
+}
 @keyframes flash-cycle-1 {
     0%, 33% { opacity: 1; transform: scale(1); }
     33.1%, 100% { opacity: 0; transform: scale(0.8); }
@@ -385,74 +396,13 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
     66.1%, 100% { opacity: 1; transform: scale(1); }
 }
 
-.animate-flash-1 { animation: flash-cycle-1 0.6s steps(1) infinite; }
-.animate-flash-2 { animation: flash-cycle-2 0.6s steps(1) infinite; }
-.animate-flash-3 { animation: flash-cycle-3 0.6s steps(1) infinite; }
-
-/* --- 3D Amethyst & Shape Shifter --- */
-
-/* Faces of the pyramid (Wireframe Background) */
-.pyramid-face {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transform-origin: bottom center;
-}
-.pyramid-face-inv {
-    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-    transform-origin: top center;
-}
-
-/* Tumble Animation */
-@keyframes crystal-tumble {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg); }
-}
-.animate-crystal-tumble { animation: crystal-tumble 20s linear infinite; }
-
-/* Vector Shape Morph Cycle */
-/* Cycles 3 icons over 0.6s total (rapid shift) */
-@keyframes morph-cycle {
-    0%, 100% { opacity: 0; transform: scale(0.8) rotate(-10deg); }
-    10% { opacity: 1; transform: scale(1.1) rotate(0deg); }
-    33% { opacity: 0; transform: scale(1.2) rotate(10deg); }
-}
-
-.animate-morph-cycle {
-    animation: morph-cycle 0.6s ease-in-out infinite;
-}
-
-/* --- 3D Amethyst & Glitch Morph --- */
-
-/* 1. The Background Planes (Pyramid) */
-.pyramid-face {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transform-origin: bottom center;
-    backface-visibility: hidden;
-}
-.pyramid-face-inv {
-    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-    transform-origin: top center;
-    backface-visibility: hidden;
-}
-
-@keyframes crystal-tumble {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg); }
-}
-.animate-crystal-tumble { animation: crystal-tumble 20s linear infinite; }
-.animate-crystal-tumble-fast { animation: crystal-tumble 3s linear infinite; }
-
-
-/* 2. The Glitch/Blend Animations */
-/* These animations are offset and jerky to create the "glitch" effect 
-   where shapes snap into existence and overlap unpredictably. */
-
+/* --- Glitch / Snap Effects --- */
 @keyframes glitch-snap-1 {
     0%, 100% { opacity: 0; transform: scale(0.8) skew(10deg); }
     5%, 30% { opacity: 1; transform: scale(1) skew(0deg); }
     31% { opacity: 0.5; transform: scale(1.1) skew(-10deg); filter: brightness(1.5); }
     35% { opacity: 0; }
 }
-
 @keyframes glitch-snap-2 {
     0% { opacity: 0; }
     30% { opacity: 0; transform: scale(0.9) rotate(180deg); }
@@ -460,7 +410,6 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
     61% { opacity: 0.5; transform: scale(1.2) skew(20deg); filter: brightness(1.5); }
     65% { opacity: 0; }
 }
-
 @keyframes glitch-snap-3 {
     0% { opacity: 0; }
     60% { opacity: 0; transform: scale(1.1); }
@@ -469,151 +418,7 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
     95%, 100% { opacity: 0; }
 }
 
-/* We run them continuously for a chaotic loop */
-.animate-glitch-1 { animation: glitch-snap-1 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-.animate-glitch-2 { animation: glitch-snap-2 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-.animate-glitch-3 { animation: glitch-snap-3 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-
-/* --- 3D Amethyst & Liquid Melt --- */
-
-/* 1. The Background Planes (Pyramid) */
-.pyramid-face {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transform-origin: bottom center;
-    backface-visibility: hidden;
-}
-.pyramid-face-inv {
-    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-    transform-origin: top center;
-    backface-visibility: hidden;
-}
-
-@keyframes crystal-tumble {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg); }
-}
-.animate-crystal-tumble { animation: crystal-tumble 20s linear infinite; }
-.animate-crystal-tumble-fast { animation: crystal-tumble 4s linear infinite; }
-
-
-/* 2. Liquid Melt Animations */
-/* Logic: To "melt", a shape blurs and scales up as it fades out, 
-   while the next shape blurs and scales down as it fades in. 
-   Overlapping them creates the fluid illusion. */
-
-@keyframes liquid-melt-1 {
-    0%, 25% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
-    33% { opacity: 0; transform: scale(1.5) rotate(10deg); filter: blur(4px); }
-    90% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(4px); }
-    100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
-}
-
-@keyframes liquid-melt-2 {
-    0%, 25% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(4px); }
-    33%, 58% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
-    66% { opacity: 0; transform: scale(1.5) rotate(10deg); filter: blur(4px); }
-    100% { opacity: 0; }
-}
-
-@keyframes liquid-melt-3 {
-    0%, 58% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(4px); }
-    66%, 90% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
-    100% { opacity: 0; transform: scale(1.5) rotate(10deg); filter: blur(4px); }
-}
-
-/* Cycle Duration: 2s total for the loop */
-.animate-liquid-1 { animation: liquid-melt-1 2s ease-in-out infinite; }
-.animate-liquid-2 { animation: liquid-melt-2 2s ease-in-out infinite; }
-.animate-liquid-3 { animation: liquid-melt-3 2s ease-in-out infinite; }
-
-/* ---------------- AI ORB UPGRADE ---------------- */
-
-/* Idle breathing */
-@keyframes idle-breath {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.05); opacity: 1; }
-}
-.animate-idle-breath {
-  animation: idle-breath 8s ease-in-out infinite;
-}
-
-/* Dynamic spin */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.animate-spin-idle {
-  animation: spin 20s linear infinite;
-}
-.animate-spin-dynamic {
-  animation: spin linear infinite;
-}
-
-/* Liquid melt */
-@keyframes liquid-1 {
-  0%, 25% { opacity: 1; transform: scale(1); }
-  33% { opacity: 0; transform: scale(1.4); }
-  100% { opacity: 1; transform: scale(1); }
-}
-@keyframes liquid-2 {
-  0%, 33% { opacity: 0; }
-  50% { opacity: 1; }
-  66% { opacity: 0; }
-}
-@keyframes liquid-3 {
-  0%, 66% { opacity: 0; }
-  83% { opacity: 1; }
-  100% { opacity: 0; }
-}
-.animate-liquid-1 { animation: liquid-1 2s ease-in-out infinite; }
-.animate-liquid-2 { animation: liquid-2 2s ease-in-out infinite; }
-.animate-liquid-3 { animation: liquid-3 2s ease-in-out infinite; }
-
-/* Pop-in success */
-@keyframes pop-in {
-  0% { transform: scale(0.3); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-pop-in {
-  animation: pop-in 0.4s cubic-bezier(.2,1.4,.4,1);
-}
-
-/* --- 4. Refined & Performance Optimized Animations --- */
-
-/* 1. Pyramid Structure */
-.pyramid-face {
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transform-origin: bottom center;
-    backface-visibility: hidden; /* GPU Opt */
-}
-.pyramid-face-inv {
-    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-    transform-origin: top center;
-    backface-visibility: hidden; /* GPU Opt */
-}
-
-/* 2. Rotations (Slow & Fast) */
-@keyframes crystal-tumble {
-  0% { transform: rotateX(0deg) rotateY(0deg); }
-  100% { transform: rotateX(360deg) rotateY(360deg); }
-}
-.animate-crystal-tumble-slow { animation: crystal-tumble 25s linear infinite; }
-.animate-crystal-tumble-fast { animation: crystal-tumble 5s linear infinite; }
-
-/* 3. Dynamic Spins (Used with inline-style duration) */
-@keyframes spin-basic { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-.animate-spin-dynamic { animation: spin-basic linear infinite; }
-.animate-spin-reverse-dynamic { animation: spin-reverse linear infinite; }
-
-/* 4. Idle Breathing (Calm state) */
-@keyframes idle-breathe {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 1; }
-}
-.animate-idle-breathe { animation: idle-breathe 4s ease-in-out infinite; }
-
-/* 5. Refined Liquid Morph (Distinct phases) */
-/* Optimized to ensure distinct shape visibility rather than muddy overlap */
+/* --- Liquid / Melt Logic (Optimized) --- */
 @keyframes liquid-1 {
     0%, 20% { opacity: 1; transform: scale(1); filter: blur(0px); }
     25% { opacity: 0; transform: scale(1.4); filter: blur(4px); }
@@ -632,9 +437,22 @@ h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
     90% { opacity: 0; transform: scale(1.4); filter: blur(4px); }
     100% { opacity: 0; }
 }
-.animate-liquid-1 { animation: liquid-1 1.8s ease-in-out infinite; }
-.animate-liquid-2 { animation: liquid-2 1.8s ease-in-out infinite; }
-.animate-liquid-3 { animation: liquid-3 1.8s ease-in-out infinite; }
 
-/* 6. Success Pulse */
-.animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+/* --- Liquid / Melt Logic (Legacy/Chaotic) --- */
+@keyframes liquid-melt-1 {
+    0%, 25% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
+    33% { opacity: 0; transform: scale(1.5) rotate(10deg); filter: blur(4px); }
+    90% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(4px); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
+}
+@keyframes liquid-melt-2 {
+    0%, 25% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(4px); }
+    33%, 58% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
+    66% { opacity: 0; transform: scale(1.5) rotate(10deg); filter: blur(4px); }
+    100% { opacity: 0; }
+}
+@keyframes liquid-melt-3 {
+    0%, 58% { opacity: 0; transform: scale(0.5) rotate(-10deg); filter: blur(4px); }
+    66%, 90% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(1.5) rotate(10deg); filter: blur(4px); }
+}
