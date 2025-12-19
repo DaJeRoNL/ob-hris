@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { 
     CheckCircle, Circle, CaretUp, CaretDown, 
-    ArrowRight, ArrowDown, TreeStructure, CaretLeft, CaretRight, 
-    UserPlus, ShieldCheck, CalendarCheck, User, Clock, 
+    ArrowRight, TreeStructure, CaretLeft, CaretRight, 
+    UserPlus, ShieldCheck, Clock, 
     UsersThree, Plus, PaperPlaneRight, Chats, Check, Pulse,
-    Link as LinkIcon, ShareNetwork
+    Link as LinkIcon, ShareNetwork, User
 } from '@phosphor-icons/react';
-
+import { useTheme } from '../../../context/ThemeContext'; // Import Hook
+import UserAvatar from '../../../components/UserAvatar'; // Import Component
 
 interface Subtask {
     id: string;
@@ -43,7 +44,6 @@ interface Task {
     links?: string[]; // Flow Links
 }
 
-
 interface Props {
     task: Task | null;
     isOpen: boolean;
@@ -53,10 +53,11 @@ interface Props {
     onAddSubtask: (taskId: string) => void;
     onAddNote: (taskId: string, text: string) => void;
     onMoveTask: (taskId: string, column: string) => void;
-    allTasks: Task[]; // Need this to show linked task details
+    allTasks: Task[];
 }
 
 export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask, onPickUpSubtask, onAddSubtask, onAddNote, onMoveTask, allTasks }: Props) {
+    const { currentAvatar } = useTheme(); // Use Theme
     const scrollRef = useRef<HTMLDivElement>(null);
     const nodesRef = useRef<Map<string, HTMLDivElement>>(new Map());
     const [noteInput, setNoteInput] = useState('');
@@ -109,18 +110,16 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
     const requiredCount = task.subtasks?.filter((s) => s.isRequired).length || 0;
     const requiredCompleted = task.subtasks?.filter((s) => s.isRequired && s.isCompleted).length || 0;
     const totalCount = task.subtasks?.length || 0;
-    const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
     const canComplete = requiredCompleted === requiredCount && requiredCount > 0;
     
-    // Dependency counts
-    const upstreamTasks = allTasks.filter(t => t.links?.includes(task.id)); // Tasks that block this one
-    const downstreamTasks = (task.links?.map(id => allTasks.find(t => t.id === id)).filter((t): t is Task => t !== undefined)) || []; // Tasks this blocks
+    const upstreamTasks = allTasks.filter(t => t.links?.includes(task.id)); 
+    const downstreamTasks = (task.links?.map(id => allTasks.find(t => t.id === id)).filter((t): t is Task => t !== undefined)) || []; 
     const hasDependencies = upstreamTasks.length > 0 || downstreamTasks.length > 0;
     
-    // Header Health Status
     const isCritical = task.priority === 'Critical';
     const isUrgent = task.deadline && (new Date(task.deadline).getTime() - new Date().getTime()) < (2 * 86400000);
     const healthColor = isCritical ? 'text-[var(--color-danger)]' : isUrgent ? 'text-[var(--color-warning)]' : 'text-[var(--color-success)]';
+
     return (
         <>
             {/* Subtle backdrop */}
@@ -140,7 +139,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                 style={{ left: '80px' }} 
                 onClick={() => !isOpen && setIsOpen(true)}
             >
-                {/* --- HEADER (Main Panel - Uses Heavy Theme Gradient) --- */}
+                {/* --- HEADER (Uses Heavy Charcoal Gradient) --- */}
                 <div 
                     className={`w-full h-14 flex items-center justify-between px-8 shrink-0 relative z-20 backdrop-blur-md border-b border-[var(--color-border)] ${isOpen ? 'rounded-tl-[32px]' : ''}`}
                     style={{ background: isOpen ? 'var(--color-header-bg)' : 'var(--color-surface)' }}
@@ -214,10 +213,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                     {/* 1. STICKY MAIN CARD (Left) */}
                     <div className="w-[420px] shrink-0 border-r border-[var(--color-border)] flex flex-col bg-[var(--color-surface)] shadow-xl z-20">
                         
-                        {/* UPDATED: Task Details Header
-                            - Removed solid gradient 'headerBg'
-                            - Added distinct surface/primary tint styling
-                        */}
+                        {/* Task Details Header (Distinct from top bar) */}
                         <div className="p-6 shrink-0 relative overflow-hidden backdrop-blur-md bg-[var(--color-surface)] border-b border-[var(--color-border)]">
                             <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/10 to-transparent pointer-events-none"></div>
                             
@@ -234,9 +230,21 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                 </div>
                                 <h2 className="text-xl font-bold font-['Montserrat'] leading-tight mb-2 text-[var(--color-text)]">{task.title}</h2>
                                 <div className="flex gap-2 mt-4">
-                                    {task.collaborators.map((c, i) => (
-                                        <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>{c.charAt(0)}</div>
-                                    ))}
+                                    {task.collaborators.map((c, i) => {
+                                        // NEW: Render Avatar for 'Me' in Main Card
+                                        if (c === 'Me') {
+                                            return (
+                                                <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-surface)] z-10 ring-2 ring-white dark:ring-[#1e293b]" title="You">
+                                                    <UserAvatar avatarId={currentAvatar} size="sm" className="w-full h-full !border-none" />
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-[#1e293b]" title={c}>
+                                                {c.charAt(0)}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -265,7 +273,11 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                     ))}
                                 </div>
                                 <div className="p-4 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 items-center">
+                                        {/* NEW: Show Avatar next to input */}
+                                        <div className="shrink-0">
+                                            <UserAvatar avatarId={currentAvatar} size="sm" />
+                                        </div>
                                         <input 
                                             value={noteInput} 
                                             onChange={e => setNoteInput(e.target.value)} 
@@ -349,8 +361,17 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                             <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex justify-between items-center">
                                                 {sub.assignee ? (
                                                     <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-primary)]">
-                                                        <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[10px] ring-2 ring-[var(--color-surface)]">{sub.assignee.charAt(0)}</div>
-                                                        {sub.assignee}
+                                                        {/* NEW: Render Avatar if assignee is 'Me' */}
+                                                        {sub.assignee === 'Me' ? (
+                                                            <div className="w-6 h-6 rounded-full bg-[var(--color-surface)] ring-2 ring-[var(--color-surface)]">
+                                                                <UserAvatar avatarId={currentAvatar} size="sm" className="w-full h-full !border-none" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[10px] ring-2 ring-[var(--color-surface)]">{sub.assignee.charAt(0)}</div>
+                                                        )}
+                                                        
+                                                        {/* Display Name */}
+                                                        {sub.assignee === 'Me' ? 'You' : sub.assignee}
                                                     </div>
                                                 ) : (
                                                     <button 
@@ -381,6 +402,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                         </div>
                                         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-success)]">Finish Task</span>
                                     </button>
+                                    
                                     {showCompleteMenu && (
                                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 bg-[var(--color-surface)] rounded-xl shadow-2xl border border-[var(--color-border)] p-2 z-50 animate-fade-in-up">
                                             <div className="text-[10px] uppercase font-bold opacity-50 px-2 py-1 mb-1 text-[var(--color-text)]">Move to...</div>
@@ -408,10 +430,10 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                         </div>
                     </div>
                     ) : (
-                        // DEPENDENCIES TAB
+                        // DEPENDENCIES TAB - Show linked tasks
                         <div className="flex-1 overflow-y-auto p-8 bg-[var(--color-bg)]/50">
                             <div className="max-w-4xl mx-auto space-y-6">
-                                {/* UPSTREAM */}
+                                {/* UPSTREAM - Tasks blocking this one */}
                                 {upstreamTasks.length > 0 && (
                                     <div>
                                         <div className="flex items-center gap-2 mb-4">
@@ -424,23 +446,35 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            {upstreamTasks.map(upTask => (
-                                                <div key={upTask.id} className={`p-4 rounded-xl border-2 ${upTask.status === 'Done' ? 'bg-[var(--color-success)]/10 border-[var(--color-success)]/30' : 'bg-[var(--color-surface)] border-[var(--color-warning)]/20'}`}>
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <Clock size={20} weight="fill" className="text-[var(--color-warning)]" />
-                                                            <div>
-                                                                <div className="font-bold text-sm text-[var(--color-text)]">{upTask.title}</div>
-                                                                <div className="text-[10px] opacity-60 text-[var(--color-text)]">{upTask.status}</div>
+                                            {upstreamTasks.map(upTask => {
+                                                const isComplete = upTask.status === 'Done';
+                                                return (
+                                                    <div key={upTask.id} className={`p-4 rounded-xl border-2 ${isComplete ? 'bg-[var(--color-success)]/10 border-[var(--color-success)]/30' : 'bg-[var(--color-surface)] border-[var(--color-warning)]/20'}`}>
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                {isComplete ? (
+                                                                    <CheckCircle size={20} weight="fill" className="text-[var(--color-success)]" />
+                                                                ) : (
+                                                                    <Clock size={20} weight="fill" className="text-[var(--color-warning)]" />
+                                                                )}
+                                                                <div>
+                                                                    <div className="font-bold text-sm text-[var(--color-text)]">{upTask.title}</div>
+                                                                    <div className="text-[10px] opacity-60 text-[var(--color-text)]">{upTask.status}</div>
+                                                                </div>
                                                             </div>
+                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${upTask.priority === 'Critical' ? 'bg-[var(--color-danger)]/10 text-[var(--color-danger)]' : 'bg-[var(--color-bg)] text-[var(--color-text-muted)]'}`}>
+                                                                {upTask.priority}
+                                                            </span>
                                                         </div>
+                                                        <p className="text-xs opacity-70 leading-relaxed text-[var(--color-text)]">{upTask.desc || 'No description'}</p>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}
-                                {/* DOWNSTREAM */}
+
+                                {/* DOWNSTREAM - Tasks this blocks */}
                                 {downstreamTasks.length > 0 && (
                                     <div>
                                         <div className="flex items-center gap-2 mb-4">
@@ -504,6 +538,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                 <span>Collaborators: <strong>{task.collaborators?.join(', ') || 'None'}</strong></span>
                             </div>
                         </div>
+                        
                         <div className="flex gap-6 text-[var(--color-text)]">
                             <div className="flex items-center gap-2">
                                 <Clock weight="bold" />

@@ -9,7 +9,9 @@ import {
 } from '@phosphor-icons/react';
 import { getCurrentRole, getSystemConfig, SystemConfig, UserRole } from '../../utils/dashboardConfig';
 import { useSystemSettings } from '../../hooks/useSystemSettings';
+import { useTheme } from '../../context/ThemeContext'; // Import useTheme
 import AiOrb from '../../components/AiOrb';
+import UserAvatar from '../../components/UserAvatar'; // Import component
 
 const ACTION_MAP: Record<string, { route: string, tabKey: string, label: string, icon: any, color: string }> = {
     'compliance': { route: '/compliance', tabKey: 'compliance', label: 'Resolve Alert', icon: ShieldCheck, color: 'rose' },
@@ -17,7 +19,8 @@ const ACTION_MAP: Record<string, { route: string, tabKey: string, label: string,
     'candidate': { route: '/hiring', tabKey: 'hiring', label: 'View Pipeline', icon: Users, color: 'amber' },
 };
 
-// Map component colors to semantic theme variables
+// ... (Keep COLOR_MAP unchanged) ...
+
 const COLOR_MAP: Record<string, any> = {
     rose: { 
         bg: 'bg-[var(--color-danger)]', 
@@ -75,6 +78,7 @@ export default function ClientProfile() {
   const navigate = useNavigate();
   const { currentClientId } = useAuth();
   const { formatDate } = useSystemSettings();
+  const { currentAvatar } = useTheme(); // Use the hook
   
   const [lastOnline, setLastOnline] = useState<string>('');
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
@@ -137,8 +141,10 @@ export default function ClientProfile() {
           
           {/* --- 1. IDENTITY HEADER --- */}
           <div className="text-center mb-12 animate-fade-in-down">
-              <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-[var(--color-surface)]/10 border-4 border-[var(--color-surface)]/20 shadow-2xl mb-6 relative backdrop-blur-md group hover:scale-105 transition-transform duration-500">
-                  <User size={54} weight="duotone" className="text-[var(--color-primary)]" />
+              <div className="inline-flex items-center justify-center mb-6 relative group hover:scale-105 transition-transform duration-500">
+                  {/* Replaced Static Icon with UserAvatar */}
+                  <UserAvatar avatarId={currentAvatar} size="xl" className="border-4 border-[var(--color-surface)] shadow-2xl" />
+                  
                   <div className="absolute bottom-1 right-1 bg-[var(--color-success)] w-7 h-7 rounded-full border-4 border-[var(--color-bg)] shadow-lg"></div>
               </div>
               <h1 className="text-5xl md:text-6xl font-black font-['Montserrat'] tracking-tight mb-3 text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-text)] via-[var(--color-primary)] to-[var(--color-text-muted)]">
@@ -151,6 +157,8 @@ export default function ClientProfile() {
               </div>
           </div>
 
+          {/* ... (Rest of file unchanged, just keeping context) ... */}
+          
           {/* --- 2. INTELLIGENCE CONSOLE --- */}
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-16 h-auto min-h-[300px]">
               

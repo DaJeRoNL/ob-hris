@@ -12,8 +12,6 @@ interface ThemeColors {
     surface: string;  
     glass: string;    
     border: string;   
-    
-    // NEW: Specifically for large headers/panels
     headerBg: string; 
 
     // Typography
@@ -61,7 +59,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff',
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(0,0,0,0.1)',
-                headerBg: '#4f46e5', // Standard solid primary
+                headerBg: '#4f46e5',
                 text: '#111827',
                 textMuted: '#6b7280',
                 success: '#10b981',
@@ -86,7 +84,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#1f2937',
                 glass: 'rgba(30, 41, 59, 0.7)',
                 border: 'rgba(255, 255, 255, 0.08)',
-                headerBg: '#6366f1', // Standard solid primary
+                headerBg: '#6366f1',
                 text: '#f3f4f6',
                 textMuted: '#9ca3af',
                 success: '#34d399', 
@@ -142,7 +140,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#0f172a', 
                 glass: 'rgba(15, 23, 42, 0.8)',
                 border: 'rgba(255, 255, 255, 0.1)',
-                headerBg: '#0284c7', // Slight variation for header
+                headerBg: '#0284c7',
                 text: '#f8fafc',
                 textMuted: '#94a3b8',
                 success: '#4ade80',
@@ -220,7 +218,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
         type: 'High Energy',
         colors: {
             light: { 
-                primary: '#ea580c', // Orange 600
+                primary: '#ea580c', 
                 secondary: '#f97316', 
                 primaryHover: '#c2410c',
                 bg: '#fff7ed',      
@@ -229,7 +227,6 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(234, 88, 12, 0.15)',
-                // FROSTED CHARCOAL GRADIENT FOR HEADERS
                 headerBg: 'linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(67, 20, 7, 0.9) 100%)', 
                 text: '#431407', 
                 textMuted: '#9a3412',
@@ -246,7 +243,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 shadow: '0 4px 15px rgba(234, 88, 12, 0.2)'
             },
             dark: { 
-                primary: '#f97316', // Orange 500
+                primary: '#f97316', 
                 secondary: '#ea580c', 
                 primaryHover: '#fb923c',
                 bg: '#18181b',      
@@ -255,7 +252,6 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#27272a', 
                 glass: 'rgba(39, 39, 42, 0.8)',
                 border: 'rgba(249, 115, 22, 0.2)',
-                // DEEP STEALTH GRADIENT FOR HEADERS
                 headerBg: 'linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(124, 45, 18, 0.2) 100%)',
                 text: '#fafafa', 
                 textMuted: '#a1a1aa',
@@ -277,23 +273,24 @@ export const THEMES: Record<string, ThemeDefinition> = {
 
 type ThemeKey = keyof typeof THEMES;
 
+// NEW: Added currentAvatar and setAvatar to context
 interface ThemeContextType {
     currentTheme: ThemeKey;
     setTheme: (key: ThemeKey) => void;
     isDarkMode: boolean;
     setMode: (mode: 'light' | 'dark') => void;
+    currentAvatar: string;
+    setAvatar: (avatar: string) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({} as any);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-    // 1. INITIALIZE FROM LOCALSTORAGE
     const [currentTheme, setCurrentTheme] = useState<ThemeKey>(() => {
         const saved = localStorage.getItem('ob_theme_preference');
         return (saved && THEMES[saved]) ? (saved as ThemeKey) : 'nexus';
     });
     
-    // 2. INITIALIZE DARK MODE FROM LOCALSTORAGE
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedMode = localStorage.getItem('ob_theme_mode');
         if (savedMode) return savedMode === 'dark';
@@ -301,6 +298,11 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
             return document.documentElement.classList.contains('dark');
         }
         return false;
+    });
+
+    // NEW: Initialize Avatar
+    const [currentAvatar, setAvatarState] = useState<string>(() => {
+        return localStorage.getItem('ob_avatar_preference') || 'gradient-1';
     });
 
     useEffect(() => {
@@ -322,7 +324,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
             root.classList.remove('dark');
         }
 
-        // 3. SAVE PREFERENCES
         localStorage.setItem('ob_theme_preference', currentTheme);
         localStorage.setItem('ob_theme_mode', isDarkMode ? 'dark' : 'light');
 
@@ -332,8 +333,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         setIsDarkMode(mode === 'dark');
     };
 
+    // NEW: Avatar Setter
+    const setAvatar = (avatar: string) => {
+        setAvatarState(avatar);
+        localStorage.setItem('ob_avatar_preference', avatar);
+    };
+
     return (
-        <ThemeContext.Provider value={{ currentTheme, setTheme: setCurrentTheme, isDarkMode, setMode }}>
+        <ThemeContext.Provider value={{ currentTheme, setTheme: setCurrentTheme, isDarkMode, setMode, currentAvatar, setAvatar }}>
             {children}
         </ThemeContext.Provider>
     );

@@ -1,12 +1,14 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { 
-    Plus, Kanban, List, MagnifyingGlass, 
-    DotsThree, UserPlus, Fire, FlowArrow, 
-    PencilSimple, CaretLeft, CaretRight, X, LockKey, Pencil, CheckCircle, Archive, SortAscending,
-    CalendarBlank, Graph, ShareNetwork, BezierCurve, Link as LinkIcon
+    Plus, Kanban, MagnifyingGlass, 
+    UserPlus, Fire, FlowArrow, 
+    PencilSimple, CaretLeft, CaretRight, X, LockKey, CheckCircle, Archive, SortAscending,
+    CalendarBlank, ShareNetwork, BezierCurve, Link as LinkIcon, User, Clock, UsersThree
 } from '@phosphor-icons/react';
 import TaskFlowPanel from './components/TaskFlowPanel';
 import EditTaskModal from './components/EditTaskModal';
+import { useTheme } from '../../context/ThemeContext'; // Import Theme Hook
+import UserAvatar from '../../components/UserAvatar'; // Import Avatar Component
 
 interface Note {
     id: string;
@@ -167,8 +169,6 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
                     }
 
                     // COLOR LOGIC - Kept static/functional colors for arrows, but could map to CSS vars if needed.
-                    // Source Focused = Green (Forward)
-                    // Dest Focused = Grey (Backward)
                     const lineColor = isSourceFocused ? '#10b981' : '#64748b'; 
                     const markerId = isSourceFocused ? 'url(#arrowhead-green)' : 'url(#arrowhead-grey)';
                     const strokeStyle = isSourceFocused ? '6,4' : '4,4'; 
@@ -217,6 +217,7 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
 };
 
 export default function TaskBoard() {
+    const { currentAvatar } = useTheme(); // NEW: Hook for Avatar
     const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
     const [columns, setColumns] = useState(['New Tickets', 'Ready', 'In Progress', 'Review', 'Done']);
     const [filter, setFilter] = useState('');
@@ -368,6 +369,7 @@ export default function TaskBoard() {
     const handlePickUpSubtask = (taskId: string, subtaskId: string) => {
         setTasks(prev => prev.map(t => {
             if (t.id !== taskId) return t;
+            // Store 'Me' string - UI will render avatar
             const updatedSubtasks = t.subtasks.map(s => s.id === subtaskId ? { ...s, assignee: 'Me' } : s);
             const newCollaborators = [...new Set([...t.collaborators, 'Me'])];
             const updatedTask = { ...t, subtasks: updatedSubtasks, collaborators: newCollaborators };
@@ -518,7 +520,13 @@ export default function TaskBoard() {
                     <p className="text-sm opacity-60 font-medium mt-1 text-[var(--color-text-muted)]">Global Operations Center • {tasks.length} Active Items</p>
                 </div>
                 
-                <div className="flex gap-3">
+                <div className="flex gap-3 items-center">
+                    
+                    {/* NEW: User Avatar Indicator */}
+                    <div className="mr-2" title="You are logged in">
+                         <UserAvatar avatarId={currentAvatar} size="sm" />
+                    </div>
+
                     <div className="relative">
                         <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 text-[var(--color-text-muted)]" />
                         <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Search tasks..." className="pl-9 pr-4 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] text-sm focus:ring-2 focus:ring-[var(--color-primary)] outline-none w-64 shadow-sm" />
@@ -713,11 +721,20 @@ export default function TaskBoard() {
                                                 <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
                                                     <div className="flex -space-x-2 overflow-hidden">
                                                         {task.collaborators.length > 0 ? (
-                                                            task.collaborators.map((c, i) => (
-                                                                <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[var(--color-surface)]" title={c}>
-                                                                    {c.charAt(0)}
-                                                                </div>
-                                                            ))
+                                                            task.collaborators.map((c, i) => {
+                                                                if (c === 'Me') {
+                                                                    return (
+                                                                        <div key={i} className="w-6 h-6 rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-surface)] z-10" title="You">
+                                                                            <UserAvatar avatarId={currentAvatar} size="sm" className="w-full h-full !border-none" />
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                return (
+                                                                    <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[var(--color-surface)]" title={c}>
+                                                                        {c.charAt(0)}
+                                                                    </div>
+                                                                );
+                                                            })
                                                         ) : (
                                                             <div className="w-6 h-6 rounded-full bg-[var(--color-bg)] text-[var(--color-text-muted)] flex items-center justify-center text-[10px] opacity-50">?</div>
                                                         )}

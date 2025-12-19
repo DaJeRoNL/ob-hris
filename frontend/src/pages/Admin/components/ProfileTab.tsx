@@ -1,6 +1,12 @@
-import { User, Envelope, Lock, Camera } from '@phosphor-icons/react';
+import { User, Envelope, Lock, Camera, CheckCircle } from '@phosphor-icons/react';
+import { useTheme } from '../../../context/ThemeContext';
+import UserAvatar from '../../../components/UserAvatar';
+
+const AVATAR_OPTIONS = ['gradient-1', 'gradient-2', 'gradient-3', 'robot', 'alien', 'spy'];
 
 export default function ProfileTab() {
+    const { currentAvatar, setAvatar } = useTheme();
+
     return (
         <div className="space-y-8 animate-fade-in max-w-3xl text-[var(--color-text)]">
             <div className="mb-6">
@@ -9,21 +15,41 @@ export default function ProfileTab() {
             </div>
 
             {/* AVATAR SECTION */}
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 rounded-2xl shadow-sm flex items-center gap-6">
-                <div className="relative group cursor-pointer">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                        SA
+            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 rounded-2xl shadow-sm">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                    
+                    {/* Active Avatar */}
+                    <div className="relative group cursor-pointer">
+                        <UserAvatar avatarId={currentAvatar} size="lg" />
+                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Camera className="text-white" size={24} weight="bold" />
+                        </div>
                     </div>
-                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Camera className="text-white" size={24} weight="bold" />
+
+                    {/* Selector Grid */}
+                    <div className="flex-1">
+                        <h3 className="font-bold mb-3 text-[var(--color-text)]">Choose Avatar</h3>
+                        <div className="flex gap-3 flex-wrap">
+                            {AVATAR_OPTIONS.map(id => (
+                                <button 
+                                    key={id} 
+                                    onClick={() => setAvatar(id)}
+                                    className={`relative rounded-full transition-transform hover:scale-110 ${currentAvatar === id ? 'ring-2 ring-[var(--color-primary)] ring-offset-2 ring-offset-[var(--color-surface)]' : 'opacity-70 hover:opacity-100'}`}
+                                >
+                                    <UserAvatar avatarId={id} size="sm" />
+                                    {currentAvatar === id && (
+                                        <div className="absolute -top-1 -right-1 bg-[var(--color-primary)] text-white rounded-full p-0.5 border border-[var(--color-surface)]">
+                                            <CheckCircle weight="fill" size={10} />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="mt-4">
+                            <h3 className="text-xl font-bold">System Admin</h3>
+                            <p className="opacity-60 text-sm text-[var(--color-text-muted)]">super.admin@company.com</p>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <h3 className="text-xl font-bold">System Admin</h3>
-                    <p className="opacity-60 text-sm mb-3 text-[var(--color-text-muted)]">super.admin@company.com</p>
-                    <span className="bg-[var(--color-success)]/10 text-[var(--color-success)] text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide border border-[var(--color-success)]/20">
-                        Active Session
-                    </span>
                 </div>
             </div>
 
