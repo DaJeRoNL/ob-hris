@@ -86,7 +86,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 glass: 'rgba(30, 41, 59, 0.7)',
                 border: 'rgba(255, 255, 255, 0.08)',
                 // NEXUS DARK: Deep Cyber Indigo
-                headerBg: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(49, 46, 129, 0.9) 100%)',
+                headerBg: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(99, 102, 241, 0.3) 100%)',
                 text: '#f3f4f6',
                 textMuted: '#9ca3af',
                 success: '#34d399', 
@@ -134,29 +134,28 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 shadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             },
             dark: { 
-                primary: '#38bdf8', 
-                secondary: '#0ea5e9', 
-                primaryHover: '#7dd3fc',
-                bg: '#020617',      
-                island: '#0f172a',
-                sidebar: '#020617',
-                surface: '#0f172a', 
-                glass: 'rgba(15, 23, 42, 0.8)',
-                border: 'rgba(255, 255, 255, 0.1)',
-                // EXECUTIVE DARK: Midnight Blue
-                headerBg: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(23, 37, 84, 0.9) 100%)',
-                text: '#f8fafc',
-                textMuted: '#94a3b8',
+                primary: '#9ca3af', // Very light grey/white for contrast
+                secondary: '#94a3b8', 
+                primaryHover: '#ffffff',
+                bg: '#111316',      // Deep Dark Steel Background (Not blue, true dark grey)
+                island: '#16191d',  // Slightly lighter steel
+                sidebar: '#111316',
+                surface: '#1c2128', // Gunmetal surface
+                glass: 'rgba(28, 33, 40, 0.9)',
+                border: '#2d333b',  // Subtle metallic border
+                headerBg: 'linear-gradient(180deg, #1c2128 0%, #16191d 100%)',
+                text: '#f3f4f6',    // Bright white-grey
+                textMuted: '#9ca3af', // Metallic grey
                 success: '#4ade80',
-                successBg: 'rgba(74, 222, 128, 0.2)',
-                info: '#7dd3fc',
-                infoBg: 'rgba(125, 211, 252, 0.2)',
-                warning: '#fcd34d',
-                warningBg: 'rgba(252, 211, 77, 0.2)',
-                danger: '#fca5a5',
-                dangerBg: 'rgba(252, 165, 165, 0.2)',
-                mapBg: '#020617',
-                mapDot: '#bae6fd',
+                successBg: 'rgba(74, 222, 128, 0.1)',
+                info: '#38bdf8',
+                infoBg: 'rgba(56, 189, 248, 0.1)',
+                warning: '#fbbf24',
+                warningBg: 'rgba(251, 191, 36, 0.1)',
+                danger: '#f87171',
+                dangerBg: 'rgba(248, 113, 113, 0.1)',
+                mapBg: '#0d1117',
+                mapDot: '#e2e8f0',
                 shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
             }
         }
@@ -166,56 +165,54 @@ export const THEMES: Record<string, ThemeDefinition> = {
         type: 'Focus & Calm',
         colors: {
             light: { 
-                primary: '#059669', 
-                secondary: '#10b981', 
-                primaryHover: '#047857',
-                bg: '#f5f5f4',
-                island: '#fafaf9',
-                sidebar: '#e7e5e4',
+                primary: '#3f6251', // Deep Sage Green (Sophisticated)
+                secondary: '#52796f', 
+                primaryHover: '#2f4b3d',
+                bg: '#f4f7f5',      // Very subtle organic grey-green mist
+                island: '#ffffff',
+                sidebar: '#e8ecea',
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.9)',
-                border: 'rgba(87, 83, 78, 0.1)',
-                // ZEN: Forest Mist
-                headerBg: 'linear-gradient(135deg, rgba(5, 150, 105, 0.9) 0%, rgba(4, 120, 87, 0.85) 100%)',
-                text: '#1c1917', 
-                textMuted: '#78716c',
+                border: '#cbdcd5',  // Soft herbal border
+                headerBg: 'linear-gradient(135deg, #e8ecea 0%, #dce4e0 100%)',
+                text: '#2d3a34',    // Dark Forest Charcoal
+                textMuted: '#6e7e76',
                 success: '#059669',
-                successBg: 'rgba(5, 150, 105, 0.15)',
+                successBg: '#d1fae5',
                 info: '#0891b2',
-                infoBg: 'rgba(8, 145, 178, 0.15)',
+                infoBg: '#cffafe',
                 warning: '#d97706',
-                warningBg: 'rgba(217, 119, 6, 0.15)',
+                warningBg: '#fef3c7',
                 danger: '#be123c',
-                dangerBg: 'rgba(190, 18, 60, 0.15)',
-                mapBg: '#44403c',
-                mapDot: '#a7f3d0',
-                shadow: 'none'
+                dangerBg: '#ffe4e6',
+                mapBg: '#dce4e0',
+                mapDot: '#3f6251',
+                shadow: '0 4px 20px -5px rgba(63, 98, 81, 0.1)' // Soft organic shadow
             },
             dark: { 
-                primary: '#34d399', 
-                secondary: '#10b981', 
-                primaryHover: '#6ee7b7',
-                bg: '#1c1917',
-                island: '#292524',
+                primary: '#86efac', // Tailwind Green 300 (High vis)
+                secondary: '#4ade80', 
+                primaryHover: '#bbf7d0',
+                bg: '#1c1917',      // Stone 900 (Deep Warm Charcoal)
+                island: '#0c0a09',  // Stone 950 (Near Black)
                 sidebar: '#1c1917',
-                surface: '#292524', 
-                glass: 'rgba(41, 37, 36, 0.8)',
-                border: 'rgba(255, 255, 255, 0.05)',
-                // ZEN DARK: Deep Jungle
-                headerBg: 'linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(2, 44, 34, 0.9) 100%)',
-                text: '#f5f5f4', 
-                textMuted: '#a8a29e',
-                success: '#6ee7b7',
-                successBg: 'rgba(110, 231, 183, 0.2)',
-                info: '#67e8f9',
-                infoBg: 'rgba(103, 232, 249, 0.2)',
+                surface: '#292524', // Stone 800 (Dark Clay)
+                glass: 'rgba(41, 37, 36, 0.9)', // Stone 800 opacity
+                border: '#44403c',  // Stone 700 (Clear separation)
+                headerBg: 'linear-gradient(180deg, #1c1917 0%, #292524 100%)',
+                text: '#f5f5f4',    // Stone 100 (Warm White)
+                textMuted: '#a8a29e', // Stone 400 (Warm Grey)
+                success: '#86efac', 
+                successBg: 'rgba(134, 239, 172, 0.1)',
+                info: '#67e8f9',    // Cyan pop
+                infoBg: 'rgba(103, 232, 249, 0.1)',
                 warning: '#fde047',
-                warningBg: 'rgba(253, 224, 71, 0.2)',
+                warningBg: 'rgba(253, 224, 71, 0.1)',
                 danger: '#fda4af',
-                dangerBg: 'rgba(253, 164, 175, 0.2)',
+                dangerBg: 'rgba(253, 164, 175, 0.1)',
                 mapBg: '#0c0a09',
-                mapDot: '#d1fae5',
-                shadow: 'none'
+                mapDot: '#86efac',
+                shadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)'
             }
         }
     },
@@ -234,7 +231,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(234, 88, 12, 0.15)',
                 // CRIMSON: Frosted Charcoal (High Contrast)
-                headerBg: 'linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(67, 20, 7, 0.9) 100%)', 
+                headerBg: 'linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(90, 27, 10, 0.9) 100%)', 
                 text: '#431407', 
                 textMuted: '#9a3412',
                 success: '#16a34a',
@@ -250,9 +247,9 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 shadow: '0 4px 15px rgba(234, 88, 12, 0.2)'
             },
             dark: { 
-                primary: '#f97316', 
-                secondary: '#ea580c', 
-                primaryHover: '#fb923c',
+                primary: '#fb923c', 
+                secondary: '#f97316', 
+                primaryHover: '#fdba74',
                 bg: '#18181b',      
                 island: '#27272a',
                 sidebar: '#18181b',
@@ -260,7 +257,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 glass: 'rgba(39, 39, 42, 0.8)',
                 border: 'rgba(249, 115, 22, 0.2)',
                 // CRIMSON DARK: Stealth Ops
-                headerBg: 'linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(124, 45, 18, 0.2) 100%)',
+                headerBg: 'linear-gradient(135deg, rgba(22, 10, 2, 0.8) 0%, rgba(189, 112, 11, 0.4) 100%)',
                 text: '#fafafa', 
                 textMuted: '#a1a1aa',
                 success: '#4ade80',
@@ -272,7 +269,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 danger: '#f87171',
                 dangerBg: 'rgba(248, 113, 113, 0.2)',
                 mapBg: '#09090b',
-                mapDot: '#fed7aa',
+                mapDot: '#fb923c',
                 shadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
             }
         }
