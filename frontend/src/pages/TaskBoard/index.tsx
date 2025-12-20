@@ -3,7 +3,8 @@ import {
     Plus, Kanban, MagnifyingGlass, 
     UserPlus, Fire, FlowArrow, 
     PencilSimple, CaretLeft, CaretRight, X, LockKey, CheckCircle, Archive, SortAscending,
-    CalendarBlank, ShareNetwork, BezierCurve, Link as LinkIcon, User, Clock, UsersThree
+    CalendarBlank, ShareNetwork, BezierCurve, Link as LinkIcon, User, Clock, UsersThree,
+    Funnel, Check, Minus, Lock
 } from '@phosphor-icons/react';
 import TaskFlowPanel from './components/TaskFlowPanel';
 import EditTaskModal from './components/EditTaskModal';
@@ -43,6 +44,7 @@ interface Task {
     createdAt?: string;
     completedAt?: string;
     links?: string[]; // Flow Links
+    isLocked?: boolean; 
 }
 
 const INITIAL_TASKS: Task[] = [
@@ -116,10 +118,8 @@ const PROTECTED_COLUMNS = ['New Tickets', 'Review', 'Done'];
 
 // SVG Layer Component (Dual Color Logic)
 const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { tasks: Task[], cardRefs: React.MutableRefObject<any>, flowFocusId: string | null, isDragging: boolean }) => {
-    // Hide immediately if dragging
     if (!flowFocusId || isDragging) return null;
 
-    // Explicitly type the paths array
     const paths: React.ReactNode[] = [];
     
     for (const task of tasks) {
@@ -154,21 +154,16 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
                     let pathData = '';
 
                     if (isSameColumn) {
-                         // Shift to Right Edge
                          x1 = sLeft + sWidth;
                          y1 = sTop + sHeight / 2;
-
                          x2 = dLeft + dWidth;
                          y2 = dTop + dHeight / 2;
-
                          const controlX = Math.max(x1, x2) + 100; 
                          pathData = `M ${x1} ${y1} C ${controlX} ${y1}, ${controlX} ${y2}, ${x2} ${y2}`;
                     } else {
-                         // Standard S-Curve
                          pathData = `M ${x1} ${y1} C ${x1} ${y1 + 150}, ${x2} ${y2 - 150}, ${x2} ${y2}`;
                     }
 
-                    // COLOR LOGIC - Kept static/functional colors for arrows, but could map to CSS vars if needed.
                     const lineColor = isSourceFocused ? '#10b981' : '#64748b'; 
                     const markerId = isSourceFocused ? 'url(#arrowhead-green)' : 'url(#arrowhead-grey)';
                     const strokeStyle = isSourceFocused ? '6,4' : '4,4'; 
@@ -184,7 +179,6 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
                                 markerEnd={markerId}
                                 className="animate-draw"
                             />
-                            {/* Halo */}
                             <path 
                                 d={pathData} 
                                 stroke={isSourceFocused ? "rgba(16,185,129,0.1)" : "rgba(100,116,139,0.1)"} 
@@ -201,12 +195,9 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
     return (
         <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0" style={{ minWidth: '100%', minHeight: '100%' }}>
             <defs>
-                {/* Green Arrow (Forward) */}
                 <marker id="arrowhead-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
                     <path d="M 0 0 L 10 6 L 0 12" fill="none" stroke="#10b981" strokeWidth="1.5" />
                 </marker>
-                
-                {/* Grey Arrow (Backward) */}
                 <marker id="arrowhead-grey" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
                     <path d="M 0 0 L 10 6 L 0 12" fill="none" stroke="#64748b" strokeWidth="1.5" />
                 </marker>
@@ -217,31 +208,29 @@ const ConnectionsOverlay = ({ tasks, cardRefs, flowFocusId, isDragging }: { task
 };
 
 export default function TaskBoard() {
-    const { currentAvatar } = useTheme(); // NEW: Hook for Avatar
+    const { currentAvatar } = useTheme(); 
     const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
     const [columns, setColumns] = useState(['New Tickets', 'Ready', 'In Progress', 'Review', 'Done']);
     const [filter, setFilter] = useState('');
+    const [viewFilter, setViewFilter] = useState<'all' | 'mine' | 'unassigned'>('all');
     const [sortBy, setSortBy] = useState<'priority' | 'deadline' | 'newest'>('priority');
     const [isAdmin] = useState(true); 
     
-    // UI States
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isFlowOpen, setIsFlowOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
     const [dragOverCol, setDragOverCol] = useState<string | null>(null); 
-    
-    // DROP FLASH STATE
     const [justDroppedId, setJustDroppedId] = useState<string | null>(null);
     
-    // FLOW STATE
     const [flowFocusId, setFlowFocusId] = useState<string | null>(null);
     const cardRefs = useRef<any>({});
     
-    // Sort Menu State
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
     const sortTimeoutRef = useRef<number | null>(null);
+
+    const [activeSubtaskDropdown, setActiveSubtaskDropdown] = useState<string | null>(null);
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -271,7 +260,6 @@ export default function TaskBoard() {
         }
     };
 
-    // Sort Menu Handlers
     const handleSortEnter = () => {
         if (sortTimeoutRef.current) clearTimeout(sortTimeoutRef.current);
         setIsSortMenuOpen(true);
@@ -283,7 +271,6 @@ export default function TaskBoard() {
         }, 400); 
     };
 
-    // Drag & Drop
     const handleDragStart = (e: React.DragEvent, id: string) => {
         setFlowFocusId(null);
         setDraggedTaskId(id);
@@ -307,7 +294,6 @@ export default function TaskBoard() {
         const task = tasks.find(t => t.id === draggedTaskId);
         if (!task) return;
 
-        // Gatekeeper
         if (targetCol === 'Review' || targetCol === 'Done') {
             const incompleteRequired = task.subtasks.some(s => s.isRequired && !s.isCompleted);
             if (incompleteRequired) {
@@ -326,9 +312,8 @@ export default function TaskBoard() {
 
         setTasks(prev => prev.map(t => t.id === draggedTaskId ? updatedTask : t));
         
-        // TRIGGER FLASH
         setJustDroppedId(draggedTaskId);
-        setTimeout(() => setJustDroppedId(null), 600); // 600ms Flash duration
+        setTimeout(() => setJustDroppedId(null), 600); 
 
         setDraggedTaskId(null);
     };
@@ -353,14 +338,9 @@ export default function TaskBoard() {
     const moveColumn = (col: string, direction: 'left' | 'right') => {
         const currentIndex = columns.indexOf(col);
         const targetIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
-        
-        // Don't allow moving out of bounds
         if (targetIndex < 0 || targetIndex >= columns.length) return;
-        
-        // Don't allow moving into protected column positions
         const targetCol = columns[targetIndex];
         if (PROTECTED_COLUMNS.includes(targetCol)) return;
-        
         const newColumns = [...columns];
         [newColumns[currentIndex], newColumns[targetIndex]] = [newColumns[targetIndex], newColumns[currentIndex]];
         setColumns(newColumns);
@@ -369,13 +349,42 @@ export default function TaskBoard() {
     const handlePickUpSubtask = (taskId: string, subtaskId: string) => {
         setTasks(prev => prev.map(t => {
             if (t.id !== taskId) return t;
-            // Store 'Me' string - UI will render avatar
-            const updatedSubtasks = t.subtasks.map(s => s.id === subtaskId ? { ...s, assignee: 'Me' } : s);
-            const newCollaborators = [...new Set([...t.collaborators, 'Me'])];
+            
+            const subtask = t.subtasks.find(s => s.id === subtaskId);
+            const isAssignedToMe = subtask?.assignee === 'Me';
+            
+            // Toggle subtask assignment
+            const updatedSubtasks = t.subtasks.map(s => s.id === subtaskId ? { ...s, assignee: isAssignedToMe ? undefined : 'Me' } : s);
+            
+            let newCollaborators = [...t.collaborators];
+            
+            if (isAssignedToMe) {
+                // REMOVE Logic: 
+                // We are unassigning 'Me' from this subtask.
+                // Check if 'Me' is assigned to any OTHER subtasks.
+                const hasOtherSubtasks = updatedSubtasks.some(s => s.assignee === 'Me');
+                // Check if 'Me' is the main assignee (optional logic, but typically safe to assume assignee field is primary owner)
+                const isMainAssignee = t.assignee === 'Me';
+                
+                // If I am not assigned to any other subtasks AND I am not the main assignee, remove me from collaborators
+                if (!hasOtherSubtasks && !isMainAssignee) {
+                    newCollaborators = newCollaborators.filter(c => c !== 'Me');
+                }
+            } else {
+                // ADD Logic:
+                // We are picking up a subtask. Ensure 'Me' is in collaborators.
+                if (!newCollaborators.includes('Me')) {
+                    newCollaborators.push('Me');
+                }
+            }
+
             const updatedTask = { ...t, subtasks: updatedSubtasks, collaborators: newCollaborators };
+            
             if (selectedTask?.id === taskId) setSelectedTask(updatedTask);
+            
             return updatedTask;
         }));
+        setActiveSubtaskDropdown(null);
     };
 
     const toggleSubtask = (taskId: string, subtaskId: string) => {
@@ -442,7 +451,6 @@ export default function TaskBoard() {
         setIsEditModalOpen(true);
     };
 
-    // Creates a new task linked TO by the sourceId
     const handleCreateLinkedTask = (sourceId: string) => {
         const sourceTask = tasks.find(t => t.id === sourceId);
         if (!sourceTask) return;
@@ -461,12 +469,11 @@ export default function TaskBoard() {
             collaborators: [],
             links: [],
             creator: 'Me',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            isLocked: false
         };
 
-        // Update Source to point to New
         const updatedSource = { ...sourceTask, links: [...(sourceTask.links || []), newId] };
-        
         setTasks(prev => [...prev.map(t => t.id === sourceId ? updatedSource : t), newTask]);
     };
 
@@ -478,9 +485,52 @@ export default function TaskBoard() {
         }
     };
 
+    const handleToggleSelfAssignment = (taskId: string) => {
+        setTasks(prev => prev.map(t => {
+            if (t.id !== taskId) return t;
+            
+            const isAssigned = t.collaborators.includes('Me');
+            
+            if (isAssigned) {
+                // Remove 'Me' from collaborators
+                const newCollaborators = t.collaborators.filter(c => c !== 'Me');
+                // Remove from assignee if set
+                const newAssignee = t.assignee === 'Me' ? null : t.assignee;
+                // NEW: Also remove 'Me' from any subtasks
+                const newSubtasks = t.subtasks ? t.subtasks.map(s => s.assignee === 'Me' ? { ...s, assignee: undefined } : s) : [];
+
+                const updated = { ...t, collaborators: newCollaborators, assignee: newAssignee, subtasks: newSubtasks };
+                if (selectedTask?.id === taskId) setSelectedTask(updated);
+                return updated;
+            } else {
+                // Add 'Me' to collaborators
+                const newCollaborators = [...t.collaborators, 'Me'];
+                const updated = { ...t, collaborators: newCollaborators };
+                if (selectedTask?.id === taskId) setSelectedTask(updated);
+                return updated;
+            }
+        }));
+    };
+
     const filteredTasks = useMemo(() => {
         let result = tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()) || t.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase())));
         
+        if (viewFilter === 'mine') {
+            result = result.filter(t => 
+                t.creator === 'Me' || 
+                t.assignee === 'Me' || 
+                t.collaborators.includes('Me')
+            );
+        } else if (viewFilter === 'unassigned') {
+            result = result.filter(t => {
+                const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+                if (hasSubtasks) {
+                    return t.subtasks.some(s => !s.assignee);
+                }
+                return !t.assignee;
+            });
+        }
+
         return result.sort((a, b) => {
             if (sortBy === 'priority') {
                 const weights = { Critical: 4, High: 3, Medium: 2, Low: 1 };
@@ -494,17 +544,21 @@ export default function TaskBoard() {
             }
             return 0;
         });
-    }, [tasks, filter, sortBy]);
+    }, [tasks, filter, sortBy, viewFilter]);
 
     const handleBackgroundClick = (e: React.MouseEvent) => {
         if (flowFocusId) {
             setFlowFocusId(null);
+        }
+        if (activeSubtaskDropdown) {
+            setActiveSubtaskDropdown(null);
         }
     };
 
     const handleCardClick = (task: Task, e: React.MouseEvent) => {
         e.stopPropagation();
         setFlowFocusId(null);
+        setActiveSubtaskDropdown(null);
         setSelectedTask(task);
         setIsFlowOpen(true);
     };
@@ -522,7 +576,13 @@ export default function TaskBoard() {
                 
                 <div className="flex gap-3 items-center">
                     
-                    {/* NEW: User Avatar Indicator */}
+                    {/* View Filter Toggle */}
+                    <div className="flex bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-1 mr-1">
+                        <button onClick={() => setViewFilter('all')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewFilter === 'all' ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}>All</button>
+                        <button onClick={() => setViewFilter('mine')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewFilter === 'mine' ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}>Mine</button>
+                        <button onClick={() => setViewFilter('unassigned')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewFilter === 'unassigned' ? 'bg-[var(--color-primary)] text-white shadow-sm' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'}`}>Unassigned</button>
+                    </div>
+
                     <div className="mr-2" title="You are logged in">
                          <UserAvatar avatarId={currentAvatar} size="sm" />
                     </div>
@@ -565,7 +625,6 @@ export default function TaskBoard() {
                 ref={scrollContainerRef}
                 className="flex-1 overflow-x-auto overflow-y-hidden pb-4 transition-all duration-500 no-scrollbar relative"
             >
-                {/* SVG Overlay Container */}
                 <div className="flex gap-6 h-full min-w-max px-2 relative z-10">
                     
                     <ConnectionsOverlay 
@@ -602,31 +661,12 @@ export default function TaskBoard() {
                                     <div className="flex gap-1 items-center">
                                         {!isProtected && (
                                             <>
-                                                {/* Column Move Arrows */}
                                                 <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1 mr-2">
-                                                    <button 
-                                                        onClick={() => moveColumn(col, 'left')} 
-                                                        disabled={idx === 0 || PROTECTED_COLUMNS.includes(columns[idx - 1])}
-                                                        className="p-1 hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
-                                                        title="Move Left"
-                                                    >
-                                                        <CaretLeft size={14} weight="bold" />
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => moveColumn(col, 'right')} 
-                                                        disabled={idx === columns.length - 1 || PROTECTED_COLUMNS.includes(columns[idx + 1])}
-                                                        className="p-1 hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded disabled:opacity-30 disabled:cursor-not-allowed transition"
-                                                        title="Move Right"
-                                                    >
-                                                        <CaretRight size={14} weight="bold" />
-                                                    </button>
+                                                    <button onClick={() => moveColumn(col, 'left')} disabled={idx === 0 || PROTECTED_COLUMNS.includes(columns[idx - 1])} className="p-1 hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded disabled:opacity-30 disabled:cursor-not-allowed transition"><CaretLeft size={14} weight="bold" /></button>
+                                                    <button onClick={() => moveColumn(col, 'right')} disabled={idx === columns.length - 1 || PROTECTED_COLUMNS.includes(columns[idx + 1])} className="p-1 hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded disabled:opacity-30 disabled:cursor-not-allowed transition"><CaretRight size={14} weight="bold" /></button>
                                                 </div>
-                                                
                                                 <div className="opacity-0 group-hover/col:opacity-100 transition-opacity flex gap-1 text-[var(--color-text-muted)]">
-                                                    <button onClick={() => {
-                                                        const newName = prompt("Rename column:", col);
-                                                        if(newName) setColumns(prev => prev.map(c => c === col ? newName : c));
-                                                    }} className="p-1 hover:bg-[var(--color-bg)] rounded"><PencilSimple size={12} /></button>
+                                                    <button onClick={() => { const newName = prompt("Rename column:", col); if(newName) setColumns(prev => prev.map(c => c === col ? newName : c)); }} className="p-1 hover:bg-[var(--color-bg)] rounded"><PencilSimple size={12} /></button>
                                                     <button onClick={() => handleDeleteColumn(col)} className="p-1 hover:bg-[var(--color-danger)]/10 text-[var(--color-danger)] rounded"><X size={12} /></button>
                                                 </div>
                                             </>
@@ -642,28 +682,14 @@ export default function TaskBoard() {
                                         const pct = total > 0 ? (completed / total) * 100 : 0;
                                         
                                         const isActiveInFlow = selectedTask?.id === task.id && isFlowOpen;
-                                        
                                         const isFocused = flowFocusId === task.id;
-                                        const isLinkedToFocused = flowFocusId && (
-                                            (tasks.find(t => t.id === flowFocusId)?.links?.includes(task.id)) || 
-                                            (task.links?.includes(flowFocusId)) 
-                                        );
+                                        const isLinkedToFocused = flowFocusId && ((tasks.find(t => t.id === flowFocusId)?.links?.includes(task.id)) || (task.links?.includes(flowFocusId)));
+                                        const isDimmed = (isFlowOpen && !isActiveInFlow && !flowFocusId) || (!isActiveInFlow && flowFocusId && !isFocused && !isLinkedToFocused);
+
+                                        let cardStateClass = isDimmed ? 'opacity-30 blur-sm grayscale transition-all duration-500' : isFocused ? 'ring-4 ring-purple-500 shadow-2xl scale-105 z-50 !bg-[var(--color-surface)]' : isActiveInFlow ? 'ring-2 ring-[var(--color-primary)]/50 shadow-2xl scale-105 z-50 !bg-[var(--color-surface)] transition-all duration-500' : '';
                                         
-                                        const isDimmed = (isFlowOpen && !isActiveInFlow && !flowFocusId) || 
-                                                        (!isActiveInFlow && flowFocusId && !isFocused && !isLinkedToFocused);
-
-                                        let cardStateClass = '';
-                                        if (isDimmed) {
-                                            cardStateClass = 'opacity-30 blur-sm grayscale transition-all duration-500';
-                                        } else if (isFocused) {
-                                            cardStateClass = 'ring-4 ring-purple-500 shadow-2xl scale-105 z-50 !bg-[var(--color-surface)]';
-                                        } else if (isActiveInFlow) {
-                                            cardStateClass = 'ring-2 ring-[var(--color-primary)]/50 shadow-2xl scale-105 z-50 !bg-[var(--color-surface)] transition-all duration-500';
-                                        }
-
                                         const isDraggingThis = draggedTaskId === task.id;
                                         const isJustDropped = justDroppedId === task.id;
-
                                         let tiltClass = isDraggingThis ? 'scale-105 shadow-2xl z-50' : 'hover:-translate-y-1 hover:shadow-xl';
                                         if (isJustDropped) tiltClass += ' brightness-125 ring-2 ring-white/50 shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-500';
 
@@ -674,6 +700,34 @@ export default function TaskBoard() {
                                         };
 
                                         const incomingLinkTask = tasks.find(t => t.links?.includes(task.id));
+                                        
+                                        // --- NEW: Self Assignment Logic ---
+                                        const isAssignedToMe = task.collaborators.includes('Me');
+                                        const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+                                        const availableSubtasks = task.subtasks.filter(s => !s.isCompleted && !s.assignee);
+                                        const isDropdownOpen = activeSubtaskDropdown === task.id;
+
+                                        const handleAvatarClick = (e: React.MouseEvent) => {
+                                            e.stopPropagation();
+                                            if (isAssignedToMe) {
+                                                handleToggleSelfAssignment(task.id);
+                                            } else {
+                                                if (hasSubtasks) {
+                                                    if (availableSubtasks.length > 0) {
+                                                        setActiveSubtaskDropdown(isDropdownOpen ? null : task.id);
+                                                    } else {
+                                                        alert("All subtasks are already assigned or completed.");
+                                                    }
+                                                } else {
+                                                    handleToggleSelfAssignment(task.id);
+                                                }
+                                            }
+                                        };
+
+                                        const showAddButton = !isAssignedToMe;
+
+                                        // FIX: Z-Index boost for open dropdown
+                                        const containerZIndex = isDropdownOpen ? 'z-50' : 'z-0';
 
                                         return (
                                             <div 
@@ -683,126 +737,95 @@ export default function TaskBoard() {
                                                 onDragStart={(e) => handleDragStart(e, task.id)}
                                                 onClick={(e) => handleCardClick(task, e)}
                                                 className={`
-                                                    glass-card !p-4 group hover:border-[var(--color-primary)]/30 transition-all duration-300 relative bg-[var(--color-surface)] cursor-pointer
-                                                    ${cardStateClass}
+                                                    glass-card !p-4 group hover:border-[var(--color-primary)]/30 transition-all duration-300 relative bg-[var(--color-surface)] cursor-pointer !overflow-visible 
+                                                    ${cardStateClass} 
                                                     ${tiltClass}
+                                                    ${containerZIndex}
                                                 `}
                                             >
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex flex-wrap gap-1">
                                                         {task.tags.map(tag => (<span key={tag} className="text-[9px] font-bold uppercase bg-[var(--color-bg)] border border-[var(--color-border)] px-1.5 py-0.5 rounded text-[var(--color-text-muted)]">{tag}</span>))}
                                                     </div>
-                                                    <div className="flex gap-1">
+                                                    <div className="flex gap-1 items-center">
+                                                        {task.isLocked && <Lock weight="fill" className="text-[var(--color-text-muted)] opacity-50" size={12} />}
                                                         <button onClick={(e) => openEditModal(task, e)} className="p-1 hover:bg-[var(--color-bg)] rounded text-[var(--color-text-muted)] hover:text-[var(--color-primary)]"><PencilSimple /></button>
                                                         {(task.priority === 'Critical' || getUrgency(task)) && (
-                                                            <div title={task.priority === 'Critical' ? "Critical Priority" : "High Risk: Deadline approaching"}>
-                                                                <Fire weight="fill" className={`${task.priority === 'Critical' ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]'} animate-pulse`} />
-                                                            </div>
+                                                            <div title={task.priority === 'Critical' ? "Critical Priority" : "High Risk: Deadline approaching"}><Fire weight="fill" className={`${task.priority === 'Critical' ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]'} animate-pulse`} /></div>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 <h3 className="font-bold text-sm mb-2 leading-tight text-[var(--color-text)]">{task.title}</h3>
-                                                
-                                                {task.deadline && (
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2 text-[var(--color-text-muted)]">
-                                                        <CalendarBlank weight="bold" /> {task.deadline}
-                                                    </div>
-                                                )}
-
-                                                {total > 0 && (
-                                                    <div className="mb-3">
-                                                        <div className="w-full h-1.5 bg-[var(--color-bg)] rounded-full overflow-hidden">
-                                                            <div className="h-full bg-[var(--color-primary)] transition-all duration-500" style={{ width: `${pct}%` }}></div>
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                {task.deadline && <div className="flex items-center gap-1 text-[10px] font-bold opacity-60 mb-2 text-[var(--color-text-muted)]"><CalendarBlank weight="bold" /> {task.deadline}</div>}
+                                                {total > 0 && <div className="mb-3"><div className="w-full h-1.5 bg-[var(--color-bg)] rounded-full overflow-hidden"><div className="h-full bg-[var(--color-primary)] transition-all duration-500" style={{ width: `${pct}%` }}></div></div></div>}
 
                                                 <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
-                                                    <div className="flex -space-x-2 overflow-hidden">
-                                                        {task.collaborators.length > 0 ? (
-                                                            task.collaborators.map((c, i) => {
+                                                    
+                                                    {/* NEW: Updated Avatar Stack with Toggle Button */}
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex -space-x-2 overflow-hidden">
+                                                            {task.collaborators.map((c, i) => {
                                                                 if (c === 'Me') {
                                                                     return (
-                                                                        <div key={i} className="w-6 h-6 rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-surface)] z-10" title="You">
+                                                                        <div 
+                                                                            key={c} 
+                                                                            onClick={handleAvatarClick}
+                                                                            className="w-6 h-6 rounded-full ring-2 ring-[var(--color-surface)] bg-[var(--color-surface)] z-10 cursor-pointer relative group/avatar hover:z-20 hover:scale-110 transition-transform"
+                                                                            title="You (Click to remove)"
+                                                                        >
                                                                             <UserAvatar avatarId={currentAvatar} size="sm" className="w-full h-full !border-none" />
+                                                                            <div className="absolute inset-0 bg-red-500/80 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                                                                                <Minus weight="bold" className="text-white" size={12} />
+                                                                            </div>
                                                                         </div>
                                                                     );
                                                                 }
                                                                 return (
-                                                                    <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[var(--color-surface)]" title={c}>
-                                                                        {c.charAt(0)}
-                                                                    </div>
+                                                                    <div key={i} className="w-6 h-6 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[var(--color-surface)] cursor-default" title={c}>{c.charAt(0)}</div>
                                                                 );
-                                                            })
-                                                        ) : (
-                                                            <div className="w-6 h-6 rounded-full bg-[var(--color-bg)] text-[var(--color-text-muted)] flex items-center justify-center text-[10px] opacity-50">?</div>
+                                                            })}
+                                                        </div>
+
+                                                        {/* 2. Render Add Button if 'Me' is not assigned */}
+                                                        {showAddButton && (
+                                                            <div className="relative z-0">
+                                                                <button 
+                                                                    onClick={handleAvatarClick}
+                                                                    className={`w-6 h-6 rounded-full ring-2 ring-[var(--color-surface)] flex items-center justify-center transition-all hover:scale-110 hover:z-10
+                                                                        ${task.collaborators.length === 0 ? 'bg-[var(--color-bg)] text-[var(--color-text-muted)]' : 'bg-[var(--color-surface)] border border-dashed border-[var(--color-text-muted)] text-[var(--color-text-muted)] ml-1'}
+                                                                        hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)]
+                                                                    `}
+                                                                    title={hasSubtasks ? "Pick a subtask" : "Join Task"}
+                                                                >
+                                                                    <Plus weight="bold" size={12} />
+                                                                </button>
+
+                                                                {/* Subtask Dropdown */}
+                                                                {isDropdownOpen && (
+                                                                    <div className="absolute left-0 top-full mt-2 w-48 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-2xl p-2 z-[100] animate-fade-in-right">
+                                                                        <div className="text-[10px] font-bold uppercase opacity-50 px-2 py-1 mb-1 text-[var(--color-text)]">Available Subtasks</div>
+                                                                        {availableSubtasks.map(s => (
+                                                                            <button key={s.id} onClick={(e) => { e.stopPropagation(); handlePickUpSubtask(task.id, s.id); }} className="w-full text-left px-2 py-1.5 hover:bg-[var(--color-bg)] rounded-lg text-xs font-medium text-[var(--color-text)] truncate transition flex items-center gap-2 group/sub">
+                                                                                <UserPlus weight="bold" className="text-[var(--color-primary)] opacity-0 group-hover/sub:opacity-100 transition-opacity" />
+                                                                                {s.title}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
 
                                                     <div className="flex gap-2">
-                                                        {/* UPSTREAM INDICATOR */}
-                                                        {incomingLinkTask && (
-                                                            <div className="group/link relative flex items-center justify-center">
-                                                                <div className="flex items-center gap-1 text-[10px] font-bold bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-1 rounded shadow-sm border border-[var(--color-warning)]/20 cursor-help">
-                                                                    <LinkIcon weight="bold" size={12} />
-                                                                    <span>Blocked</span>
-                                                                </div>
-                                                                <div className="absolute bottom-full right-0 mb-2 hidden group-hover/link:block w-max max-w-[200px] bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-[60] pointer-events-none">
-                                                                    Depends on: {incomingLinkTask.title}
-                                                                    <div className="absolute top-full right-1 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {/* DOWNSTREAM INDICATOR */}
-                                                        {task.links && task.links.length > 0 && (
-                                                            <button 
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation(); 
-                                                                    setFlowFocusId(flowFocusId === task.id ? null : task.id);
-                                                                }}
-                                                                title="Show Flow Dependencies"
-                                                                className={`text-[10px] font-bold flex items-center gap-1.5 px-2 py-1 rounded transition shadow-sm border
-                                                                    ${flowFocusId === task.id 
-                                                                        ? 'bg-purple-600 text-white ring-2 ring-purple-300 border-purple-600' 
-                                                                        : 'bg-purple-50 text-purple-600 hover:bg-purple-100 border-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:hover:bg-purple-500/20 dark:border-purple-500/20'
-                                                                    }
-                                                                `}
-                                                            >
-                                                                <span className="uppercase tracking-wide">Blocks {task.links.length}</span>
-                                                                <BezierCurve weight="bold" size={14} />
-                                                            </button>
-                                                        )}
-
-                                                        {task.subtasks.length > 0 && (
-                                                            <button 
-                                                                onClick={(e) => { e.stopPropagation(); handleCardClick(task, e); }}
-                                                                className="text-xs font-bold text-[var(--color-primary)] flex items-center gap-1 hover:underline"
-                                                                title="Open Workflow"
-                                                            >
-                                                                <FlowArrow weight="bold" />
-                                                            </button>
-                                                        )}
+                                                        {incomingLinkTask && <div className="group/link relative flex items-center justify-center"><div className="flex items-center gap-1 text-[10px] font-bold bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-1 rounded shadow-sm border border-[var(--color-warning)]/20 cursor-help"><LinkIcon weight="bold" size={12} /><span>Blocked</span></div><div className="absolute bottom-full right-0 mb-2 hidden group-hover/link:block w-max max-w-[200px] bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-[60] pointer-events-none">Depends on: {incomingLinkTask.title}<div className="absolute top-full right-1 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-900"></div></div></div>}
+                                                        {task.links && task.links.length > 0 && <button onClick={(e) => { e.stopPropagation(); setFlowFocusId(flowFocusId === task.id ? null : task.id); }} title="Show Flow Dependencies" className={`text-[10px] font-bold flex items-center gap-1.5 px-2 py-1 rounded transition shadow-sm border ${flowFocusId === task.id ? 'bg-purple-600 text-white ring-2 ring-purple-300 border-purple-600' : 'bg-purple-50 text-purple-600 hover:bg-purple-100 border-purple-200 dark:bg-purple-500/10 dark:text-purple-300 dark:hover:bg-purple-500/20 dark:border-purple-500/20'}`}><span className="uppercase tracking-wide">Blocks {task.links.length}</span><BezierCurve weight="bold" size={14} /></button>}
+                                                        {task.subtasks.length > 0 && <button onClick={(e) => { e.stopPropagation(); handleCardClick(task, e); }} className="text-xs font-bold text-[var(--color-primary)] flex items-center gap-1 hover:underline" title="Open Workflow"><FlowArrow weight="bold" /></button>}
                                                     </div>
                                                 </div>
 
-                                                {task.status === 'Review' && (
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); moveTaskToColumn(task.id, 'Done'); }}
-                                                        className="w-full mt-3 py-1.5 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded text-[10px] font-bold border border-[var(--color-success)]/20 hover:bg-[var(--color-success)] hover:text-white transition flex items-center justify-center gap-1"
-                                                    >
-                                                        <CheckCircle weight="fill" /> Approve & Finish
-                                                    </button>
-                                                )}
-                                                {task.status === 'Done' && (
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); handleArchiveTask(task.id); }}
-                                                        className="w-full mt-3 py-1.5 bg-[var(--color-bg)] text-[var(--color-text-muted)] rounded text-[10px] font-bold hover:bg-[var(--color-border)] transition flex items-center justify-center gap-1"
-                                                    >
-                                                        <Archive weight="fill" /> Archive Ticket
-                                                    </button>
-                                                )}
+                                                {task.status === 'Review' && <button onClick={(e) => { e.stopPropagation(); moveTaskToColumn(task.id, 'Done'); }} className="w-full mt-3 py-1.5 bg-[var(--color-success)]/10 text-[var(--color-success)] rounded text-[10px] font-bold border border-[var(--color-success)]/20 hover:bg-[var(--color-success)] hover:text-white transition flex items-center justify-center gap-1"><CheckCircle weight="fill" /> Approve & Finish</button>}
+                                                {task.status === 'Done' && <button onClick={(e) => { e.stopPropagation(); handleArchiveTask(task.id); }} className="w-full mt-3 py-1.5 bg-[var(--color-bg)] text-[var(--color-text-muted)] rounded text-[10px] font-bold hover:bg-[var(--color-border)] transition flex items-center justify-center gap-1"><Archive weight="fill" /> Archive Ticket</button>}
                                             </div>
                                         );
                                     })}

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-// 1. Define the Expanded Color Interface
 interface ThemeColors {
     // Core Layout
     primary: string;
@@ -12,6 +11,8 @@ interface ThemeColors {
     surface: string;  
     glass: string;    
     border: string;   
+    
+    // THE STAR OF THE SHOW
     headerBg: string; 
 
     // Typography
@@ -43,7 +44,6 @@ interface ThemeDefinition {
     };
 }
 
-// 2. Define Themes
 export const THEMES: Record<string, ThemeDefinition> = {
     nexus: {
         name: 'Nexus (Default)',
@@ -59,7 +59,8 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff',
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(0,0,0,0.1)',
-                headerBg: '#4f46e5',
+                // NEXUS GRADIENT: Modern Tech Blue
+                headerBg: 'linear-gradient(135deg, rgba(79, 70, 229, 0.95) 0%, rgba(67, 56, 202, 0.9) 100%)',
                 text: '#111827',
                 textMuted: '#6b7280',
                 success: '#10b981',
@@ -84,7 +85,8 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#1f2937',
                 glass: 'rgba(30, 41, 59, 0.7)',
                 border: 'rgba(255, 255, 255, 0.08)',
-                headerBg: '#6366f1',
+                // NEXUS DARK: Deep Cyber Indigo
+                headerBg: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(49, 46, 129, 0.9) 100%)',
                 text: '#f3f4f6',
                 textMuted: '#9ca3af',
                 success: '#34d399', 
@@ -115,7 +117,8 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.98)',
                 border: 'rgba(0,0,0,0.15)',
-                headerBg: '#334155',
+                // EXECUTIVE: Professional Slate
+                headerBg: 'linear-gradient(135deg, rgba(51, 65, 85, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%)',
                 text: '#020617', 
                 textMuted: '#64748b',
                 success: '#059669',
@@ -140,7 +143,8 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#0f172a', 
                 glass: 'rgba(15, 23, 42, 0.8)',
                 border: 'rgba(255, 255, 255, 0.1)',
-                headerBg: '#0284c7',
+                // EXECUTIVE DARK: Midnight Blue
+                headerBg: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(23, 37, 84, 0.9) 100%)',
                 text: '#f8fafc',
                 textMuted: '#94a3b8',
                 success: '#4ade80',
@@ -171,7 +175,8 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.9)',
                 border: 'rgba(87, 83, 78, 0.1)',
-                headerBg: '#059669',
+                // ZEN: Forest Mist
+                headerBg: 'linear-gradient(135deg, rgba(5, 150, 105, 0.9) 0%, rgba(4, 120, 87, 0.85) 100%)',
                 text: '#1c1917', 
                 textMuted: '#78716c',
                 success: '#059669',
@@ -196,7 +201,8 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#292524', 
                 glass: 'rgba(41, 37, 36, 0.8)',
                 border: 'rgba(255, 255, 255, 0.05)',
-                headerBg: '#34d399',
+                // ZEN DARK: Deep Jungle
+                headerBg: 'linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(2, 44, 34, 0.9) 100%)',
                 text: '#f5f5f4', 
                 textMuted: '#a8a29e',
                 success: '#6ee7b7',
@@ -227,6 +233,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#ffffff', 
                 glass: 'rgba(255, 255, 255, 0.95)',
                 border: 'rgba(234, 88, 12, 0.15)',
+                // CRIMSON: Frosted Charcoal (High Contrast)
                 headerBg: 'linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(67, 20, 7, 0.9) 100%)', 
                 text: '#431407', 
                 textMuted: '#9a3412',
@@ -252,6 +259,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
                 surface: '#27272a', 
                 glass: 'rgba(39, 39, 42, 0.8)',
                 border: 'rgba(249, 115, 22, 0.2)',
+                // CRIMSON DARK: Stealth Ops
                 headerBg: 'linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(124, 45, 18, 0.2) 100%)',
                 text: '#fafafa', 
                 textMuted: '#a1a1aa',
@@ -273,7 +281,7 @@ export const THEMES: Record<string, ThemeDefinition> = {
 
 type ThemeKey = keyof typeof THEMES;
 
-// NEW: Added currentAvatar and setAvatar to context
+// Context Interfaces
 interface ThemeContextType {
     currentTheme: ThemeKey;
     setTheme: (key: ThemeKey) => void;
@@ -286,11 +294,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({} as any);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+    // 1. Load Theme from LocalStorage
     const [currentTheme, setCurrentTheme] = useState<ThemeKey>(() => {
         const saved = localStorage.getItem('ob_theme_preference');
         return (saved && THEMES[saved]) ? (saved as ThemeKey) : 'nexus';
     });
     
+    // 2. Load Dark Mode from LocalStorage or System
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const savedMode = localStorage.getItem('ob_theme_mode');
         if (savedMode) return savedMode === 'dark';
@@ -300,30 +310,35 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
     });
 
-    // NEW: Initialize Avatar
+    // 3. Load Avatar from LocalStorage
     const [currentAvatar, setAvatarState] = useState<string>(() => {
         return localStorage.getItem('ob_avatar_preference') || 'gradient-1';
     });
 
+    // EFFECT: Apply CSS Variables
     useEffect(() => {
         const mode = isDarkMode ? 'dark' : 'light';
         const colors = THEMES[currentTheme].colors[mode];
         const root = document.documentElement;
 
         Object.entries(colors).forEach(([key, value]) => {
+            // Convert camelCase to kebab-case (e.g. headerBg -> --color-header-bg)
             const cssVarName = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
             root.style.setProperty(cssVarName, value);
         });
 
+        // Hard set body colors for overscroll areas
         document.body.style.backgroundColor = colors.bg;
         document.body.style.color = colors.text;
 
+        // Toggle Tailwind Dark Class
         if (isDarkMode) {
             root.classList.add('dark');
         } else {
             root.classList.remove('dark');
         }
 
+        // Persist preferences
         localStorage.setItem('ob_theme_preference', currentTheme);
         localStorage.setItem('ob_theme_mode', isDarkMode ? 'dark' : 'light');
 
@@ -333,7 +348,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         setIsDarkMode(mode === 'dark');
     };
 
-    // NEW: Avatar Setter
     const setAvatar = (avatar: string) => {
         setAvatarState(avatar);
         localStorage.setItem('ob_avatar_preference', avatar);

@@ -4,7 +4,7 @@ import {
     ArrowRight, TreeStructure, CaretLeft, CaretRight, 
     UserPlus, ShieldCheck, Clock, 
     UsersThree, Plus, PaperPlaneRight, Chats, Check, Pulse,
-    Link as LinkIcon, ShareNetwork, User
+    Link as LinkIcon, ShareNetwork, User, Minus
 } from '@phosphor-icons/react';
 import { useTheme } from '../../../context/ThemeContext'; // Import Hook
 import UserAvatar from '../../../components/UserAvatar'; // Import Component
@@ -139,7 +139,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                 style={{ left: '80px' }} 
                 onClick={() => !isOpen && setIsOpen(true)}
             >
-                {/* --- HEADER (Uses Heavy Charcoal Gradient) --- */}
+                {/* --- HEADER --- */}
                 <div 
                     className={`w-full h-14 flex items-center justify-between px-8 shrink-0 relative z-20 backdrop-blur-md border-b border-[var(--color-border)] ${isOpen ? 'rounded-tl-[32px]' : ''}`}
                     style={{ background: isOpen ? 'var(--color-header-bg)' : 'var(--color-surface)' }}
@@ -312,6 +312,7 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
 
                             {task.subtasks?.map((sub: Subtask, idx: number) => {
                                 const isNext = !sub.isCompleted && (idx === 0 || task.subtasks[idx-1].isCompleted);
+                                const isAssignedToMe = sub.assignee === 'Me';
                                 
                                 return (
                                     <div 
@@ -361,17 +362,24 @@ export default function TaskFlowPanel({ task, isOpen, setIsOpen, onToggleSubtask
                                             <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex justify-between items-center">
                                                 {sub.assignee ? (
                                                     <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-primary)]">
-                                                        {/* NEW: Render Avatar if assignee is 'Me' */}
-                                                        {sub.assignee === 'Me' ? (
-                                                            <div className="w-6 h-6 rounded-full bg-[var(--color-surface)] ring-2 ring-[var(--color-surface)]">
+                                                        {/* NEW: Updated Subtask Avatar Logic */}
+                                                        {isAssignedToMe ? (
+                                                            <div 
+                                                                className="w-6 h-6 rounded-full bg-[var(--color-surface)] ring-2 ring-[var(--color-surface)] cursor-pointer relative group/avatar hover:scale-110 transition-transform"
+                                                                title="You (Click to unassign)"
+                                                                onClick={() => onPickUpSubtask(task.id, sub.id)}
+                                                            >
                                                                 <UserAvatar avatarId={currentAvatar} size="sm" className="w-full h-full !border-none" />
+                                                                <div className="absolute inset-0 bg-red-500/80 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                                                                    <Minus weight="bold" className="text-white" size={12} />
+                                                                </div>
                                                             </div>
                                                         ) : (
                                                             <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[10px] ring-2 ring-[var(--color-surface)]">{sub.assignee.charAt(0)}</div>
                                                         )}
                                                         
                                                         {/* Display Name */}
-                                                        {sub.assignee === 'Me' ? 'You' : sub.assignee}
+                                                        {isAssignedToMe ? 'You' : sub.assignee}
                                                     </div>
                                                 ) : (
                                                     <button 

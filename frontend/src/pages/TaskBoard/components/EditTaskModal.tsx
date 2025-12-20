@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
     X, Plus, Trash, CalendarBlank, CheckSquare, Square, 
-    CaretUp, CaretDown, TextT, Link as LinkIcon, TreeStructure
+    CaretUp, CaretDown, TextT, Link as LinkIcon, TreeStructure,
+    Lock, LockKey, LockOpen
 } from '@phosphor-icons/react';
 
 interface Subtask {
@@ -36,7 +37,8 @@ interface Task {
     collaborators: string[];
     completedAt?: string;
     assignee: string | null;
-    links?: string[]; 
+    links?: string[];
+    isLocked?: boolean; // NEW
 }
 
 interface Props {
@@ -64,7 +66,8 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
         links: [],
         deadline: '',
         creator: 'Me',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        isLocked: false
     });
 
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
@@ -79,6 +82,10 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
     useEffect(() => {
         if (task) setForm(task);
     }, [task]);
+
+    // Derived permissions
+    const isCreator = form.creator === 'Me';
+    const isLockedForUser = form.isLocked && !isCreator;
 
     const handleSave = () => {
         if (!form.title) return alert('Title required');
@@ -126,6 +133,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
     };
 
     const toggleTag = (tag: string) => {
+        if (isLockedForUser) return;
         setForm(prev => {
             const exists = prev.tags.includes(tag);
             return {
@@ -170,10 +178,25 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            {/* REMOVED overflow-hidden from parent to allow button to pop out */}
             <div className="bg-[var(--color-surface)] w-full max-w-lg rounded-2xl shadow-2xl border border-[var(--color-border)] flex flex-col max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
                 
-                {/* --- PURPLE ACTION BUTTON (Now visible due to removed overflow-hidden) --- */}
+                {/* --- HEADER --- */}
+                <div 
+                    className="p-6 border-b border-[var(--color-border)] flex justify-between items-center backdrop-blur-md relative z-10 rounded-t-2xl"
+                    style={{ background: 'var(--color-header-bg)' }}
+                >
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-bold font-['Montserrat'] text-white">{task ? 'Edit Task' : 'New Ticket'}</h2>
+                        {form.isLocked && (
+                            <div className="flex items-center gap-1 bg-black/20 text-white/80 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-white/10">
+                                <LockKey weight="fill" /> Locked
+                            </div>
+                        )}
+                    </div>
+                    <button onClick={onClose} className="text-white/70 hover:text-white transition"><X size={20} /></button>
+                </div>
+                
+                {/* --- ACTION BUTTON (Link) --- */}
                 <div 
                     className="absolute -right-5 top-1/2 -translate-y-1/2 z-50 group"
                     onMouseEnter={handleLinkEnter}
@@ -190,33 +213,17 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                             onMouseLeave={handleLinkLeave}
                         >
                             <div className="text-[10px] uppercase font-bold opacity-50 mb-2 px-2 text-[var(--color-text)]">Flow Connections</div>
-                            
-                            <button 
-                                onClick={() => { onSave(form); onCreateLinked(form.id); onClose(); }}
-                                className="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-purple-500/20 rounded-lg text-xs font-bold transition flex items-center gap-2 text-purple-600 dark:text-purple-400"
-                            >
+                            <button onClick={() => { onSave(form); onCreateLinked(form.id); onClose(); }} className="w-full text-left px-3 py-2 hover:bg-purple-50 dark:hover:bg-purple-500/20 rounded-lg text-xs font-bold transition flex items-center gap-2 text-purple-600 dark:text-purple-400">
                                 <Plus weight="bold" /> Add New Card
                             </button>
-                            
-                            <button 
-                                onClick={() => setShowExistingSelector(true)}
-                                className="w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] rounded-lg text-xs font-bold transition flex items-center gap-2 text-[var(--color-text)]"
-                            >
+                            <button onClick={() => setShowExistingSelector(true)} className="w-full text-left px-3 py-2 hover:bg-[var(--color-bg)] rounded-lg text-xs font-bold transition flex items-center gap-2 text-[var(--color-text)]">
                                 <LinkIcon weight="bold" /> Select Existing
                             </button>
-
-                            {/* Existing Selector Sub-menu */}
                             {showExistingSelector && (
                                 <div className="mt-2 border-t border-[var(--color-border)] pt-2 max-h-40 overflow-y-auto custom-scrollbar">
                                     {linkableTasks.length === 0 && <div className="px-2 text-[10px] opacity-50 text-[var(--color-text)]">No other tasks available.</div>}
                                     {linkableTasks.map(t => (
-                                        <button 
-                                            key={t.id}
-                                            onClick={() => addLink(t.id)}
-                                            className="w-full text-left px-2 py-1.5 hover:bg-[var(--color-bg)] rounded text-[10px] font-medium truncate transition text-[var(--color-text)]"
-                                        >
-                                            {t.title}
-                                        </button>
+                                        <button key={t.id} onClick={() => addLink(t.id)} className="w-full text-left px-2 py-1.5 hover:bg-[var(--color-bg)] rounded text-[10px] font-medium truncate transition text-[var(--color-text)]">{t.title}</button>
                                     ))}
                                 </div>
                             )}
@@ -224,19 +231,39 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     )}
                 </div>
 
-                {/* --- HEADER (Rounded corners added explicitly) --- */}
-                <div 
-                    className="p-6 border-b border-[var(--color-border)] flex justify-between items-center backdrop-blur-md relative z-10 rounded-t-2xl"
-                    style={{ background: 'var(--color-header-bg)' }}
-                >
-                    <h2 className="text-lg font-bold font-['Montserrat'] text-white">{task ? 'Edit Task' : 'New Ticket'}</h2>
-                    <button onClick={onClose} className="text-white/70 hover:text-white transition"><X size={20} /></button>
-                </div>
-                
                 <div className="p-6 overflow-y-auto space-y-4 flex-1">
-                    <div>
-                        <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Title</label>
-                        <input className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 font-bold outline-none focus:border-[var(--color-primary)] text-[var(--color-text)]" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Task Title" />
+                    
+                    {/* Read-Only Warning */}
+                    {isLockedForUser && (
+                        <div className="p-3 bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 rounded-lg flex items-center gap-2 text-xs text-[var(--color-text)]">
+                            <LockKey className="text-[var(--color-warning)]" weight="fill" />
+                            <span>This task is locked by the creator. You can only collaborate (add notes/subtasks).</span>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between items-start">
+                        <div className="flex-1 mr-4">
+                            <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Title</label>
+                            <input 
+                                disabled={isLockedForUser}
+                                className={`w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 font-bold outline-none focus:border-[var(--color-primary)] text-[var(--color-text)] ${isLockedForUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                value={form.title} 
+                                onChange={e => setForm({...form, title: e.target.value})} 
+                                placeholder="Task Title" 
+                            />
+                        </div>
+                        {isCreator && (
+                            <div className="flex flex-col items-center">
+                                <label className="text-[9px] font-bold uppercase opacity-60 mb-1 text-[var(--color-text)]">Lock</label>
+                                <button 
+                                    onClick={() => setForm(prev => ({...prev, isLocked: !prev.isLocked}))}
+                                    className={`p-2 rounded-lg transition border ${form.isLocked ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-[var(--color-bg)] text-[var(--color-text-muted)] border-[var(--color-border)]'}`}
+                                    title={form.isLocked ? "Unlock Task" : "Lock Task"}
+                                >
+                                    {form.isLocked ? <LockKey weight="fill" /> : <LockOpen weight="bold" />}
+                                </button>
+                            </div>
+                        )}
                     </div>
                     
                     {form.links && form.links.length > 0 && (
@@ -250,7 +277,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                                     return (
                                         <div key={linkId} className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2">
                                             <span>{linkedTask ? linkedTask.title : 'Unknown Task'}</span>
-                                            <button onClick={() => removeLink(linkId)} className="hover:text-red-500"><X weight="bold" /></button>
+                                            {!isLockedForUser && <button onClick={() => removeLink(linkId)} className="hover:text-red-500"><X weight="bold" /></button>}
                                         </div>
                                     );
                                 })}
@@ -264,35 +291,25 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                             {form.tags.map(tag => (
                                 <span key={tag} className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 border border-[var(--color-primary)]/20">
                                     {tag}
-                                    <button onClick={() => toggleTag(tag)} className="hover:text-red-500"><X weight="bold" /></button>
+                                    {!isLockedForUser && <button onClick={() => toggleTag(tag)} className="hover:text-red-500"><X weight="bold" /></button>}
                                 </span>
                             ))}
-                            <button onClick={() => setShowTagMenu(!showTagMenu)} className="bg-[var(--color-bg)] hover:bg-[var(--color-border)] text-[var(--color-text-muted)] text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition border border-[var(--color-border)]">
-                                <Plus weight="bold" /> Add Tag
-                            </button>
+                            {!isLockedForUser && (
+                                <button onClick={() => setShowTagMenu(!showTagMenu)} className="bg-[var(--color-bg)] hover:bg-[var(--color-border)] text-[var(--color-text-muted)] text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition border border-[var(--color-border)]">
+                                    <Plus weight="bold" /> Add Tag
+                                </button>
+                            )}
                         </div>
                         
-                        {showTagMenu && (
+                        {showTagMenu && !isLockedForUser && (
                             <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 shadow-lg mb-4 animate-fade-in-down">
                                 <div className="flex gap-2 mb-2">
-                                    <input 
-                                        className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1 text-xs outline-none text-[var(--color-text)]" 
-                                        placeholder="Custom tag..." 
-                                        value={tagInput}
-                                        onChange={e => setTagInput(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && addCustomTag()}
-                                    />
+                                    <input className="flex-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg px-2 py-1 text-xs outline-none text-[var(--color-text)]" placeholder="Custom tag..." value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCustomTag()} />
                                     <button onClick={addCustomTag} className="p-1 bg-[var(--color-primary)] text-white rounded-lg"><Plus /></button>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {PRESET_TAGS.map(t => (
-                                        <button 
-                                            key={t} 
-                                            onClick={() => toggleTag(t)}
-                                            className={`text-[10px] font-bold px-2 py-1 rounded border transition ${form.tags.includes(t) ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent border-[var(--color-border)] hover:border-[var(--color-primary)] text-[var(--color-text-muted)]'}`}
-                                        >
-                                            {t}
-                                        </button>
+                                        <button key={t} onClick={() => toggleTag(t)} className={`text-[10px] font-bold px-2 py-1 rounded border transition ${form.tags.includes(t) ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent border-[var(--color-border)] hover:border-[var(--color-primary)] text-[var(--color-text-muted)]'}`}>{t}</button>
                                     ))}
                                 </div>
                             </div>
@@ -302,7 +319,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Priority</label>
-                            <select className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] text-[var(--color-text)]" value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})}>
+                            <select disabled={isLockedForUser} className={`w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] text-[var(--color-text)] ${isLockedForUser ? 'opacity-50' : ''}`} value={form.priority} onChange={e => setForm({...form, priority: e.target.value as any})}>
                                 <option className="bg-[var(--color-surface)]" value="Low">Low</option>
                                 <option className="bg-[var(--color-surface)]" value="Medium">Medium</option>
                                 <option className="bg-[var(--color-surface)]" value="High">High</option>
@@ -312,7 +329,7 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                         <div>
                             <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Deadline</label>
                             <div className="relative">
-                                <input type="date" className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] text-[var(--color-text)]" value={form.deadline} onChange={e => setForm({...form, deadline: e.target.value})} />
+                                <input disabled={isLockedForUser} type="date" className={`w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] text-[var(--color-text)] ${isLockedForUser ? 'opacity-50' : ''}`} value={form.deadline} onChange={e => setForm({...form, deadline: e.target.value})} />
                                 <CalendarBlank className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none text-[var(--color-text)]" />
                             </div>
                         </div>
@@ -320,32 +337,21 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
 
                     <div>
                         <label className="text-xs font-bold uppercase opacity-60 mb-1 block text-[var(--color-text)]">Description</label>
-                        <textarea className="w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] h-20 resize-none text-[var(--color-text)]" value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} placeholder="Main task details..." />
+                        <textarea disabled={isLockedForUser} className={`w-full bg-transparent border border-[var(--color-border)] rounded-xl px-4 py-2 outline-none focus:border-[var(--color-primary)] h-20 resize-none text-[var(--color-text)] ${isLockedForUser ? 'opacity-50' : ''}`} value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} placeholder="Main task details..." />
                     </div>
 
                     <div>
                         <label className="text-xs font-bold uppercase opacity-60 mb-2 block text-[var(--color-text)]">Subtasks (Workflow)</label>
                         
+                        {/* Always allow adding subtasks (Collaboration) */}
                         <div className="bg-[var(--color-bg)]/50 p-3 rounded-xl border border-dashed border-[var(--color-border)] mb-3">
                             <div className="flex gap-2 mb-2">
-                                <input 
-                                    className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm outline-none text-[var(--color-text)]" 
-                                    placeholder="New subtask title..." 
-                                    value={newSubtaskTitle}
-                                    onChange={e => setNewSubtaskTitle(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && addSubtask()}
-                                />
+                                <input className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-sm outline-none text-[var(--color-text)]" placeholder="New subtask title..." value={newSubtaskTitle} onChange={e => setNewSubtaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSubtask()} />
                                 <button onClick={() => setShowSubtaskDescInput(!showSubtaskDescInput)} className={`p-2 rounded-lg transition ${showSubtaskDescInput ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-border)] text-[var(--color-text-muted)]'}`} title="Add Description"><TextT weight="bold" /></button>
                                 <button onClick={addSubtask} className="p-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition"><Plus weight="bold" /></button>
                             </div>
                             {showSubtaskDescInput && (
-                                <input 
-                                    className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs outline-none animate-fade-in text-[var(--color-text)]" 
-                                    placeholder="Optional short description..." 
-                                    value={newSubtaskDesc}
-                                    onChange={e => setNewSubtaskDesc(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && addSubtask()}
-                                />
+                                <input className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-1.5 text-xs outline-none animate-fade-in text-[var(--color-text)]" placeholder="Optional short description..." value={newSubtaskDesc} onChange={e => setNewSubtaskDesc(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSubtask()} />
                             )}
                         </div>
 
@@ -375,7 +381,6 @@ export default function EditTaskModal({ task, allTasks, onClose, onSave, onCreat
                     </div>
                 </div>
 
-                {/* --- FOOTER (Rounded corners added explicitly) --- */}
                 <div className="p-4 border-t border-[var(--color-border)] flex justify-end gap-3 bg-[var(--color-bg)]/50 rounded-b-2xl">
                     <button onClick={onClose} className="px-6 py-2 rounded-xl font-bold text-sm hover:bg-[var(--color-border)] transition text-[var(--color-text)]">Cancel</button>
                     <button onClick={handleSave} className="px-6 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-xl font-bold text-sm shadow-lg">Save Task</button>
