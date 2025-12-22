@@ -1,104 +1,215 @@
+// frontend/src/pages/Dashboard/Dashboard.tsx
 import { useState } from 'react';
+import { Plus, X, Gear, HouseLine, AppWindow, CheckCircle } from '@phosphor-icons/react';
 import { useDashboardData } from './hooks/useDashboardData';
-import { Sparkle, HouseLine, ArrowRight } from '@phosphor-icons/react';
-
-// Components
-import ExecutiveSummary from './components/ExecutiveSummary';
-import RevenueWidget from './components/RevenueWidget';
-import LiveFeed from './components/LiveFeed';
-import TalentWidget from './components/TalentWidget';
+import { WIDGET_REGISTRY, WidgetDefinition } from '../../utils/widgetRegistry';
+import { saveUserLayout } from '../../utils/dashboardConfig';
 
 export default function Dashboard() {
-    const { metrics, pipeline, activityFeed, financialTrends, clientName } = useDashboardData();
-    const [viewMode, setViewMode] = useState<'Executive' | 'Manager'>('Executive');
+  const {
+    layoutConfig, // assuming your hook now returns layoutConfig
+    metrics,
+    pipeline,
+    activityFeed,
+    financialTrends,
+    countryStats,
+    clientName
+  } = useDashboardData();
 
-    const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showStore, setShowStore] = useState(false);
 
-    return (
-        <div className="p-8 animate-fade-in text-[var(--color-text)] min-h-full flex flex-col relative overflow-x-hidden">
-            
-            {/* -- HEADER -- */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 shrink-0">
-                <div className="relative">
-                    <div className="flex items-center gap-2 text-xs font-bold opacity-50 uppercase tracking-widest mb-2 text-[var(--color-text-muted)]">
-                        <HouseLine weight="fill" className="text-[var(--color-primary)]" /> {clientName} HQ
-                    </div>
-                    <h1 className="text-4xl font-black font-['Montserrat'] flex items-center gap-3 tracking-tight text-[var(--color-text)]">
-                        Dashboard
-                        <span className="text-xs bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white px-3 py-1 rounded-full font-bold shadow-lg shadow-[var(--color-primary)]/20 uppercase tracking-widest">
-                            Live
-                        </span>
-                    </h1>
-                    <p className="text-sm opacity-60 mt-1 font-medium text-[var(--color-text-muted)]">{currentDate}</p>
-                </div>
+  const dashboardData = { metrics, pipeline, activityFeed, financialTrends, countryStats };
 
-                <div className="flex items-center gap-4">
-                    <div className="bg-[var(--color-surface)]/50 p-1.5 rounded-xl flex text-xs font-bold border border-[var(--color-border)] backdrop-blur-sm">
-                        <button 
-                            onClick={() => setViewMode('Executive')}
-                            className={`px-6 py-2.5 rounded-lg transition-all duration-300 ${viewMode === 'Executive' ? 'bg-[var(--color-surface)] shadow-lg shadow-[var(--color-shadow)] text-[var(--color-primary)] scale-105' : 'opacity-60 hover:opacity-100 hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'}`}
-                        >
-                            Executive
-                        </button>
-                        <button 
-                            onClick={() => setViewMode('Manager')}
-                            className={`px-6 py-2.5 rounded-lg transition-all duration-300 ${viewMode === 'Manager' ? 'bg-[var(--color-surface)] shadow-lg shadow-[var(--color-shadow)] text-[var(--color-primary)] scale-105' : 'opacity-60 hover:opacity-100 hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'}`}
-                        >
-                            Manager
-                        </button>
-                    </div>
-                </div>
-            </header>
+  const handleAddWidget = (id: string) => {
+    const newLayout = [...layoutConfig, id];
+    saveUserLayout(newLayout);
+  };
 
-            {/* -- MAIN CONTENT -- */}
-            <div className="flex-1 space-y-8 pb-8">
-                
-                {/* 1. HERO STATS */}
-                <ExecutiveSummary metrics={metrics} />
+  const handleRemoveWidget = (id: string) => {
+    const newLayout = layoutConfig.filter((w: string) => w !== id);
+    saveUserLayout(newLayout);
+  };
 
-                {/* 2. MAIN WIDGET GRID */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    
-                    {/* Left Column (Charts & Widgets) */}
-                    <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="h-[400px]">
-                            <RevenueWidget data={financialTrends} />
-                        </div>
-                        <div className="h-[400px]">
-                            <TalentWidget pipeline={pipeline} />
-                        </div>
-                        
-                        {/* AI Insight Box (Span Full Width of Left Col) */}
-                        <div className="md:col-span-2 glass-card bg-[var(--color-surface)] border-[var(--color-border)] border flex items-center gap-6 p-8 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
-                             {/* Gradient Ambient */}
-                             <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/5 to-[var(--color-surface)] pointer-events-none" />
-                             
-                             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-primary)]/10 rounded-full blur-3xl translate-x-10 -translate-y-10 group-hover:bg-[var(--color-primary)]/20 transition-colors"></div>
-                             
-                             <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary)] flex items-center justify-center text-white shrink-0 shadow-lg shadow-[var(--color-primary)]/30 group-hover:scale-110 transition-transform duration-300 relative z-10">
-                                <Sparkle size={32} weight="fill" className="animate-pulse" />
-                            </div>
-                            <div className="relative z-10">
-                                <h4 className="font-bold text-lg mb-1 flex items-center gap-2 text-[var(--color-text)]">
-                                    AI Insight Generated 
-                                    <span className="text-[10px] bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 px-2 py-0.5 rounded font-bold uppercase">New</span>
-                                </h4>
-                                <p className="text-sm opacity-70 leading-relaxed max-w-2xl text-[var(--color-text-muted)]">
-                                    Workforce efficiency is up <strong className="text-[var(--color-success)]">12%</strong> compared to last quarter. However, <strong>Engineering</strong> retention risk has increased slightly. Suggested action: Review compensation bands for Senior levels.
-                                </p>
-                            </div>
-                            <button className="ml-auto p-3 rounded-xl bg-[var(--color-bg)] hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 text-[var(--color-primary)] border border-[var(--color-border)] relative z-10">
-                                <ArrowRight weight="bold" />
-                            </button>
-                        </div>
-                    </div>
+  const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-                    {/* Right Column (Live Feed - Variable Height) */}
-                    <div className="lg:col-span-4">
-                        <LiveFeed feed={activityFeed} />
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="p-8 animate-fade-in text-[var(--color-text)] min-h-full flex flex-col relative overflow-x-hidden">
+      {/* -- HEADER -- */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 shrink-0">
+        <div className="relative">
+          <div className="flex items-center gap-2 text-xs font-bold opacity-50 uppercase tracking-widest mb-2 text-[var(--color-text-muted)]">
+            <HouseLine weight="fill" className="text-[var(--color-primary)]" /> {clientName} HQ
+          </div>
+          <h1 className="text-4xl font-black font-['Montserrat'] flex items-center gap-3 tracking-tight text-[var(--color-text)]">
+            Dashboard
+            {isEditMode && (
+              <span className="text-xs bg-[var(--color-warning)] text-[var(--color-bg)] px-2 py-1 rounded font-bold uppercase tracking-wide animate-pulse">
+                Editing Layout
+              </span>
+            )}
+          </h1>
+          <p className="text-sm opacity-60 mt-1 font-medium text-[var(--color-text-muted)]">{currentDate}</p>
         </div>
-    );
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsEditMode(!isEditMode)}
+            className={`px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition shadow-sm ${
+              isEditMode
+                ? 'bg-[var(--color-primary)] text-white shadow-lg'
+                : 'bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-bg)]'
+            }`}
+          >
+            <Gear weight={isEditMode ? 'fill' : 'bold'} /> {isEditMode ? 'Save Layout' : 'Customize'}
+          </button>
+        </div>
+      </header>
+
+      {/* -- WIDGET GRID -- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
+        {layoutConfig.map((widgetId: string) => {
+          const def: WidgetDefinition | undefined = WIDGET_REGISTRY[widgetId];
+          if (!def) return null;
+
+          const WidgetComponent = def.component;
+
+          return (
+            <div
+              key={widgetId}
+              className={`relative group h-full flex flex-col ${
+                isEditMode ? 'ring-2 ring-dashed ring-[var(--color-primary)]/50 rounded-2xl cursor-move bg-[var(--color-bg)]/50' : ''
+              }`}
+              style={{
+                gridColumn: `span ${def.minW}`,
+                gridRow: `span ${def.minH}`,
+                minHeight: def.minH === 1 ? '150px' : '350px'
+              }}
+            >
+              {isEditMode && (
+                <button
+                  onClick={() => handleRemoveWidget(widgetId)}
+                  className="absolute -top-3 -right-3 z-50 bg-[var(--color-danger)] text-white rounded-full p-1.5 shadow-lg hover:scale-110 transition animate-pop-in"
+                >
+                  <X weight="bold" size={14} />
+                </button>
+              )}
+
+              <div className={`h-full w-full ${isEditMode ? 'pointer-events-none opacity-60 scale-95 transition-transform' : ''}`}>
+                <WidgetComponent {...dashboardData} />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Add Widget Button */}
+        {isEditMode && (
+          <div
+            onClick={() => setShowStore(true)}
+            className="col-span-1 md:col-span-2 min-h-[200px] border-2 border-dashed border-[var(--color-border)] rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] transition gap-4 group bg-[var(--color-bg)]/30"
+          >
+            <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:scale-110 transition-all border border-[var(--color-border)]">
+              <Plus weight="bold" size={32} />
+            </div>
+            <span className="font-bold text-sm text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] uppercase tracking-wider">
+              Open Widget Store
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* -- WIDGET STORE MODAL -- */}
+      {showStore && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowStore(false)}
+        >
+          <div
+            className="bg-[var(--color-surface)] w-full max-w-5xl h-[80vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[var(--color-border)]"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-8 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-bg)]/50">
+              <div>
+                <h2 className="text-2xl font-black font-['Montserrat'] flex items-center gap-3">
+                  <AppWindow size={32} className="text-[var(--color-primary)]" weight="duotone" />
+                  Widget Library
+                </h2>
+                <p className="text-sm opacity-60 mt-1">Select components to add to your dashboard.</p>
+              </div>
+              <button onClick={() => setShowStore(false)} className="p-2 hover:bg-[var(--color-bg)] rounded-full transition">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 bg-[var(--color-bg)]/30 custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.values(WIDGET_REGISTRY).map((widget: WidgetDefinition) => {
+                  const isAdded = layoutConfig.includes(widget.id);
+                  const hasPermission = !widget.permissionReq || (('permissions' in widget ? widget.permissions : []) as string[]).includes(widget.permissionReq);
+
+                  return (
+                    <div
+                      key={widget.id}
+                      className={`relative p-6 rounded-2xl border transition-all duration-300 flex flex-col gap-4
+                        ${
+                          !hasPermission
+                            ? 'opacity-50 grayscale cursor-not-allowed bg-[var(--color-bg)] border-[var(--color-border)]'
+                            : isAdded
+                            ? 'border-[var(--color-success)] bg-[var(--color-success)]/5 ring-1 ring-[var(--color-success)]/20'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-lg hover:-translate-y-1'
+                        }
+                      `}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className={`p-3 rounded-xl ${isAdded ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]' : 'bg-[var(--color-bg)] text-[var(--color-primary)]'}`}>
+                          <AppWindow size={24} weight="duotone" />
+                        </div>
+                        {isAdded && <CheckCircle size={24} weight="fill" className="text-[var(--color-success)]" />}
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-lg mb-1">{widget.title}</h3>
+                        <p className="text-xs opacity-60 leading-relaxed min-h-[40px]">{widget.description}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-auto">
+                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-40 bg-[var(--color-bg)] px-2 py-1 rounded border border-[var(--color-border)]">
+                          Size: {widget.minW}x{widget.minH}
+                        </span>
+                        {widget.permissionReq && (
+                          <span
+                            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border ${
+                              hasPermission
+                                ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20'
+                                : 'bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20'
+                            }`}
+                          >
+                            {hasPermission ? 'Unlocked' : 'Restricted'}
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => hasPermission && !isAdded && handleAddWidget(widget.id)}
+                        disabled={isAdded || !hasPermission}
+                        className={`w-full py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition shadow-sm ${
+                          isAdded
+                            ? 'bg-[var(--color-success)] text-white cursor-default'
+                            : !hasPermission
+                            ? 'bg-[var(--color-bg)] text-[var(--color-text-muted)] cursor-not-allowed'
+                            : 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]'
+                        }`}
+                      >
+                        {isAdded ? 'Added' : !hasPermission ? 'Locked by Admin' : 'Add to Dashboard'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

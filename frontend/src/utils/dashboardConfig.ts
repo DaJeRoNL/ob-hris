@@ -1,13 +1,5 @@
 export type UserRole = 'System Admin' | 'Executive' | 'Manager' | 'HR_Admin' | 'Employee';
 
-export interface WidgetConfig {
-    revenue: boolean;
-    talent: boolean;
-    feed: boolean;
-    global: boolean;
-    ai: boolean;
-}
-
 export interface TabConfig {
     dashboard: boolean;
     people: boolean;
@@ -18,23 +10,24 @@ export interface TabConfig {
     compliance: boolean;
     docs: boolean;
     chat: boolean;
-    tasks: boolean; // NEW TAB
+    tasks: boolean;
     admin: boolean;
 }
 
+export interface RoleConfig {
+    permissions: string[]; // List of allowed actions/views
+    defaultLayout: string[]; // List of widget IDs
+    tabs: TabConfig;
+}
+
 export interface GeneralSettings {
-    dateFormat: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD';
-    currency: 'USD' | 'EUR' | 'GBP';
+    dateFormat: string;
+    currency: string;
     systemName: string;
     mfaEnabled: boolean;
     sessionTimeout: string;
     dataRetention: string;
     maintenanceMode: boolean;
-}
-
-export interface RoleConfig {
-    widgets: WidgetConfig;
-    tabs: TabConfig;
 }
 
 export interface SystemConfig {
@@ -56,30 +49,36 @@ const DEFAULT_CONFIG: SystemConfig = {
     },
     layout: {
         'System Admin': {
-            widgets: { revenue: true, talent: true, feed: true, global: true, ai: true },
+            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai'],
+            defaultLayout: ['stats_summary', 'revenue_chart', 'talent_pipeline', 'global_map', 'live_feed'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Executive': {
-            widgets: { revenue: true, talent: true, feed: true, global: true, ai: true },
+            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai'],
+            defaultLayout: ['stats_summary', 'revenue_chart', 'talent_pipeline'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Manager': {
-            widgets: { revenue: false, talent: true, feed: true, global: true, ai: false },
+            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_global'],
+            defaultLayout: ['stats_summary', 'talent_pipeline', 'live_feed'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'HR_Admin': {
-            widgets: { revenue: false, talent: true, feed: true, global: false, ai: true },
+            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_ai'],
+            defaultLayout: ['stats_summary', 'talent_pipeline', 'live_feed'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Employee': {
-            widgets: { revenue: false, talent: false, feed: true, global: false, ai: false },
+            permissions: ['view_activity'],
+            defaultLayout: ['live_feed'],
             tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, tasks: true, admin: true }
         }
     }
 };
 
-const STORAGE_KEY = 'ob_hris_config_v6'; // Incremented to force new config
+const STORAGE_KEY = 'ob_hris_config_v7'; // Incremented version
 const ROLE_KEY = 'ob_hris_active_role';
+const USER_LAYOUT_KEY = 'ob_hris_user_layout';
 
 export const getSystemConfig = (): SystemConfig => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -96,17 +95,28 @@ export const saveSystemConfig = (config: SystemConfig) => {
     window.dispatchEvent(new Event('sys-config-updated'));
 };
 
-export const resetSystemConfig = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    window.dispatchEvent(new Event('sys-config-updated'));
-    return DEFAULT_CONFIG;
-};
-
 export const getCurrentRole = (): UserRole => {
     return (localStorage.getItem(ROLE_KEY) as UserRole) || 'System Admin';
 };
 
 export const setCurrentRole = (role: UserRole) => {
     localStorage.setItem(ROLE_KEY, role);
+    // Reset user custom layout when role changes to simulate new user
+    localStorage.removeItem(USER_LAYOUT_KEY);
     window.dispatchEvent(new Event('role-updated'));
+};
+
+// New: Get/Set User's Custom Layout
+export const getUserLayout = (role: UserRole): string[] => {
+    const saved = localStorage.getItem(USER_LAYOUT_KEY);
+    if (saved) return JSON.parse(saved);
+    
+    // Fallback to role default
+    const config = getSystemConfig();
+    return config.layout[role]?.defaultLayout || [];
+};
+
+export const saveUserLayout = (layout: string[]) => {
+    localStorage.setItem(USER_LAYOUT_KEY, JSON.stringify(layout));
+    window.dispatchEvent(new Event('layout-updated'));
 };

@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ToggleLeft, ToggleRight, LockKey, LockOpen } from '@phosphor-icons/react';
-import { getSystemConfig, saveSystemConfig, getCurrentRole } from '../../../utils/dashboardConfig';
-
-// Mock Type
-interface SystemConfig { settings: any; layout: any; }
-type UserRole = 'System Admin' | 'Executive' | 'Manager' | 'HR_Admin' | 'Employee';
+// FIX: Added CheckCircle to imports
+import { ToggleLeft, ToggleRight, LockKey, LockOpen, Layout, ShieldCheck, CheckCircle } from '@phosphor-icons/react';
+import { getSystemConfig, saveSystemConfig, getCurrentRole, UserRole, SystemConfig } from '../../../utils/dashboardConfig';
+import { WIDGET_REGISTRY } from '../../../utils/widgetRegistry';
 
 export default function LayoutTab() {
     const [config, setConfig] = useState<SystemConfig>(getSystemConfig());
@@ -14,10 +12,30 @@ export default function LayoutTab() {
 
     useEffect(() => { setConfig(getSystemConfig()); }, []);
 
-    const toggleConfig = (role: UserRole, key: string) => {
+    const toggleDefaultWidget = (role: UserRole, widgetId: string) => {
         const newConfig = { ...config };
-        // @ts-ignore
-        newConfig.layout[role].widgets[key] = !newConfig.layout[role].widgets[key];
+        const currentDefaults = newConfig.layout[role].defaultLayout;
+        
+        if (currentDefaults.includes(widgetId)) {
+            newConfig.layout[role].defaultLayout = currentDefaults.filter(id => id !== widgetId);
+        } else {
+            newConfig.layout[role].defaultLayout = [...currentDefaults, widgetId];
+        }
+        
+        setConfig(newConfig);
+        saveSystemConfig(newConfig);
+    };
+
+    const togglePermission = (role: UserRole, permission: string) => {
+        const newConfig = { ...config };
+        const currentPerms = newConfig.layout[role].permissions;
+        
+        if (currentPerms.includes(permission)) {
+            newConfig.layout[role].permissions = currentPerms.filter(p => p !== permission);
+        } else {
+            newConfig.layout[role].permissions = [...currentPerms, permission];
+        }
+        
         setConfig(newConfig);
         saveSystemConfig(newConfig);
     };
@@ -38,32 +56,59 @@ export default function LayoutTab() {
     }
 
     return (
-        <div className="space-y-6 animate-fade-in text-[var(--color-text)]">
-            <div className="mb-6 flex justify-between items-end">
+        <div className="space-y-8 animate-fade-in text-[var(--color-text)]">
+            <div className="mb-6 flex justify-between items-end border-b border-[var(--color-border)] pb-4">
                 <div>
-                    <h2 className="text-2xl font-bold mb-1">Roles & Layouts</h2>
-                    <p className="opacity-60 text-sm text-[var(--color-text-muted)]">Configure default widgets for each user persona.</p>
+                    <h2 className="text-2xl font-bold mb-1">Role Configuration</h2>
+                    <p className="opacity-60 text-sm text-[var(--color-text-muted)]">Set default widgets and permissions per role.</p>
                 </div>
                 <button onClick={() => setIsUnlocked(false)} className="text-xs font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Lock Changes</button>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                 {['System Admin', 'Executive', 'Manager', 'HR_Admin', 'Employee'].map(role => (
-                    <div key={role} className="bg-[var(--color-surface)] border border-[var(--color-border)] p-5 rounded-2xl shadow-sm">
-                        <div className="flex items-center gap-2 mb-4 border-b border-[var(--color-border)] pb-3">
-                            <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]"></span>
-                            <h4 className="font-bold text-sm uppercase tracking-wide opacity-80">{role.replace('_', ' ')}</h4>
+                    <div key={role} className="bg-[var(--color-surface)] border border-[var(--color-border)] p-6 rounded-2xl shadow-sm">
+                        <div className="flex items-center gap-3 mb-6">
+                            <span className="w-3 h-3 rounded-full bg-[var(--color-primary)]"></span>
+                            <h4 className="font-bold text-lg uppercase tracking-wide opacity-90">{role.replace('_', ' ')}</h4>
                         </div>
-                        <div className="space-y-1">
-                            {Object.keys(config.layout[role as UserRole].widgets).map((key) => (
-                                <div key={key} className="flex items-center justify-between p-2 hover:bg-[var(--color-bg)]/50 rounded-lg transition group">
-                                    <span className="capitalize text-xs font-bold opacity-70 group-hover:opacity-100">{key}</span>
-                                    <button onClick={() => toggleConfig(role as UserRole, key)} className="text-[var(--color-primary)] opacity-80 hover:opacity-100 transition">
-                                        {/* @ts-ignore */}
-                                        {config.layout[role].widgets[key] ? <ToggleRight size={24} weight="fill" /> : <ToggleLeft size={24} className="text-[var(--color-text-muted)]" />}
-                                    </button>
-                                </div>
-                            ))}
+
+                        {/* Default Widgets */}
+                        <div className="mb-6">
+                            <h5 className="text-xs font-bold uppercase opacity-50 mb-3 flex items-center gap-2"><Layout /> Default Widgets</h5>
+                            <div className="space-y-2">
+                                {Object.values(WIDGET_REGISTRY).map((widget) => {
+                                    // @ts-ignore
+                                    const isEnabled = config.layout[role].defaultLayout.includes(widget.id);
+                                    return (
+                                        <div key={widget.id} className="flex items-center justify-between p-2 hover:bg-[var(--color-bg)]/50 rounded-lg transition group">
+                                            <span className="text-sm font-medium opacity-80 group-hover:opacity-100">{widget.title}</span>
+                                            <button onClick={() => toggleDefaultWidget(role as UserRole, widget.id)} className="text-[var(--color-primary)] opacity-80 hover:opacity-100 transition">
+                                                {isEnabled ? <ToggleRight size={24} weight="fill" /> : <ToggleLeft size={24} className="text-[var(--color-text-muted)]" />}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Permissions */}
+                        <div className="pt-4 border-t border-[var(--color-border)]">
+                            <h5 className="text-xs font-bold uppercase opacity-50 mb-3 flex items-center gap-2"><ShieldCheck /> Access Controls</h5>
+                            <div className="space-y-2">
+                                {['view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai'].map((perm) => {
+                                    // @ts-ignore
+                                    const hasPerm = config.layout[role].permissions.includes(perm);
+                                    return (
+                                        <div key={perm} className="flex items-center justify-between p-2 hover:bg-[var(--color-bg)]/50 rounded-lg transition group">
+                                            <span className="text-xs font-mono opacity-60 group-hover:opacity-100">{perm}</span>
+                                            <button onClick={() => togglePermission(role as UserRole, perm)} className={`opacity-80 hover:opacity-100 transition ${hasPerm ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'}`}>
+                                                {hasPerm ? <CheckCircle size={18} weight="fill" /> : <div className="w-4 h-4 rounded-full border-2 border-[var(--color-text-muted)]"></div>}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 ))}
