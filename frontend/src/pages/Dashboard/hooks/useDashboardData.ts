@@ -9,7 +9,7 @@ export function useDashboardData() {
     const [config, setConfig] = useState<SystemConfig>(() => getSystemConfig());
     const [userRole, setUserRole] = useState(getCurrentRole());
     
-    // DEFENSIVE FIX: Ensure we never start with undefined by forcing an array check
+    // Safety check for layout array
     const [layoutConfig, setLayoutConfig] = useState<string[]>(() => {
         const layout = getUserLayout(getCurrentRole());
         return Array.isArray(layout) ? layout : []; 
@@ -20,8 +20,6 @@ export function useDashboardData() {
             const role = getCurrentRole();
             setConfig(getSystemConfig()); 
             setUserRole(role);
-            
-            // DEFENSIVE FIX: Check result before setting state
             const newLayout = getUserLayout(role);
             setLayoutConfig(Array.isArray(newLayout) ? newLayout : []);
         };
@@ -37,11 +35,13 @@ export function useDashboardData() {
         };
     }, []);
 
+    // --- CORE DATA ---
     const clientPeople = useMemo(() => MOCK_DB.people.filter(p => p.clientId === currentClientId), [currentClientId]);
     const clientHiring = useMemo(() => MOCK_DB.hiring.filter(h => h.clientId === currentClientId), [currentClientId]);
     const clientFinance = useMemo(() => MOCK_DB.finance.filter(f => f.clientId === currentClientId), [currentClientId]);
     const currentClient = useMemo(() => MOCK_DB.clients.find(c => c.id === currentClientId), [currentClientId]);
 
+    // --- DERIVED METRICS ---
     const metrics: MetricItem[] = useMemo(() => {
         const headcount = clientPeople.length;
         const payrollRaw = clientFinance.reduce((acc, curr) => acc + (parseFloat(curr.amount.replace(/[^0-9.-]+/g,"")) || 0), 0);
@@ -56,6 +56,84 @@ export function useDashboardData() {
             { label: 'Active Pipeline', value: clientHiring.length, trend: 8, trendLabel: 'open reqs', linkTo: '/hiring', color: 'amber' },
         ];
     }, [clientPeople, clientFinance, clientHiring]);
+
+    // --- TEAM STATUS SIMULATION ---
+    const teamStatus = useMemo(() => {
+        return clientPeople.map(p => {
+            // Deterministic pseudo-random status based on name length
+            const r = p.name.length % 3;
+            const status = r === 0 ? 'Online' : r === 1 ? 'In Meeting' : 'Offline';
+            return {
+                id: p.id,
+                name: p.name,
+                role: p.role,
+                avatar: p.name.charAt(0),
+                status: status as 'Online' | 'In Meeting' | 'Offline'
+            };
+        }).slice(0, 6); // Limit for widget
+    }, [clientPeople]);
+
+    // --- PENDING TASKS AGGREGATION ---
+    const pendingTasks = useMemo(() => {
+        const items = [];
+        
+        // 1. Pending Invoices
+        const pendingInvoices = clientFinance.filter(f => f.status === 'Pending');
+        pendingInvoices.forEach(i => items.push({
+            id: i.id,
+            title: `Approve Invoice ${i.id}`,
+            desc: `${i.amount} for ${i.entity}`,
+            type: 'Finance',
+            priority: 'High',
+            actionLink: '/finance'
+        }));
+
+        // 2. Hiring Offers
+        const offers = clientHiring.filter(h => h.stage === 'Offer');
+        offers.forEach(h => items.push({
+            id: h.id,
+            title: `Sign Offer: ${h.name}`,
+            desc: h.role,
+            type: 'Hiring',
+            priority: 'Critical',
+            actionLink: '/hiring'
+        }));
+
+        // 3. Compliance Reviews
+        const visaReviews = clientPeople.filter(p => p.visa !== 'Citizen' && p.status === 'Active');
+        if (visaReviews.length > 0) {
+            items.push({
+                id: 'compliance-bulk',
+                title: 'Visa Expiry Review',
+                desc: `${visaReviews.length} employees need review`,
+                type: 'Legal',
+                priority: 'Medium',
+                actionLink: '/compliance'
+            });
+        }
+
+        return items;
+    }, [clientFinance, clientHiring, clientPeople]);
+
+    // --- PERSONAL TASKS MOCK ---
+    const myTasks = useMemo(() => [
+        { id: 't1', title: 'Review Q4 Budget', due: 'Today', status: 'Pending', tag: 'Finance' },
+        { id: 't2', title: 'Onboard Sarah Connor', due: 'Tomorrow', status: 'In Progress', tag: 'HR' },
+        { id: 't3', title: 'Update Compliance Policy', due: 'Nov 12', status: 'Pending', tag: 'Legal' },
+        { id: 't4', title: 'Weekly Sync Prep', due: 'Today', status: 'Pending', tag: 'General' },
+    ], []);
+
+    // --- TEAM WORKLOAD MOCK ---
+    const teamWorkload = useMemo(() => {
+        return clientPeople.slice(0, 5).map(p => ({
+            id: p.id,
+            name: p.name,
+            role: p.role,
+            avatar: p.name.charAt(0),
+            hours: Math.floor(Math.random() * 40) + 10,
+            capacity: 40
+        }));
+    }, [clientPeople]);
 
     const financialTrends: FinancialMetric[] = useMemo(() => {
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -87,7 +165,12 @@ export function useDashboardData() {
         activityFeed, 
         financialTrends, 
         countryStats, 
+        teamStatus,
+        pendingTasks,
+        myTasks,
+        teamWorkload,
         clientName: currentClient?.name || 'Unknown', 
-        layoutConfig: layoutConfig || [] // Final safety fallback
+        layoutConfig: layoutConfig || [],
+        permissions: config.layout[userRole]?.permissions || [] // Crucial fix for permissions error
     };
 }

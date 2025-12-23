@@ -15,8 +15,8 @@ export interface TabConfig {
 }
 
 export interface RoleConfig {
-    permissions: string[]; // List of allowed actions/views
-    defaultLayout: string[]; // List of widget IDs
+    permissions: string[];
+    defaultLayout: string[];
     tabs: TabConfig;
 }
 
@@ -49,34 +49,34 @@ const DEFAULT_CONFIG: SystemConfig = {
     },
     layout: {
         'System Admin': {
-            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai'],
-            defaultLayout: ['stats_summary', 'revenue_chart', 'talent_pipeline', 'global_map', 'live_feed'],
+            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai', 'view_team', 'view_approvals', 'view_tasks'],
+            defaultLayout: ['stats_summary', 'global_map', 'my_today', 'sticky_notes', 'team_availability', 'revenue_chart', 'talent_pipeline', 'live_feed'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Executive': {
-            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai'],
-            defaultLayout: ['stats_summary', 'revenue_chart', 'talent_pipeline'],
+            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai', 'view_approvals'],
+            defaultLayout: ['stats_summary', 'global_map', 'revenue_chart', 'talent_pipeline', 'live_feed'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Manager': {
-            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_global'],
-            defaultLayout: ['stats_summary', 'talent_pipeline', 'live_feed'],
+            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_global', 'view_team', 'view_approvals', 'view_tasks'],
+            defaultLayout: ['stats_summary', 'team_availability', 'team_workload', 'my_today', 'my_tasks', 'talent_pipeline'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'HR_Admin': {
-            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_ai'],
-            defaultLayout: ['stats_summary', 'talent_pipeline', 'live_feed'],
+            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_ai', 'view_team', 'view_tasks'],
+            defaultLayout: ['stats_summary', 'team_availability', 'sticky_notes', 'talent_pipeline', 'live_feed'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Employee': {
-            permissions: ['view_activity'],
-            defaultLayout: ['live_feed'],
+            permissions: ['view_activity', 'view_team', 'view_tasks'],
+            defaultLayout: ['my_today', 'my_tasks', 'sticky_notes', 'team_availability'],
             tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, tasks: true, admin: true }
         }
     }
 };
 
-const STORAGE_KEY = 'ob_hris_config_v7'; // Incremented version
+const STORAGE_KEY = 'ob_hris_config_v9'; // Incremented version
 const ROLE_KEY = 'ob_hris_active_role';
 const USER_LAYOUT_KEY = 'ob_hris_user_layout';
 
@@ -101,17 +101,13 @@ export const getCurrentRole = (): UserRole => {
 
 export const setCurrentRole = (role: UserRole) => {
     localStorage.setItem(ROLE_KEY, role);
-    // Reset user custom layout when role changes to simulate new user
-    localStorage.removeItem(USER_LAYOUT_KEY);
+    localStorage.removeItem(USER_LAYOUT_KEY); // Reset layout on role switch
     window.dispatchEvent(new Event('role-updated'));
 };
 
-// New: Get/Set User's Custom Layout
 export const getUserLayout = (role: UserRole): string[] => {
     const saved = localStorage.getItem(USER_LAYOUT_KEY);
     if (saved) return JSON.parse(saved);
-    
-    // Fallback to role default
     const config = getSystemConfig();
     return config.layout[role]?.defaultLayout || [];
 };

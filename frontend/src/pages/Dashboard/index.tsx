@@ -1,6 +1,5 @@
-// frontend/src/pages/Dashboard/Dashboard.tsx
-import { useState } from 'react';
-import { Plus, X, Gear, HouseLine, AppWindow, CheckCircle } from '@phosphor-icons/react';
+import { useState, useRef } from 'react';
+import { Plus, X, Gear, HouseLine, AppWindow, CheckCircle, DotsSixVertical } from '@phosphor-icons/react';
 import { useDashboardData } from './hooks/useDashboardData';
 import { WIDGET_REGISTRY, WidgetDefinition } from '../../utils/widgetRegistry';
 import { saveUserLayout } from '../../utils/dashboardConfig';
@@ -13,28 +12,81 @@ export default function Dashboard() {
     activityFeed,
     financialTrends,
     countryStats,
-    clientName
+    teamStatus,
+    pendingTasks,
+    myTasks,
+    teamWorkload,
+    clientName,
+    permissions
   } = useDashboardData();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [showStore, setShowStore] = useState(false);
+  const [localLayout, setLocalLayout] = useState<string[]>(layoutConfig);
+  
+  // Drag State
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
-  const dashboardData = { metrics, pipeline, activityFeed, financialTrends, countryStats };
+  // Sync local layout if config changes from outside (e.g. role switch)
+  if (JSON.stringify(layoutConfig) !== JSON.stringify(localLayout) && !isEditMode) {
+      setLocalLayout(layoutConfig);
+  }
+
+  const dashboardData = { metrics, pipeline, activityFeed, financialTrends, countryStats, teamStatus, pendingTasks, myTasks, teamWorkload };
 
   const handleAddWidget = (id: string) => {
-    const newLayout = [...layoutConfig, id];
+    const newLayout = [...localLayout, id];
+    setLocalLayout(newLayout);
     saveUserLayout(newLayout);
   };
 
   const handleRemoveWidget = (id: string) => {
-    const newLayout = layoutConfig.filter((w: string) => w !== id);
+    const newLayout = localLayout.filter((w: string) => w !== id);
+    setLocalLayout(newLayout);
     saveUserLayout(newLayout);
+  };
+
+  const handleSaveLayout = () => {
+      saveUserLayout(localLayout);
+      setIsEditMode(false);
+  };
+
+  // --- DRAG HANDLERS ---
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+      dragItem.current = index;
+      e.dataTransfer.effectAllowed = "move";
+      // Transparent ghost image if needed, or default
+  };
+
+  const handleDragEnter = (e: React.DragEvent, index: number) => {
+      dragOverItem.current = index;
+  };
+
+  const handleDragEnd = () => {
+      const startIdx = dragItem.current;
+      const endIdx = dragOverItem.current;
+
+      if (startIdx !== null && endIdx !== null && startIdx !== endIdx) {
+          const newLayout = [...localLayout];
+          const item = newLayout.splice(startIdx, 1)[0];
+          newLayout.splice(endIdx, 0, item);
+          setLocalLayout(newLayout);
+      }
+
+      dragItem.current = null;
+      dragOverItem.current = null;
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault(); // Necessary for drop to work
   };
 
   const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="p-8 animate-fade-in text-[var(--color-text)] min-h-full flex flex-col relative overflow-x-hidden">
+      
       {/* -- HEADER -- */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 shrink-0">
         <div className="relative">
@@ -54,11 +106,11 @@ export default function Dashboard() {
 
         <div className="flex gap-3">
           <button
-            onClick={() => setIsEditMode(!isEditMode)}
+            onClick={() => isEditMode ? handleSaveLayout() : setIsEditMode(true)}
             className={`px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition shadow-sm ${
               isEditMode
-                ? 'bg-[var(--color-primary)] text-white shadow-lg'
-                : 'bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-bg)]'
+                ? 'bg-[var(--color-primary)] text-white shadow-lg scale-105'
+                : 'bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-bg)] text-[var(--color-text)]'
             }`}
           >
             <Gear weight={isEditMode ? 'fill' : 'bold'} /> {isEditMode ? 'Save Layout' : 'Customize'}
@@ -68,7 +120,7 @@ export default function Dashboard() {
 
       {/* -- WIDGET GRID -- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
-        {layoutConfig.map((widgetId: string) => {
+        {localLayout.map((widgetId: string, index: number) => {
           const def: WidgetDefinition | undefined = WIDGET_REGISTRY[widgetId];
           if (!def) return null;
 
@@ -77,8 +129,15 @@ export default function Dashboard() {
           return (
             <div
               key={widgetId}
-              className={`relative group h-full flex flex-col ${
-                isEditMode ? 'ring-2 ring-dashed ring-[var(--color-primary)]/50 rounded-2xl cursor-move bg-[var(--color-bg)]/50' : ''
+              draggable={isEditMode}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnter={(e) => handleDragEnter(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              className={`relative group h-full flex flex-col transition-all duration-200 ${
+                isEditMode 
+                    ? 'ring-2 ring-dashed ring-[var(--color-border)] hover:ring-[var(--color-primary)] rounded-2xl cursor-grab bg-[var(--color-surface)] shadow-lg active:cursor-grabbing' 
+                    : ''
               }`}
               style={{
                 gridColumn: `span ${def.minW}`,
@@ -86,6 +145,12 @@ export default function Dashboard() {
                 minHeight: def.minH === 1 ? '150px' : '350px'
               }}
             >
+              {isEditMode && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50 text-[var(--color-text-muted)] bg-[var(--color-surface)] px-2 rounded-full border border-[var(--color-border)]">
+                    <DotsSixVertical size={24} weight="bold" />
+                </div>
+              )}
+
               {isEditMode && (
                 <button
                   onClick={() => handleRemoveWidget(widgetId)}
@@ -106,7 +171,7 @@ export default function Dashboard() {
         {isEditMode && (
           <div
             onClick={() => setShowStore(true)}
-            className="col-span-1 md:col-span-2 min-h-[200px] border-2 border-dashed border-[var(--color-border)] rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] transition gap-4 group bg-[var(--color-bg)]/30"
+            className="col-span-1 md:col-span-2 min-h-[200px] border-2 border-dashed border-[var(--color-border)] rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)] transition gap-4 group bg-[var(--color-bg)]/30 animate-fade-in"
           >
             <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] shadow-sm flex items-center justify-center text-[var(--color-text-muted)] group-hover:text-[var(--color-primary)] group-hover:scale-110 transition-all border border-[var(--color-border)]">
               <Plus weight="bold" size={32} />
@@ -125,7 +190,7 @@ export default function Dashboard() {
           onClick={() => setShowStore(false)}
         >
           <div
-            className="bg-[var(--color-surface)] w-full max-w-5xl h-[80vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[var(--color-border)]"
+            className="bg-[var(--color-surface)] w-full max-w-5xl h-[80vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-[var(--color-border)] text-[var(--color-text)]"
             onClick={e => e.stopPropagation()}
           >
             <div className="p-8 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-bg)]/50">
@@ -144,8 +209,9 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto p-8 bg-[var(--color-bg)]/30 custom-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.values(WIDGET_REGISTRY).map((widget: WidgetDefinition) => {
-                  const isAdded = layoutConfig.includes(widget.id);
-                  const hasPermission = !widget.permissionReq || (('permissions' in widget ? widget.permissions : []) as string[]).includes(widget.permissionReq);
+                  const isAdded = localLayout.includes(widget.id);
+                  // Check permission against the config loaded from useDashboardData
+                  const hasPermission = !widget.permissionReq || (permissions || []).includes(widget.permissionReq);
 
                   return (
                     <div
