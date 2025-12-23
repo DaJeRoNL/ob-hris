@@ -9,7 +9,6 @@ export function useDashboardData() {
     const [config, setConfig] = useState<SystemConfig>(() => getSystemConfig());
     const [userRole, setUserRole] = useState(getCurrentRole());
     
-    // Safety check for layout array
     const [layoutConfig, setLayoutConfig] = useState<string[]>(() => {
         const layout = getUserLayout(getCurrentRole());
         return Array.isArray(layout) ? layout : []; 
@@ -23,11 +22,9 @@ export function useDashboardData() {
             const newLayout = getUserLayout(role);
             setLayoutConfig(Array.isArray(newLayout) ? newLayout : []);
         };
-        
         window.addEventListener('sys-config-updated', handleUpdate);
         window.addEventListener('role-updated', handleUpdate);
         window.addEventListener('layout-updated', handleUpdate);
-        
         return () => { 
             window.removeEventListener('sys-config-updated', handleUpdate); 
             window.removeEventListener('role-updated', handleUpdate);
@@ -41,115 +38,108 @@ export function useDashboardData() {
     const clientFinance = useMemo(() => MOCK_DB.finance.filter(f => f.clientId === currentClientId), [currentClientId]);
     const currentClient = useMemo(() => MOCK_DB.clients.find(c => c.id === currentClientId), [currentClientId]);
 
-    // --- DERIVED METRICS ---
-    const metrics: MetricItem[] = useMemo(() => {
-        const headcount = clientPeople.length;
-        const payrollRaw = clientFinance.reduce((acc, curr) => acc + (parseFloat(curr.amount.replace(/[^0-9.-]+/g,"")) || 0), 0);
-        const payrollFmt = (payrollRaw / 1000).toFixed(1) + 'k';
-        const safeUsers = clientPeople.filter(p => p.visa === 'Citizen').length;
-        const complianceScore = headcount > 0 ? Math.round((safeUsers / headcount) * 100) : 100;
+    // --- HR METRICS ---
+    const hrMetrics = useMemo(() => {
+        const onboarding = clientPeople.filter(p => p.status === 'Onboarding').map(p => ({
+            id: p.id, name: p.name, role: p.role, progress: Math.floor(Math.random() * 80) + 10
+        }));
+        
+        const expiringDocs = clientPeople.filter(p => p.visa !== 'Citizen').map(p => ({
+            id: p.id, name: p.name, docType: p.visa, daysLeft: Math.floor(Math.random() * 90) + 5
+        })).sort((a,b) => a.daysLeft - b.daysLeft).slice(0, 5);
 
-        return [
-            { label: 'Total Workforce', value: headcount, trend: 4, trendLabel: 'vs last month', linkTo: '/people', color: 'indigo' },
-            { label: 'Total Spend', value: payrollFmt, trend: 12, trendLabel: 'expansion costs', isCurrency: true, linkTo: '/finance', color: 'emerald' },
-            { label: 'Compliance Health', value: `${complianceScore}%`, trend: complianceScore < 90 ? -5 : 0, trendLabel: 'audit readiness', linkTo: '/compliance', color: complianceScore < 90 ? 'rose' : 'blue' },
-            { label: 'Active Pipeline', value: clientHiring.length, trend: 8, trendLabel: 'open reqs', linkTo: '/hiring', color: 'amber' },
-        ];
-    }, [clientPeople, clientFinance, clientHiring]);
+        const deptCounts = clientPeople.reduce((acc, p) => {
+            const dept = p.role.split(' ')[1] || 'General'; 
+            acc[dept] = (acc[dept] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
 
-    // --- TEAM STATUS SIMULATION ---
+        const headcount = Object.entries(deptCounts).map(([dept, count]) => ({ dept, count }));
+
+        return {
+            onboarding,
+            expiringDocs,
+            headcount,
+            attrition: { monthly: 2.1, quarterly: 5.4, trend: 'down' },
+            compliance: { score: 94, pending: expiringDocs.length }
+        };
+    }, [clientPeople]);
+
+    // --- PAYROLL DATA ---
+    const payrollData = useMemo(() => {
+        const total = clientFinance.reduce((acc, curr) => acc + (parseFloat(curr.amount.replace(/[^0-9.-]+/g,"")) || 0), 0);
+        return { total: total * 1.2, change: 4.5, history: [40, 42, 41, 45, 48, 50] }; // Mock history
+    }, [clientFinance]);
+
+    // --- COMMUNICATION ---
+    const announcements = useMemo(() => [
+        { id: 1, title: 'Q4 All Hands Meeting', date: 'Oct 24', author: 'CEO' },
+        { id: 2, title: 'New Benefits Enrollment', date: 'Oct 20', author: 'HR' },
+        { id: 3, title: 'Office Closure (Holiday)', date: 'Oct 15', author: 'Admin' },
+    ], []);
+
+    const upcomingEvents = useMemo(() => {
+        return clientPeople.slice(0, 3).map((p, i) => ({
+            id: p.id,
+            name: p.name,
+            type: i % 2 === 0 ? 'Birthday' : 'Work Anniversary',
+            date: new Date(Date.now() + (i + 1) * 86400000 * 3).toLocaleDateString([], {month:'short', day:'numeric'})
+        }));
+    }, [clientPeople]);
+
+    // --- TEAM STATUS ---
     const teamStatus = useMemo(() => {
         return clientPeople.map(p => {
-            // Deterministic pseudo-random status based on name length
             const r = p.name.length % 3;
             const status = r === 0 ? 'Online' : r === 1 ? 'In Meeting' : 'Offline';
             return {
-                id: p.id,
-                name: p.name,
-                role: p.role,
-                avatar: p.name.charAt(0),
+                id: p.id, name: p.name, role: p.role, avatar: p.name.charAt(0),
                 status: status as 'Online' | 'In Meeting' | 'Offline'
             };
-        }).slice(0, 6); // Limit for widget
+        }).slice(0, 6);
     }, [clientPeople]);
 
-    // --- PENDING TASKS AGGREGATION ---
+    // --- PENDING TASKS ---
     const pendingTasks = useMemo(() => {
-        const items = [];
+        // FIX: Explicitly typed to avoid implicit any error
+        const items: { id: string; title: string; desc: string; type: string; priority: string; actionLink: string }[] = [];
         
-        // 1. Pending Invoices
-        const pendingInvoices = clientFinance.filter(f => f.status === 'Pending');
-        pendingInvoices.forEach(i => items.push({
-            id: i.id,
-            title: `Approve Invoice ${i.id}`,
-            desc: `${i.amount} for ${i.entity}`,
-            type: 'Finance',
-            priority: 'High',
-            actionLink: '/finance'
+        clientFinance.filter(f => f.status === 'Pending').forEach(i => items.push({
+            id: i.id, title: `Approve Invoice ${i.id}`, desc: `${i.amount}`, type: 'Finance', priority: 'High', actionLink: '/finance'
         }));
-
-        // 2. Hiring Offers
-        const offers = clientHiring.filter(h => h.stage === 'Offer');
-        offers.forEach(h => items.push({
-            id: h.id,
-            title: `Sign Offer: ${h.name}`,
-            desc: h.role,
-            type: 'Hiring',
-            priority: 'Critical',
-            actionLink: '/hiring'
+        
+        clientHiring.filter(h => h.stage === 'Offer').forEach(h => items.push({
+            id: h.id, title: `Sign Offer: ${h.name}`, desc: h.role, type: 'Hiring', priority: 'Critical', actionLink: '/hiring'
         }));
-
-        // 3. Compliance Reviews
-        const visaReviews = clientPeople.filter(p => p.visa !== 'Citizen' && p.status === 'Active');
-        if (visaReviews.length > 0) {
-            items.push({
-                id: 'compliance-bulk',
-                title: 'Visa Expiry Review',
-                desc: `${visaReviews.length} employees need review`,
-                type: 'Legal',
-                priority: 'Medium',
-                actionLink: '/compliance'
-            });
-        }
-
+        
         return items;
-    }, [clientFinance, clientHiring, clientPeople]);
+    }, [clientFinance, clientHiring]);
 
-    // --- PERSONAL TASKS MOCK ---
+    // --- OTHER MOCKS ---
     const myTasks = useMemo(() => [
         { id: 't1', title: 'Review Q4 Budget', due: 'Today', status: 'Pending', tag: 'Finance' },
         { id: 't2', title: 'Onboard Sarah Connor', due: 'Tomorrow', status: 'In Progress', tag: 'HR' },
-        { id: 't3', title: 'Update Compliance Policy', due: 'Nov 12', status: 'Pending', tag: 'Legal' },
-        { id: 't4', title: 'Weekly Sync Prep', due: 'Today', status: 'Pending', tag: 'General' },
     ], []);
 
-    // --- TEAM WORKLOAD MOCK ---
-    const teamWorkload = useMemo(() => {
-        return clientPeople.slice(0, 5).map(p => ({
-            id: p.id,
-            name: p.name,
-            role: p.role,
-            avatar: p.name.charAt(0),
-            hours: Math.floor(Math.random() * 40) + 10,
-            capacity: 40
-        }));
-    }, [clientPeople]);
+    const teamWorkload = useMemo(() => clientPeople.slice(0, 5).map(p => ({
+        id: p.id, name: p.name, role: p.role, avatar: p.name.charAt(0),
+        hours: Math.floor(Math.random() * 40) + 10, capacity: 40
+    })), [clientPeople]);
 
-    const financialTrends: FinancialMetric[] = useMemo(() => {
+    const financialTrends = useMemo(() => {
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         return days.map(day => ({ day, revenue: 60 + Math.random() * 25, expense: 45 + Math.random() * 15 }));
     }, []);
 
-    const pipeline: PipelineStat[] = useMemo(() => {
+    const pipeline = useMemo(() => {
         const stages = ['Screening', 'Interview', 'Offer'];
         return stages.map(stage => ({ stage, count: clientHiring.filter(h => h.stage === stage).length, candidates: clientHiring.filter(h => h.stage === stage).map(c => ({ name: c.name, role: c.role })) }));
     }, [clientHiring]);
 
-    const activityFeed: ActivityItem[] = useMemo(() => {
+    const activityFeed = useMemo(() => {
         const feed: ActivityItem[] = [];
         clientPeople.slice(-2).forEach((p, i) => feed.push({ id: `hire-${p.id}`, user: 'System', action: 'Onboarded', target: p.name, time: `${i + 2}h ago`, category: 'hr' }));
         clientFinance.slice(-2).forEach((f, i) => feed.push({ id: `fin-${f.id}`, user: 'Finance Bot', action: f.status === 'Paid' ? 'Processed' : 'Flagged', target: `Invoice ${f.id}`, time: `${i + 5}h ago`, category: 'finance', priority: f.status === 'Pending' ? 'high' : 'normal' }));
-        if (feed.length < 3) feed.push({ id: 'sys-1', user: 'Admin', action: 'Updated', target: 'Security Policy', time: '2d ago', category: 'system' });
         return feed.sort((a,b) => a.time.localeCompare(b.time));
     }, [clientPeople, clientFinance]);
 
@@ -159,18 +149,20 @@ export function useDashboardData() {
         return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
     }, [clientPeople]);
 
+    const metrics: MetricItem[] = useMemo(() => {
+        const headcount = clientPeople.length;
+        const complianceScore = 94;
+        return [
+            { label: 'Total Workforce', value: headcount, trend: 4, trendLabel: 'vs last month', linkTo: '/people', color: 'indigo' },
+            { label: 'Compliance Health', value: `${complianceScore}%`, trend: 0, trendLabel: 'audit readiness', linkTo: '/compliance', color: 'blue' },
+        ];
+    }, [clientPeople]);
+
     return { 
-        metrics, 
-        pipeline, 
-        activityFeed, 
-        financialTrends, 
-        countryStats, 
-        teamStatus,
-        pendingTasks,
-        myTasks,
-        teamWorkload,
+        metrics, pipeline, activityFeed, financialTrends, countryStats, teamStatus, 
+        pendingTasks, myTasks, teamWorkload, hrMetrics, payrollData, announcements, upcomingEvents,
         clientName: currentClient?.name || 'Unknown', 
         layoutConfig: layoutConfig || [],
-        permissions: config.layout[userRole]?.permissions || [] // Crucial fix for permissions error
+        permissions: config.layout[userRole]?.permissions || []
     };
 }

@@ -5,6 +5,7 @@ import { WIDGET_REGISTRY, WidgetDefinition } from '../../utils/widgetRegistry';
 import { saveUserLayout } from '../../utils/dashboardConfig';
 
 export default function Dashboard() {
+  // Destructure all data and the critical 'permissions' array from our hook
   const {
     layoutConfig,
     metrics,
@@ -16,35 +17,46 @@ export default function Dashboard() {
     pendingTasks,
     myTasks,
     teamWorkload,
+    hrMetrics,
+    payrollData,
+    announcements,
+    upcomingEvents,
     clientName,
-    permissions
+    permissions // <--- Used for the Widget Store
   } = useDashboardData();
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [showStore, setShowStore] = useState(false);
   const [localLayout, setLocalLayout] = useState<string[]>(layoutConfig);
   
-  // Drag State
+  // Drag & Drop Refs
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
-  // Sync local layout if config changes from outside (e.g. role switch)
+  // Sync state if the underlying config changes (e.g. switching roles in Admin panel)
+  // We only sync if NOT in edit mode to prevent overwriting user's active changes
   if (JSON.stringify(layoutConfig) !== JSON.stringify(localLayout) && !isEditMode) {
       setLocalLayout(layoutConfig);
   }
 
-  const dashboardData = { metrics, pipeline, activityFeed, financialTrends, countryStats, teamStatus, pendingTasks, myTasks, teamWorkload };
+  // Bundle data props to pass to widgets
+  const dashboardData = { 
+      metrics, pipeline, activityFeed, financialTrends, countryStats, teamStatus, 
+      pendingTasks, myTasks, teamWorkload, hrMetrics, payrollData, announcements, upcomingEvents 
+  };
+
+  // --- LAYOUT ACTIONS ---
 
   const handleAddWidget = (id: string) => {
     const newLayout = [...localLayout, id];
     setLocalLayout(newLayout);
-    saveUserLayout(newLayout);
+    saveUserLayout(newLayout); // Auto-save on add
   };
 
   const handleRemoveWidget = (id: string) => {
     const newLayout = localLayout.filter((w: string) => w !== id);
     setLocalLayout(newLayout);
-    saveUserLayout(newLayout);
+    saveUserLayout(newLayout); // Auto-save on remove
   };
 
   const handleSaveLayout = () => {
@@ -53,10 +65,11 @@ export default function Dashboard() {
   };
 
   // --- DRAG HANDLERS ---
+
   const handleDragStart = (e: React.DragEvent, index: number) => {
       dragItem.current = index;
       e.dataTransfer.effectAllowed = "move";
-      // Transparent ghost image if needed, or default
+      // Optional: Set a custom drag image here if desired
   };
 
   const handleDragEnter = (e: React.DragEvent, index: number) => {
@@ -74,12 +87,14 @@ export default function Dashboard() {
           setLocalLayout(newLayout);
       }
 
+      // Reset refs
       dragItem.current = null;
       dragOverItem.current = null;
   };
 
+  // Necessary to allow dropping
   const handleDragOver = (e: React.DragEvent) => {
-      e.preventDefault(); // Necessary for drop to work
+      e.preventDefault(); 
   };
 
   const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -122,6 +137,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
         {localLayout.map((widgetId: string, index: number) => {
           const def: WidgetDefinition | undefined = WIDGET_REGISTRY[widgetId];
+          // Skip if widget ID is invalid/removed
           if (!def) return null;
 
           const WidgetComponent = def.component;
@@ -145,12 +161,14 @@ export default function Dashboard() {
                 minHeight: def.minH === 1 ? '150px' : '350px'
               }}
             >
+              {/* Drag Handle (Visual Only) */}
               {isEditMode && (
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50 text-[var(--color-text-muted)] bg-[var(--color-surface)] px-2 rounded-full border border-[var(--color-border)]">
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50 text-[var(--color-text-muted)] bg-[var(--color-surface)] px-2 rounded-full border border-[var(--color-border)] shadow-sm pointer-events-none">
                     <DotsSixVertical size={24} weight="bold" />
                 </div>
               )}
 
+              {/* Remove Button */}
               {isEditMode && (
                 <button
                   onClick={() => handleRemoveWidget(widgetId)}
@@ -160,6 +178,7 @@ export default function Dashboard() {
                 </button>
               )}
 
+              {/* Widget Content (Disabled pointer events in edit mode to prevent interactions while dragging) */}
               <div className={`h-full w-full ${isEditMode ? 'pointer-events-none opacity-60 scale-95 transition-transform' : ''}`}>
                 <WidgetComponent {...dashboardData} />
               </div>
@@ -167,7 +186,7 @@ export default function Dashboard() {
           );
         })}
 
-        {/* Add Widget Button */}
+        {/* Add Widget Button (Only visible in Edit Mode) */}
         {isEditMode && (
           <div
             onClick={() => setShowStore(true)}
@@ -210,7 +229,10 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.values(WIDGET_REGISTRY).map((widget: WidgetDefinition) => {
                   const isAdded = localLayout.includes(widget.id);
-                  // Check permission against the config loaded from useDashboardData
+                  
+                  // PERMISSION CHECK:
+                  // 1. If widget has NO requirement, it's allowed.
+                  // 2. If it HAS a requirement, check if 'permissions' array includes it.
                   const hasPermission = !widget.permissionReq || (permissions || []).includes(widget.permissionReq);
 
                   return (

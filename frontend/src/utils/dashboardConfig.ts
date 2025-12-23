@@ -49,34 +49,34 @@ const DEFAULT_CONFIG: SystemConfig = {
     },
     layout: {
         'System Admin': {
-            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai', 'view_team', 'view_approvals', 'view_tasks'],
-            defaultLayout: ['stats_summary', 'global_map', 'my_today', 'sticky_notes', 'team_availability', 'revenue_chart', 'talent_pipeline', 'live_feed'],
+            permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai', 'view_team', 'view_approvals', 'view_tasks', 'view_hr_metrics'],
+            defaultLayout: ['stats_summary', 'global_map', 'my_today', 'announcements', 'payroll_snapshot', 'headcount_breakdown', 'revenue_chart', 'compliance_status'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Executive': {
             permissions: ['view_stats', 'view_finance', 'view_hiring', 'view_activity', 'view_global', 'view_ai', 'view_approvals'],
-            defaultLayout: ['stats_summary', 'global_map', 'revenue_chart', 'talent_pipeline', 'live_feed'],
+            defaultLayout: ['stats_summary', 'global_map', 'payroll_snapshot', 'attrition_overview', 'revenue_chart', 'talent_pipeline'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: true, growth: true, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Manager': {
             permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_global', 'view_team', 'view_approvals', 'view_tasks'],
-            defaultLayout: ['stats_summary', 'team_availability', 'team_workload', 'my_today', 'my_tasks', 'talent_pipeline'],
+            defaultLayout: ['stats_summary', 'team_availability', 'team_alerts', 'upcoming_events', 'my_today', 'my_tasks'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'HR_Admin': {
-            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_ai', 'view_team', 'view_tasks'],
-            defaultLayout: ['stats_summary', 'team_availability', 'sticky_notes', 'talent_pipeline', 'live_feed'],
+            permissions: ['view_stats', 'view_hiring', 'view_activity', 'view_ai', 'view_team', 'view_tasks', 'view_hr_metrics'],
+            defaultLayout: ['stats_summary', 'onboarding_progress', 'doc_expiry', 'compliance_status', 'headcount_breakdown', 'upcoming_events'],
             tabs: { dashboard: true, people: true, hiring: true, time: true, finance: false, growth: false, compliance: true, docs: true, chat: true, tasks: true, admin: true }
         },
         'Employee': {
             permissions: ['view_activity', 'view_team', 'view_tasks'],
-            defaultLayout: ['my_today', 'my_tasks', 'sticky_notes', 'team_availability'],
+            defaultLayout: ['my_today', 'time_snapshot', 'announcements', 'celebrations', 'quick_links', 'my_tasks'],
             tabs: { dashboard: true, people: false, hiring: false, time: true, finance: false, growth: false, compliance: false, docs: true, chat: true, tasks: true, admin: true }
         }
     }
 };
 
-const STORAGE_KEY = 'ob_hris_config_v9'; // Incremented version
+const STORAGE_KEY = 'ob_hris_config_v10'; // Incremented version
 const ROLE_KEY = 'ob_hris_active_role';
 const USER_LAYOUT_KEY = 'ob_hris_user_layout';
 
@@ -101,7 +101,7 @@ export const getCurrentRole = (): UserRole => {
 
 export const setCurrentRole = (role: UserRole) => {
     localStorage.setItem(ROLE_KEY, role);
-    localStorage.removeItem(USER_LAYOUT_KEY); // Reset layout on role switch
+    localStorage.removeItem(USER_LAYOUT_KEY);
     window.dispatchEvent(new Event('role-updated'));
 };
 
