@@ -7,7 +7,7 @@ import { saveUserLayout } from '../../utils/dashboardConfig';
 
 export default function Dashboard() {
   const {
-    layoutConfig, // assuming your hook now returns layoutConfig
+    layoutConfig,
     metrics,
     pipeline,
     activityFeed,

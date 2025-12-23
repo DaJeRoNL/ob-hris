@@ -1,19 +1,40 @@
 import { useMemo, useState, useEffect } from 'react';
 import { MOCK_DB } from '../../../utils/mockData';
 import { useAuth } from '../../../context/AuthContext';
-import { getSystemConfig, SystemConfig, getCurrentRole } from '../../../utils/dashboardConfig';
+import { getSystemConfig, SystemConfig, getCurrentRole, getUserLayout } from '../../../utils/dashboardConfig';
 import { ActivityItem, MetricItem, PipelineStat, FinancialMetric } from '../types';
 
 export function useDashboardData() {
     const { currentClientId } = useAuth();
-    const [config, setConfig] = useState<SystemConfig>(getSystemConfig());
+    const [config, setConfig] = useState<SystemConfig>(() => getSystemConfig());
     const [userRole, setUserRole] = useState(getCurrentRole());
+    
+    // DEFENSIVE FIX: Ensure we never start with undefined by forcing an array check
+    const [layoutConfig, setLayoutConfig] = useState<string[]>(() => {
+        const layout = getUserLayout(getCurrentRole());
+        return Array.isArray(layout) ? layout : []; 
+    });
 
     useEffect(() => {
-        const handleUpdate = () => { setConfig(getSystemConfig()); setUserRole(getCurrentRole()); };
+        const handleUpdate = () => { 
+            const role = getCurrentRole();
+            setConfig(getSystemConfig()); 
+            setUserRole(role);
+            
+            // DEFENSIVE FIX: Check result before setting state
+            const newLayout = getUserLayout(role);
+            setLayoutConfig(Array.isArray(newLayout) ? newLayout : []);
+        };
+        
         window.addEventListener('sys-config-updated', handleUpdate);
         window.addEventListener('role-updated', handleUpdate);
-        return () => { window.removeEventListener('sys-config-updated', handleUpdate); window.removeEventListener('role-updated', handleUpdate); };
+        window.addEventListener('layout-updated', handleUpdate);
+        
+        return () => { 
+            window.removeEventListener('sys-config-updated', handleUpdate); 
+            window.removeEventListener('role-updated', handleUpdate);
+            window.removeEventListener('layout-updated', handleUpdate);
+        };
     }, []);
 
     const clientPeople = useMemo(() => MOCK_DB.people.filter(p => p.clientId === currentClientId), [currentClientId]);
@@ -60,9 +81,13 @@ export function useDashboardData() {
         return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
     }, [clientPeople]);
 
-    // Use current user's role to determine layout
-    // @ts-ignore
-    const layoutConfig = config.layout[userRole]?.widgets || config.layout['Executive'].widgets;
-
-    return { metrics, pipeline, activityFeed, financialTrends, countryStats, clientName: currentClient?.name || 'Unknown', layoutConfig };
+    return { 
+        metrics, 
+        pipeline, 
+        activityFeed, 
+        financialTrends, 
+        countryStats, 
+        clientName: currentClient?.name || 'Unknown', 
+        layoutConfig: layoutConfig || [] // Final safety fallback
+    };
 }
